@@ -12,6 +12,7 @@ import ReportsView from './components/ReportsView'
 import AlertsView from './components/AlertsView'
 import DataExplorerView from './components/DataExplorerView'
 import SettingsView from './components/SettingsView'
+import LandingPage from './components/LandingPage'
 import { 
   LayoutDashboard, Map, Compass, Activity, Flame, Wind, 
   Tag, BarChart3, FileSpreadsheet, BellRing, Database, Settings, HelpCircle,
@@ -48,6 +49,7 @@ export default function App() {
 
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [showDiagnostic, setShowDiagnostic] = useState(false)
+  const [enteredDashboard, setEnteredDashboard] = useState(false)
 
   useEffect(() => {
     fetchMetadata()
@@ -62,6 +64,10 @@ export default function App() {
       localStorage.setItem('theme', 'dark')
     }
   }, [theme])
+
+  if (!enteredDashboard) {
+    return <LandingPage onEnterDashboard={() => setEnteredDashboard(true)} />
+  }
 
   // Render active view
   const renderView = () => {
