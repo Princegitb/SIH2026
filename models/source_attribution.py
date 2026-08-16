@@ -1,0 +1,108 @@
+import numpy as np
+import pandas as pd
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logger = logging.getLogger(__name__)
+
+class SourceAttributor:
+    def __init__(self):
+        pass
+
+    def compute_attribution(self, hcho_col, no2_col, so2_col, co_col, cell_type="rural", smoke_impact=0.0):
+        """
+        Decomposes the source attribution into Biomass %, Vehicular %, and Industrial %
+        using gas ratios and cell types.
+        
+        Rationals:
+        - HCHO is a key tracer for VOCs emitted during biomass combustion.
+        - NO2 is a tracer for high-temperature fossil-fuel combustion (vehicles, power plants).
+        - SO2 is a tracer for sulfur-rich fuels (coal burning in industrial plants).
+        - CO is a general combustion indicator.
+        """
+        # 1. Establish baselines based on land use / cell type
+        if cell_type == "urban":
+            base_v = 60.0
+            base_i = 25.0
+            base_b = 15.0
+        elif cell_type == "industrial":
+            base_v = 25.0
+            base_i = 65.0
+            base_b = 10.0
+        elif cell_type == "agricultural":
+            base_v = 20.0
+            base_i = 15.0
+            base_b = 65.0
+        else: # rural/other
+            base_v = 40.0
+            base_i = 30.0
+            base_b = 30.0
+
+        # 2. Extract signals from columns (normalized/scaled inputs)
+        # HCHO is primarily biomass marker in this region
+        biomass_sig = hcho_col * 2.5 + (smoke_impact * 0.08)
+        # NO2 is vehicular
+        vehicular_sig = no2_col * 3.5 + co_col * 0.8
+        # SO2 is industrial
+        industrial_sig = so2_col * 6.0 + no2_col * 0.5
+        
+        # 3. Add signals to baselines
+        weight_b = base_b + biomass_sig * 12.0
+        weight_v = base_v + vehicular_sig * 4.0
+        # Industrial areas shouldn't spike massively in biomass unless smoke is present
+        weight_i = base_i + industrial_sig * 5.0
+        
+        # Adjust vehicular down in heavy smoke conditions (since smoke overwhelms local traffic)
+        if smoke_impact > 30.0:
+            weight_v *= (1.0 - min(0.6, smoke_impact / 200.0))
+            
+        # Sum weights and normalize to 100%
+        total = weight_b + weight_v + weight_i
+        
+        biomass_pct = (weight_b / total) * 100.0
+        vehicular_pct = (weight_v / total) * 100.0
+        industrial_pct = (weight_i / total) * 100.0
+        
+        # Safety rounding to ensure exactly 100% sum
+        p_b = round(biomass_pct, 1)
+        p_v = round(vehicular_pct, 1)
+        p_i = round(100.0 - (p_b + p_v), 1)
+        
+        return {
+            "biomass_pct": p_b,
+            "vehicular_pct": p_v,
+            "industrial_pct": p_i
+        }
+
+    def attribute_dataframe(self, df):
+        """
+        Applies source attribution to a whole dataframe.
+        """
+        b_pcts, v_pcts, i_pcts = [], [], []
+        
+        for idx, r in df.iterrows():
+            smoke = r.get("smoke_impact", 0.0)
+            res = self.compute_attribution(
+                r["hcho_column"], r["no2_column"], r["so2_column"], r["co_column"],
+                cell_type=r["type"], smoke_impact=smoke
+            )
+            b_pcts.append(res["biomass_pct"])
+            v_pcts.append(res["vehicular_pct"])
+            i_pcts.append(res["industrial_pct"])
+            
+        out_df = df.copy()
+        out_df["source_biomass_pct"] = b_pcts
+        out_df["source_vehicular_pct"] = v_pcts
+        out_df["source_industrial_pct"] = i_pcts
+        
+        return out_df
+
+if __name__ == "__main__":
+    attributor = SourceAttributor()
+    # Test urban cell with high smoke
+    print("Urban (with smoke):", attributor.compute_attribution(4.5, 2.0, 0.5, 1.2, "urban", 120.0))
+    # Test urban cell (no smoke)
+    print("Urban (no smoke):", attributor.compute_attribution(1.2, 2.5, 0.6, 0.8, "urban", 0.0))
+    # Test industrial cell
+    print("Industrial:", attributor.compute_attribution(1.0, 1.8, 4.0, 1.5, "industrial", 0.0))

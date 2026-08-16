@@ -1,0 +1,29 @@
+# Virtual Environment
+venv/
+.venv/
+env/
+__pycache__/
+*.pyc
+
+# Node Modules (Frontend)
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Bulky Data Files (keep code lightweight, rebuild locally with grid_builder.py)
+data/
+models/saved/
+
+# Editor / System config
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+.gemini/
+.agents/
+brain/
+*.log
+*.pkl
+*.nc
+*.csv
