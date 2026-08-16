@@ -15,7 +15,7 @@ import SettingsView from './components/SettingsView'
 import { 
   LayoutDashboard, Map, Compass, Activity, Flame, Wind, 
   Tag, BarChart3, FileSpreadsheet, BellRing, Database, Settings, HelpCircle,
-  Menu, X, Sun, Moon
+  Menu, X, Sun, Moon, Info
 } from 'lucide-react'
 
 // Icon mapping for navigation links
@@ -46,6 +46,7 @@ export default function App() {
 
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark')
+  const [showDiagnostic, setShowDiagnostic] = useState(false)
 
   useEffect(() => {
     fetchMetadata()
@@ -87,11 +88,11 @@ export default function App() {
         <div className="space-y-6">
           {/* Header Row: Logo & Modern Inside-Sidebar Toggle Button + Theme Toggle */}
           <div className="flex items-center justify-between px-1 overflow-hidden">
-            <div className="flex items-center space-x-2.5 overflow-hidden whitespace-nowrap">
-              <span className="text-2xl flex-shrink-0">🛰️</span>
+            <div className="flex items-center space-x-2.5 overflow-hidden whitespace-nowrap group cursor-pointer">
+              <span className="text-2xl flex-shrink-0 transition-transform duration-300 group-hover:scale-110">🛰️</span>
               {sidebarOpen && (
                 <div className="transition-opacity duration-300">
-                  <h1 className="text-sm font-extrabold text-white tracking-tight">VayuDrishti</h1>
+                  <h1 className="text-sm font-extrabold text-white tracking-tight group-hover:text-[#4b6bf5] transition-colors">VayuShetra</h1>
                   <span className="text-[8px] text-slate-400 font-bold tracking-wider uppercase mt-0.5 block">Satellite Intelligence</span>
                 </div>
               )}
@@ -117,7 +118,7 @@ export default function App() {
           </div>
 
           {/* Links list */}
-          <nav className="space-y-1 overflow-y-auto max-h-[calc(100vh-220px)] pr-1">
+          <nav className="space-y-1 overflow-y-auto max-h-[calc(100vh-220px)] pr-1 relative">
             {navItems.map((item) => {
               const Icon = item.icon
               const isActive = activeTab === item.value
@@ -126,15 +127,19 @@ export default function App() {
                   key={item.value}
                   onClick={() => setActiveTab(item.value)}
                   title={!sidebarOpen ? item.name : undefined}
-                  className={`w-full flex items-center rounded-lg text-xs font-semibold tracking-wide transition-all ${
-                    sidebarOpen ? 'space-x-3 px-3 py-2.5' : 'justify-center p-2.5'
+                  className={`w-full flex items-center rounded-lg text-xs font-semibold tracking-wide relative transition-all duration-200 transform ${
+                    sidebarOpen ? 'space-x-3 px-3 py-2.5 hover:translate-x-1' : 'justify-center p-2.5'
                   } ${
                     isActive 
                       ? 'bg-[#4b6bf5]/15 text-[#7c93fe] font-bold border border-[#4b6bf5]/35 shadow-[0_0_15px_rgba(75,107,245,0.18)]' 
-                      : 'text-slate-400 hover:bg-white/5 hover:text-slate-100'
+                      : 'text-slate-400 hover:bg-slate-800/20 hover:text-slate-100'
                   }`}
                 >
-                  <Icon size={16} className="flex-shrink-0" />
+                  {/* Left indicator bar */}
+                  {isActive && sidebarOpen && (
+                    <div className="absolute left-0 top-2 bottom-2 w-1 rounded-r bg-[#4b6bf5]"></div>
+                  )}
+                  <Icon size={16} className={`flex-shrink-0 transition-transform duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-105'}`} />
                   {sidebarOpen && <span className="truncate transition-opacity duration-300">{item.name}</span>}
                 </button>
               );
@@ -142,16 +147,50 @@ export default function App() {
           </nav>
         </div>
 
-        {/* Bottom Card: Data Updated */}
-        <div className={`bg-slate-900/40 border border-slate-800/80 rounded-lg text-[10px] space-y-1 text-slate-400 transition-all duration-300 ${sidebarOpen ? 'p-3' : 'p-1.5 flex flex-col items-center'}`}>
+        {/* Dynamic Diagnostics Overlay Popup */}
+        {showDiagnostic && sidebarOpen && (
+          <div className="absolute bottom-18 left-4 right-4 glass-panel p-3.5 rounded-xl z-50 text-[10px] text-slate-350 space-y-1.5 shadow-2xl border-emerald-500/20 bg-slate-950/95 backdrop-blur-md">
+            <div className="flex justify-between items-center border-b border-slate-800 pb-1.5">
+              <span className="font-bold text-emerald-400 uppercase tracking-wider flex items-center">
+                <Info size={11} className="mr-1" /> System Diagnostics
+              </span>
+              <button 
+                onClick={(e) => { e.stopPropagation(); setShowDiagnostic(false); }} 
+                className="text-slate-500 hover:text-white text-xs font-bold focus:outline-none"
+              >
+                ×
+              </button>
+            </div>
+            <div className="space-y-1 font-medium">
+              <div className="flex justify-between"><span>XGBoost Models:</span> <span className="text-white">6 operational</span></div>
+              <div className="flex justify-between"><span>SHAP TreeExplainers:</span> <span className="text-white">Active</span></div>
+              <div className="flex justify-between"><span>Meteorology Feed:</span> <span className="text-white">ERA5 Realtime</span></div>
+              <div className="flex justify-between"><span>Satellite Track:</span> <span className="text-white">Sentinel-5P / VIIRS</span></div>
+            </div>
+          </div>
+        )}
+
+        {/* Bottom Card: Data Updated (Interactive diagnostic toggler) */}
+        <div 
+          onClick={() => sidebarOpen && setShowDiagnostic(!showDiagnostic)}
+          className={`border rounded-lg text-[10px] space-y-1 text-slate-400 transition-all duration-300 select-none bg-slate-900/40 border-slate-800/80 ${
+            sidebarOpen 
+              ? 'p-3 cursor-pointer hover:bg-slate-800/25 hover:border-slate-700/60' 
+              : 'p-1.5 flex flex-col items-center'
+          }`}
+          title={sidebarOpen ? "Click to view diagnostics" : "Grid Engine Active"}
+        >
           <div className="flex items-center space-x-2 text-slate-400">
-            <div className="w-2 h-2 bg-[#00e676] rounded-full shadow-[0_0_8px_#00e676] flex-shrink-0"></div>
-            {sidebarOpen && <span className="font-semibold">Grid Engine Live</span>}
+            <div className="w-2 h-2 bg-[#00e676] rounded-full shadow-[0_0_8px_#00e676] flex-shrink-0 animate-pulse"></div>
+            {sidebarOpen && <span className="font-bold">Grid Engine Live</span>}
           </div>
           {sidebarOpen && (
             <>
               <div className="font-bold text-slate-200">Atmospheric Data Synced</div>
-              <div className="text-[9px] text-slate-500">Updated 2 min ago</div>
+              <div className="text-[9px] text-slate-500 flex justify-between items-center">
+                <span>Updated 2 min ago</span>
+                <span className="text-sky-400 font-bold hover:underline">Info →</span>
+              </div>
             </>
           )}
         </div>
@@ -164,7 +203,7 @@ export default function App() {
         {activeTab === 'Dashboard' && (
           <header className="px-6 pt-5 pb-2 flex justify-between items-start flex-shrink-0 bg-transparent">
             <div>
-              <h2 className="text-xl font-extrabold text-white tracking-tight">VayuDrishti <span className="text-[#4b6bf5]">Intelligence Center</span></h2>
+              <h2 className="text-xl font-extrabold text-white tracking-tight">VayuShetra</h2>
               <div className="flex items-center space-x-2 text-xs text-slate-400 mt-1 font-medium">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
                 <span>India Atmospheric Monitoring • Updated 2 min ago</span>
@@ -176,7 +215,7 @@ export default function App() {
               <select
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                className="bg-[#0d1121] border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 outline-none focus:border-[#4b6bf5] cursor-pointer shadow-sm"
+                className="bg-[#0d1121] border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 outline-none focus:border-[#4b6bf5] cursor-pointer shadow-sm font-semibold"
               >
                 {dates.map(d => <option key={d} value={d}>{d}</option>)}
               </select>
@@ -207,7 +246,7 @@ export default function App() {
             <span>☁️ Google Earth Engine</span>
           </div>
           <div className="flex items-center space-x-1.5">
-            <span>VayuDrishti Platform v1.0.0</span>
+            <span>VayuShetra Platform v1.0.0</span>
             <span className="w-1.5 h-1.5 bg-[#00e676] rounded-full"></span>
             <span>Online</span>
           </div>

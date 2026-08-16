@@ -23,7 +23,7 @@ from models.explainability import AQIExplainer
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="VayuDrishti API Service", version="1.0.0")
+app = FastAPI(title="VayuShetra API Service", version="1.0.0")
 
 # Enable CORS for React dev server on port 5173
 app.add_middleware(
