@@ -52,7 +52,7 @@ export default function ReportsView() {
     return (
       <div className="flex items-center justify-center h-[50vh]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4b6bf5]"></div>
-        <span className="ml-3 text-slate-500">Loading NCAP compliance report...</span>
+        <span className="ml-3 text-slate-400">Loading NCAP compliance report...</span>
       </div>
     )
   }
@@ -64,8 +64,8 @@ export default function ReportsView() {
     <div className="space-y-6">
       {/* Header */}
       <div className="glass-panel rounded-xl p-5">
-        <h2 className="text-base font-bold text-slate-800 flex items-center">
-          <Award size={18} className="text-emerald-500 mr-2" /> National Clean Air Programme (NCAP) Compliance Panel
+        <h2 className="text-base font-bold text-slate-200 flex items-center">
+          <Award size={18} className="text-emerald-400 mr-2" /> National Clean Air Programme (NCAP) Compliance Panel
         </h2>
         <p className="text-xs text-slate-500 font-medium">Target status tracking against official environmental quality thresholds</p>
       </div>
@@ -75,31 +75,31 @@ export default function ReportsView() {
         <div className="glass-panel rounded-xl p-6 flex flex-col justify-between h-[250px]">
           <div className="flex justify-between items-start">
             <div>
-              <span className="bg-emerald-100 text-emerald-700 border border-emerald-200 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Compliance Status</span>
-              <h3 className="text-base font-bold text-slate-800 mt-2">Rolling 30-Day Average</h3>
+              <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Compliance Status</span>
+              <h3 className="text-base font-bold text-slate-200 mt-2">Rolling 30-Day Average</h3>
               <p className="text-xs text-slate-500">{selectedDistrict} District</p>
             </div>
             {data.is_compliant ? (
-              <span className="bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-bold px-3 py-1 rounded">
+              <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs font-bold px-3 py-1 rounded">
                 COMPLIANT
               </span>
             ) : (
-              <span className="bg-red-100 text-red-600 border border-red-200 text-xs font-bold px-3 py-1 rounded">
+              <span className="bg-red-500/10 text-red-400 border border-red-500/30 text-xs font-bold px-3 py-1 rounded">
                 NON-COMPLIANT
               </span>
             )}
           </div>
 
           <div className="my-4 flex items-baseline space-x-2">
-            <span className="text-5xl font-extrabold text-slate-800">{data.rolling_average}</span>
+            <span className="text-5xl font-extrabold text-slate-100">{data.rolling_average}</span>
             <span className="text-sm font-semibold text-slate-500">/ {data.target} Target AQI</span>
           </div>
 
-          <div className="border-t border-slate-200 pt-3 text-xs text-slate-600">
+          <div className="border-t border-slate-800/60 pt-3 text-xs text-slate-400">
             {data.is_compliant ? (
-              <span>District is compliant by <span className="font-bold text-emerald-600">{margin} AQI points</span>.</span>
+              <span>District is compliant by <span className="font-bold text-emerald-400">{margin} AQI points</span>.</span>
             ) : (
-              <span>District exceeds NCAP target by <span className="font-bold text-red-500">{Math.abs(margin)} AQI points</span>.</span>
+              <span>District exceeds NCAP target by <span className="font-bold text-red-400">{Math.abs(margin)} AQI points</span>.</span>
             )}
           </div>
         </div>
@@ -107,15 +107,15 @@ export default function ReportsView() {
         {/* Exporter actions card */}
         <div className="glass-panel rounded-xl p-6 flex flex-col justify-between h-[250px]">
           <div className="space-y-3">
-            <h3 className="text-base font-bold text-slate-800">Compliance Exporter Tool</h3>
-            <p className="text-xs text-slate-600">
+            <h3 className="text-base font-bold text-slate-200">Compliance Exporter Tool</h3>
+            <p className="text-xs text-slate-400">
               Download complete high-resolution spatial grid predictions, meteorological layers, and Sentinel-5P column density calculations in tabular format.
             </p>
           </div>
 
           <button 
             onClick={downloadCSVReport}
-            className="w-full bg-[#4b6bf5] hover:bg-[#3b56cf] text-white text-xs font-bold py-3 rounded-lg flex items-center justify-center transition-colors shadow-md border-transparent"
+            className="w-full bg-[#4b6bf5] hover:bg-[#3b56cf] text-white text-xs font-bold py-3 rounded-lg flex items-center justify-center transition-colors shadow-md border-transparent focus:outline-none"
           >
             <FileDown size={14} className="mr-2" /> Export 30-Day compliance CSV Report
           </button>

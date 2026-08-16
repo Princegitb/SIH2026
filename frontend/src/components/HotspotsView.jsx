@@ -86,7 +86,7 @@ export default function HotspotsView() {
 
       {/* 2. Interactive Cluster Grid */}
       <div className="space-y-4">
-        <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider border-b border-slate-200 pb-2">Identified HCHO Clusters</h3>
+        <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider border-b border-slate-800/40 pb-2">Identified HCHO Clusters</h3>
         {clusterList.length === 0 ? (
           <div className="glass-panel rounded-xl p-8 text-center text-slate-500">
             No HCHO column hotspots detected on this date.
@@ -98,28 +98,28 @@ export default function HotspotsView() {
               return (
                 <div 
                   key={c.id} 
-                  className={`glass-panel rounded-xl p-5 transition-all duration-300 ${isExpanded ? 'border-purple-500/50 bg-purple-50/20' : ''}`}
+                  className={`glass-panel rounded-xl p-5 transition-all duration-300 ${isExpanded ? 'border-purple-500/50 bg-purple-950/20' : ''}`}
                 >
                   <div className="flex justify-between items-start">
                     <div>
                       <div className="flex items-center space-x-2">
-                        <span className="font-bold text-slate-800">Cluster #{c.id}</span>
+                        <span className="font-bold text-slate-100">Cluster #{c.id}</span>
                         {c.isBiomass ? (
-                          <span className="flex items-center bg-orange-50 text-orange-600 border border-orange-200 text-[9px] font-bold px-2 py-0.5 rounded">
+                          <span className="flex items-center bg-orange-950/20 text-orange-400 border border-orange-500/30 text-[9px] font-bold px-2 py-0.5 rounded">
                             <Flame size={10} className="mr-1" /> Biomass
                           </span>
                         ) : (
-                          <span className="flex items-center bg-sky-50 text-sky-600 border border-sky-200 text-[9px] font-bold px-2 py-0.5 rounded">
+                          <span className="flex items-center bg-sky-950/20 text-sky-400 border border-sky-500/30 text-[9px] font-bold px-2 py-0.5 rounded">
                             <Building2 size={10} className="mr-1" /> Industrial
                           </span>
                         )}
                       </div>
-                      <p className="text-[10px] text-slate-600 mt-1">Contains {c.members.length} district coordinates</p>
+                      <p className="text-[10px] text-slate-400 mt-1">Contains {c.members.length} district coordinates</p>
                     </div>
 
                     <button 
                       onClick={() => setExpandedCluster(isExpanded ? null : c.id)}
-                      className="p-1 text-slate-600 hover:text-slate-900 bg-white border border-slate-200 rounded shadow-sm"
+                      className="p-1.5 text-slate-400 hover:text-white bg-slate-900 border border-slate-800/60 rounded shadow-sm focus:outline-none"
                     >
                       {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                     </button>
@@ -127,13 +127,13 @@ export default function HotspotsView() {
 
                   {/* Avg HCHO Progress Indicator */}
                   <div className="mt-4">
-                    <div className="flex justify-between text-xs text-slate-600 mb-1">
+                    <div className="flex justify-between text-xs text-slate-400 mb-1">
                       <span>Average HCHO column density</span>
-                      <span className="font-mono font-bold text-purple-600">{c.avgHcho.toFixed(4)} molecules/cm²</span>
+                      <span className="font-mono font-bold text-purple-400">{c.avgHcho.toFixed(4)} molecules/cm²</span>
                     </div>
-                    <div className="progress-bar-bg">
+                    <div className="w-full h-1.5 bg-slate-900 border border-slate-800/40 rounded-full overflow-hidden">
                       <div 
-                        className="progress-bar-fill bg-purple-500" 
+                        className="h-full rounded-full bg-purple-500" 
                         style={{ width: `${Math.min(100, (c.avgHcho / 8.0) * 100)}%` }}
                       ></div>
                     </div>
@@ -141,10 +141,10 @@ export default function HotspotsView() {
 
                   {/* Expanded district members table */}
                   {isExpanded && (
-                    <div className="mt-4 border-t border-slate-200 pt-3 overflow-x-auto">
-                      <table className="min-w-full text-xs text-slate-700">
+                    <div className="mt-4 border-t border-slate-850 pt-3 overflow-x-auto">
+                      <table className="min-w-full text-xs text-slate-400">
                         <thead>
-                          <tr className="border-b border-slate-200 text-slate-500 text-left">
+                          <tr className="border-b border-slate-800 text-slate-500 text-left">
                             <th className="pb-1.5 font-bold">District</th>
                             <th className="pb-1.5 font-bold">State</th>
                             <th className="pb-1.5 font-bold text-right">Latitude</th>
@@ -154,12 +154,12 @@ export default function HotspotsView() {
                         </thead>
                         <tbody>
                           {c.members.map((m, mIdx) => (
-                            <tr key={mIdx} className="hover:bg-slate-50">
-                              <td className="py-1.5 text-slate-800 font-semibold">{m.district}</td>
+                            <tr key={mIdx} className="hover:bg-slate-800/40 border-b border-slate-800/20">
+                              <td className="py-1.5 text-slate-200 font-semibold">{m.district}</td>
                               <td className="py-1.5">{m.state}</td>
                               <td className="py-1.5 text-right font-mono">{m.latitude.toFixed(2)}</td>
                               <td className="py-1.5 text-right font-mono">{m.longitude.toFixed(2)}</td>
-                              <td className="py-1.5 text-right font-mono text-purple-600 font-bold">{m.hcho_column.toFixed(4)}</td>
+                              <td className="py-1.5 text-right font-mono text-purple-400 font-bold">{m.hcho_column.toFixed(4)}</td>
                             </tr>
                           ))}
                         </tbody>

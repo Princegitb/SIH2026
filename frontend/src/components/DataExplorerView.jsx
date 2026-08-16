@@ -44,12 +44,12 @@ export default function DataExplorerView() {
             placeholder="Search by District or State..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-white border border-slate-200 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-800 outline-none focus:border-[#4b6bf5] shadow-sm"
+            className="w-full bg-[#090d16] border border-slate-800 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-200 outline-none focus:border-[#4b6bf5] shadow-sm"
           />
         </div>
 
-        <div className="text-xs text-slate-600">
-          Showing page <span className="font-bold text-slate-800">{page}</span> of {totalPages}
+        <div className="text-xs text-slate-400">
+          Showing page <span className="font-bold text-slate-200">{page}</span> of {totalPages}
         </div>
       </div>
 
@@ -60,9 +60,9 @@ export default function DataExplorerView() {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4b6bf5]"></div>
           </div>
         ) : (
-          <table className="min-w-full text-xs text-slate-700">
+          <table className="min-w-full text-xs text-slate-300">
             <thead>
-              <tr className="border-b border-slate-200 text-slate-500 text-left">
+              <tr className="border-b border-slate-800 text-slate-500 text-left">
                 <th className="pb-3 font-bold">Date</th>
                 <th className="pb-3 font-bold">District</th>
                 <th className="pb-3 font-bold">State</th>
@@ -80,20 +80,20 @@ export default function DataExplorerView() {
             </thead>
             <tbody>
               {filteredData.map((r, idx) => (
-                <tr key={idx} className="border-b border-slate-100 hover:bg-slate-50/80">
+                <tr key={idx} className="border-b border-slate-800/40 hover:bg-slate-800/40">
                   <td className="py-2.5 font-mono">{r.date}</td>
-                  <td className="py-2.5 text-slate-800 font-semibold">{r.district}</td>
-                  <td className="py-2.5">{r.state}</td>
-                  <td className="py-2.5 text-right font-mono font-bold text-[#4b6bf5]">{r.aqi}</td>
-                  <td className="py-2.5 text-right font-mono">{r.pm25}</td>
-                  <td className="py-2.5 text-right font-mono">{r.pm10}</td>
-                  <td className="py-2.5 text-right font-mono">{r.no2_surface.toFixed(1)}</td>
-                  <td className="py-2.5 text-right font-mono">{r.so2_surface.toFixed(1)}</td>
-                  <td className="py-2.5 text-right font-mono">{r.co_surface.toFixed(2)}</td>
-                  <td className="py-2.5 text-right font-mono">{r.o3_surface.toFixed(1)}</td>
-                  <td className="py-2.5 text-right font-mono">{r.aod.toFixed(2)}</td>
-                  <td className="py-2.5 text-right font-mono text-purple-600">{r.hcho_column.toFixed(4)}</td>
-                  <td className="py-2.5 text-right font-mono">{r.blh}</td>
+                  <td className="py-2.5 text-slate-200 font-semibold">{r.district}</td>
+                  <td className="py-2.5 text-slate-400">{r.state}</td>
+                  <td className="py-2.5 text-right font-mono font-bold text-[#7c93fe]">{r.aqi}</td>
+                  <td className="py-2.5 text-right font-mono text-slate-300">{r.pm25}</td>
+                  <td className="py-2.5 text-right font-mono text-slate-300">{r.pm10}</td>
+                  <td className="py-2.5 text-right font-mono text-slate-300">{r.no2_surface.toFixed(1)}</td>
+                  <td className="py-2.5 text-right font-mono text-slate-300">{r.so2_surface.toFixed(1)}</td>
+                  <td className="py-2.5 text-right font-mono text-slate-300">{r.co_surface.toFixed(2)}</td>
+                  <td className="py-2.5 text-right font-mono text-slate-300">{r.o3_surface.toFixed(1)}</td>
+                  <td className="py-2.5 text-right font-mono text-slate-300">{r.aod.toFixed(2)}</td>
+                  <td className="py-2.5 text-right font-mono text-purple-400">{r.hcho_column.toFixed(4)}</td>
+                  <td className="py-2.5 text-right font-mono text-slate-300">{r.blh}</td>
                 </tr>
               ))}
             </tbody>
@@ -102,18 +102,18 @@ export default function DataExplorerView() {
       </div>
 
       {/* Pagination controls */}
-      <div className="flex justify-between items-center text-xs">
+      <div className="flex justify-between items-center text-xs text-slate-400">
         <button 
           onClick={() => setPage(p => Math.max(1, p - 1))}
           disabled={page === 1}
-          className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-600 hover:text-slate-800 hover:border-slate-300 disabled:opacity-40 flex items-center transition-colors shadow-sm"
+          className="px-3 py-1.5 bg-[#090d16] border border-slate-800 rounded-lg text-slate-400 hover:text-white hover:border-slate-700 disabled:opacity-40 flex items-center transition-colors shadow-sm focus:outline-none"
         >
           <ChevronLeft size={14} className="mr-1" /> Previous
         </button>
         <button 
           onClick={() => setPage(p => Math.min(totalPages, p + 1))}
           disabled={page === totalPages}
-          className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-600 hover:text-slate-800 hover:border-slate-300 disabled:opacity-40 flex items-center transition-colors shadow-sm"
+          className="px-3 py-1.5 bg-[#090d16] border border-slate-800 rounded-lg text-slate-400 hover:text-white hover:border-slate-700 disabled:opacity-40 flex items-center transition-colors shadow-sm focus:outline-none"
         >
           Next <ChevronRight size={14} className="ml-1" />
         </button>

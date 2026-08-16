@@ -70,9 +70,9 @@ export default function App() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#f4f6fa] text-slate-800 font-outfit select-none">
+    <div className="flex h-screen overflow-hidden bg-[#05070f] text-slate-100 font-outfit select-none">
       {/* 1. LEFT SIDEBAR NAVIGATION */}
-      <aside className={`bg-gradient-to-b from-[#4b6bf5] to-[#253994] border-r border-transparent flex flex-col justify-between p-4 flex-shrink-0 relative transition-all duration-300 ${sidebarOpen ? 'w-64' : 'w-18'}`}>
+      <aside className={`bg-[#080b16] border-r border-slate-800/60 flex flex-col justify-between p-4 flex-shrink-0 relative transition-all duration-300 ${sidebarOpen ? 'w-64' : 'w-18'}`}>
         <div className="space-y-6">
           {/* Header Row: Logo & Modern Inside-Sidebar Toggle Button */}
           <div className="flex items-center justify-between px-1 overflow-hidden">
@@ -80,15 +80,15 @@ export default function App() {
               <span className="text-2xl flex-shrink-0">🛰️</span>
               {sidebarOpen && (
                 <div className="transition-opacity duration-300">
-                  <h1 className="text-sm font-extrabold text-white leading-none">VayuDrishti</h1>
-                  <span className="text-[8px] text-[#c2d0ff] font-semibold tracking-wider uppercase mt-0.5 block">Smart Intelligence</span>
+                  <h1 className="text-sm font-extrabold text-white tracking-tight">VayuDrishti</h1>
+                  <span className="text-[8px] text-slate-400 font-bold tracking-wider uppercase mt-0.5 block">Satellite Intelligence</span>
                 </div>
               )}
             </div>
             
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-[#c2d0ff] hover:text-white transition-colors focus:outline-none flex-shrink-0"
+              className="p-1.5 rounded-lg bg-slate-800/50 hover:bg-slate-700/60 text-slate-400 hover:text-white transition-colors focus:outline-none flex-shrink-0"
               title={sidebarOpen ? "Collapse Sidebar" : "Expand Sidebar"}
             >
               <Menu size={16} />
@@ -106,11 +106,11 @@ export default function App() {
                   onClick={() => setActiveTab(item.value)}
                   title={!sidebarOpen ? item.name : undefined}
                   className={`w-full flex items-center rounded-lg text-xs font-semibold tracking-wide transition-all ${
-                    sidebarOpen ? 'space-x-3 px-3 py-2' : 'justify-center p-2.5'
+                    sidebarOpen ? 'space-x-3 px-3 py-2.5' : 'justify-center p-2.5'
                   } ${
                     isActive 
-                      ? 'bg-white text-[#3b56cf] font-bold shadow-md' 
-                      : 'text-[#c2d0ff] hover:bg-white/10 hover:text-white'
+                      ? 'bg-[#4b6bf5]/15 text-[#7c93fe] font-bold border border-[#4b6bf5]/35 shadow-[0_0_15px_rgba(75,107,245,0.18)]' 
+                      : 'text-slate-400 hover:bg-white/5 hover:text-slate-100'
                   }`}
                 >
                   <Icon size={16} className="flex-shrink-0" />
@@ -122,15 +122,15 @@ export default function App() {
         </div>
 
         {/* Bottom Card: Data Updated */}
-        <div className={`bg-white/10 border border-white/20 rounded-lg text-[10px] space-y-1 text-[#c2d0ff] transition-all duration-300 ${sidebarOpen ? 'p-3' : 'p-1.5 flex flex-col items-center'}`}>
-          <div className="flex items-center space-x-2 text-[#c2d0ff]">
+        <div className={`bg-slate-900/40 border border-slate-800/80 rounded-lg text-[10px] space-y-1 text-slate-400 transition-all duration-300 ${sidebarOpen ? 'p-3' : 'p-1.5 flex flex-col items-center'}`}>
+          <div className="flex items-center space-x-2 text-slate-400">
             <div className="w-2 h-2 bg-[#00e676] rounded-full shadow-[0_0_8px_#00e676] flex-shrink-0"></div>
-            {sidebarOpen && <span>Online</span>}
+            {sidebarOpen && <span className="font-semibold">Grid Engine Live</span>}
           </div>
           {sidebarOpen && (
             <>
-              <div className="font-extrabold text-white">All systems operational</div>
-              <div className="text-[9px] text-[#c2d0ff]/80">2 min ago</div>
+              <div className="font-bold text-slate-200">Atmospheric Data Synced</div>
+              <div className="text-[9px] text-slate-500">Updated 2 min ago</div>
             </>
           )}
         </div>
@@ -143,8 +143,11 @@ export default function App() {
         {activeTab === 'Dashboard' && (
           <header className="px-6 pt-5 pb-2 flex justify-between items-start flex-shrink-0 bg-transparent">
             <div>
-              <h2 className="text-xl font-bold text-slate-800 leading-none">Good Afternoon, Team <span className="text-[#4b6bf5]">VayuDrishti!</span> 👋</h2>
-              <p className="text-xs text-slate-500 mt-1 font-medium">Real-time Air Quality Intelligence Powered by Satellite & AI</p>
+              <h2 className="text-xl font-extrabold text-white tracking-tight">VayuDrishti <span className="text-[#4b6bf5]">Intelligence Center</span></h2>
+              <div className="flex items-center space-x-2 text-xs text-slate-400 mt-1 font-medium">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                <span>India Atmospheric Monitoring • Updated 2 min ago</span>
+              </div>
             </div>
             
             <div className="flex items-center space-x-3">
@@ -152,13 +155,13 @@ export default function App() {
               <select
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                className="bg-white border border-slate-200 rounded px-3 py-1.5 text-xs text-slate-800 outline-none focus:border-[#4b6bf5] cursor-pointer shadow-sm"
+                className="bg-[#0d1121] border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 outline-none focus:border-[#4b6bf5] cursor-pointer shadow-sm"
               >
                 {dates.map(d => <option key={d} value={d}>{d}</option>)}
               </select>
               <button 
                 onClick={() => alert('NCAP Compliance report prepared for export!')}
-                className="bg-[#4b6bf5] hover:bg-[#3b56cf] text-white text-xs font-semibold px-4.5 py-1.5 rounded transition-colors shadow-sm"
+                className="bg-[#4b6bf5] hover:bg-[#3b56cf] text-white text-xs font-semibold px-4.5 py-1.5 rounded-lg transition-colors shadow-sm"
               >
                 Export Report 📥
               </button>
@@ -172,7 +175,7 @@ export default function App() {
         </section>
 
         {/* Footer */}
-        <footer className="px-6 py-3 border-t border-slate-200 flex justify-between items-center text-[10px] text-slate-500 flex-shrink-0 bg-white shadow-sm">
+        <footer className="px-6 py-3 border-t border-slate-800/60 flex justify-between items-center text-[10px] text-slate-500 flex-shrink-0 bg-[#080b16] shadow-sm">
           <div className="flex space-x-4">
             <span><b>Data Sources:</b></span>
             <span>📡 Sentinel-5P</span>

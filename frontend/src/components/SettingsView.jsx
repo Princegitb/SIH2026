@@ -17,7 +17,7 @@ export default function SettingsView() {
   return (
     <div className="space-y-6">
       <div className="glass-panel rounded-xl p-5">
-        <h2 className="text-base font-bold text-slate-800 flex items-center">
+        <h2 className="text-base font-bold text-slate-200 flex items-center">
           <Sliders size={18} className="text-[#4b6bf5] mr-2" /> Platform Parameters & Configuration
         </h2>
         <p className="text-xs text-slate-500 font-medium">Configure core parameters for spatial clustering and threshold alerts</p>
@@ -28,8 +28,8 @@ export default function SettingsView() {
         <div className="space-y-4">
           <div className="space-y-2">
             <div className="flex justify-between text-xs">
-              <span className="font-semibold text-slate-700">DBSCAN Neighborhood Radius (eps)</span>
-              <span className="font-mono font-bold text-[#4b6bf5]">{eps} degrees</span>
+              <span className="font-semibold text-slate-350">DBSCAN Neighborhood Radius (eps)</span>
+              <span className="font-mono font-bold text-[#7c93fe]">{eps} degrees</span>
             </div>
             <input 
               type="range" 
@@ -38,15 +38,15 @@ export default function SettingsView() {
               step="0.05"
               value={eps} 
               onChange={(e) => setEps(parseFloat(e.target.value))}
-              className="w-full accent-[#4b6bf5] bg-slate-100 h-1.5 rounded-lg appearance-none cursor-pointer"
+              className="w-full accent-[#4b6bf5] bg-slate-900 h-1.5 rounded-lg appearance-none cursor-pointer border border-slate-800"
             />
-            <p className="text-[10px] text-slate-600">Determines the maximum distance threshold for linking Formaldehyde anomalies into a single hotspot cluster.</p>
+            <p className="text-[10px] text-slate-400">Determines the maximum distance threshold for linking Formaldehyde anomalies into a single hotspot cluster.</p>
           </div>
 
           <div className="space-y-2">
             <div className="flex justify-between text-xs">
-              <span className="font-semibold text-slate-700">HCHO Anomaly Percentile Threshold</span>
-              <span className="font-mono font-bold text-[#4b6bf5]">{percentile}th Percentile</span>
+              <span className="font-semibold text-slate-350">HCHO Anomaly Percentile Threshold</span>
+              <span className="font-mono font-bold text-[#7c93fe]">{percentile}th Percentile</span>
             </div>
             <input 
               type="range" 
@@ -55,23 +55,23 @@ export default function SettingsView() {
               step="1"
               value={percentile} 
               onChange={(e) => setPercentile(parseInt(e.target.value))}
-              className="w-full accent-[#4b6bf5] bg-slate-100 h-1.5 rounded-lg appearance-none cursor-pointer"
+              className="w-full accent-[#4b6bf5] bg-slate-900 h-1.5 rounded-lg appearance-none cursor-pointer border border-slate-800"
             />
-            <p className="text-[10px] text-slate-600">Grid cells exceeding this percentile in HCHO column density will be flagged as anomalous hotspots.</p>
+            <p className="text-[10px] text-slate-400">Grid cells exceeding this percentile in HCHO column density will be flagged as anomalous hotspots.</p>
           </div>
         </div>
 
         {/* Action Button */}
-        <div className="border-t border-slate-200 pt-4 flex items-center justify-between">
+        <div className="border-t border-slate-800/80 pt-4 flex items-center justify-between">
           <button 
             onClick={handleSave}
-            className="bg-[#4b6bf5] hover:bg-[#3b56cf] text-white text-xs font-bold px-4 py-2 rounded-lg flex items-center transition-colors shadow-sm border-transparent"
+            className="bg-[#4b6bf5] hover:bg-[#3b56cf] text-white text-xs font-bold px-4 py-2 rounded-lg flex items-center transition-colors shadow-sm border-transparent focus:outline-none"
           >
             <Save size={14} className="mr-2" /> Save Parameters
           </button>
 
           {saveStatus && (
-            <span className="text-xs text-emerald-600 font-semibold">{saveStatus}</span>
+            <span className="text-xs text-emerald-400 font-semibold">{saveStatus}</span>
           )}
         </div>
       </div>
