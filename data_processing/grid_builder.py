@@ -70,13 +70,13 @@ def simulate_data():
     logger.info("Initializing grid and date parameters...")
     grid_df = generate_spatial_grid()
     
-    start_date = datetime(2025, 10, 1)
-    end_date = datetime(2025, 11, 30)
+    start_date = datetime(2025, 11, 1)
+    end_date = datetime(2025, 11, 8)
     days = (end_date - start_date).days + 1
     
     date_list = [start_date + timedelta(days=x) for x in range(days)]
     
-    logger.info(f"Generated {len(grid_df)} grid cells. Simulating {days} days from Oct 1 to Nov 30...")
+    logger.info(f"Generated {len(grid_df)} grid cells. Simulating {days} days from Nov 1 to Nov 8...")
     
     # 1. Simulate Fire Events for the period
     np.random.seed(42)

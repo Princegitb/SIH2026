@@ -46,16 +46,35 @@ def startup_event():
     global grid_df, fires_df, model_manager, explainer, attributor, transport, hotspot_detector
     logger.info("Initializing models and loading datasets...")
     
-    # Auto-generate data if missing (Crucial for fresh Render/cloud deployments)
+    # Simple lock mechanism to prevent multi-worker race conditions on Render
+    import time
+    lock_file = "data/sim.lock"
+    
     if not (os.path.exists("data/grid_data.csv") and os.path.exists("data/ground_stations.csv")):
-        logger.info("Simulation datasets not found. Triggering automated grid builder simulator...")
-        try:
-            from data_processing.grid_builder import simulate_data
-            simulate_data()
-            logger.info("Simulation dataset generated successfully!")
-        except Exception as e:
-            logger.error(f"Failed to auto-generate simulation datasets: {e}")
-            raise e
+        # Check if another worker is already generating the data
+        if os.path.exists(lock_file):
+            logger.info("Another worker is generating data, waiting...")
+            while os.path.exists(lock_file) or not os.path.exists("data/grid_data.csv"):
+                time.sleep(1)
+        else:
+            # Create lock file
+            os.makedirs("data", exist_ok=True)
+            with open(lock_file, "w") as f:
+                f.write("locked")
+            
+            logger.info("Simulation datasets not found. Triggering automated grid builder simulator...")
+            try:
+                from data_processing.grid_builder import simulate_data
+                simulate_data()
+                logger.info("Simulation dataset generated successfully!")
+            except Exception as e:
+                logger.error(f"Failed to auto-generate simulation datasets: {e}")
+                if os.path.exists(lock_file):
+                    os.remove(lock_file)
+                raise e
+            finally:
+                if os.path.exists(lock_file):
+                    os.remove(lock_file)
             
     # Load raw datasets
     grid_df_raw = pd.read_csv("data/grid_data.csv")
