@@ -9,7 +9,9 @@ import logging
 
 
 # Add project root to python path to resolve models imports
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, ROOT_DIR)
+os.chdir(ROOT_DIR)
 
 from models.aqi_model import AQIModelManager, FEATURES
 from models.hotspot_detection import HotspotDetector
