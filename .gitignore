@@ -13,7 +13,6 @@ dist-ssr/
 
 # Bulky Data Files (keep code lightweight, rebuild locally with grid_builder.py)
 data/
-models/saved/
 
 # Editor / System config
 .vscode/
@@ -24,6 +23,6 @@ Thumbs.db
 .agents/
 brain/
 *.log
-*.pkl
 *.nc
 *.csv
+
