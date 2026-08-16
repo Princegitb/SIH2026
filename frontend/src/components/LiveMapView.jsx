@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useStore } from '../store'
-import { MapContainer, TileLayer, CircleMarker, Circle, Popup, Polyline, Rectangle } from 'react-leaflet'
+import { MapContainer, TileLayer, CircleMarker, Circle, Popup, Polyline } from 'react-leaflet'
 
 const getCpcbColorAndLabel = (aqi) => {
   if (aqi <= 50) return { color: "#10b981", label: "Good" }
@@ -9,6 +9,81 @@ const getCpcbColorAndLabel = (aqi) => {
   if (aqi <= 300) return { color: "#f97316", label: "Poor" }
   if (aqi <= 400) return { color: "#ef4444", label: "Very Poor" }
   return { color: "#7f1d1d", label: "Severe" }
+}
+
+const getCellColorAndLabel = (cell, layer) => {
+  if (layer === 'AQI') {
+    return getCpcbColorAndLabel(cell.aqi)
+  }
+  if (layer === 'PM2.5') {
+    const val = cell.pm25
+    if (val <= 30) return { color: "#10b981", label: "Good" }
+    if (val <= 60) return { color: "#84cc16", label: "Satisfactory" }
+    if (val <= 90) return { color: "#eab308", label: "Moderate" }
+    if (val <= 120) return { color: "#f97316", label: "Poor" }
+    if (val <= 250) return { color: "#ef4444", label: "Very Poor" }
+    return { color: "#7f1d1d", label: "Severe" }
+  }
+  if (layer === 'PM10') {
+    const val = cell.pm10 || (cell.pm25 * 1.5)
+    if (val <= 50) return { color: "#10b981", label: "Good" }
+    if (val <= 100) return { color: "#84cc16", label: "Satisfactory" }
+    if (val <= 250) return { color: "#eab308", label: "Moderate" }
+    if (val <= 350) return { color: "#f97316", label: "Poor" }
+    if (val <= 430) return { color: "#ef4444", label: "Very Poor" }
+    return { color: "#7f1d1d", label: "Severe" }
+  }
+  if (layer === 'HCHO') {
+    const val = cell.hcho
+    if (val <= 3.0) return { color: "#10b981", label: "Low" }
+    if (val <= 5.0) return { color: "#84cc16", label: "Satisfactory" }
+    if (val <= 7.0) return { color: "#eab308", label: "Moderate" }
+    if (val <= 10.0) return { color: "#f97316", label: "High" }
+    if (val <= 14.0) return { color: "#ef4444", label: "Very High" }
+    return { color: "#7f1d1d", label: "Severe" }
+  }
+  return { color: "#10b981", label: "Good" }
+}
+
+// Helper to aggregate grid cells into district centers
+const getDistrictMarkers = (cells) => {
+  if (!cells) return []
+  const groups = {}
+  cells.forEach(c => {
+    if (!groups[c.district]) {
+      groups[c.district] = {
+        district: c.district,
+        state: c.state,
+        lats: [],
+        lons: [],
+        aqis: [],
+        pm25s: [],
+        pm10s: [],
+        hchos: []
+      }
+    }
+    groups[c.district].lats.push(c.latitude)
+    groups[c.district].lons.push(c.longitude)
+    groups[c.district].aqis.push(c.aqi)
+    groups[c.district].pm25s.push(c.pm25)
+    groups[c.district].pm10s.push(c.pm10 || (c.pm25 * 1.5))
+    groups[c.district].hchos.push(c.hcho)
+  })
+
+  return Object.values(groups).map(g => {
+    const count = g.aqis.length
+    const avg = (arr) => arr.reduce((sum, val) => sum + val, 0) / count
+    return {
+      district: g.district,
+      state: g.state,
+      latitude: avg(g.lats),
+      longitude: avg(g.lons),
+      aqi: Math.round(avg(g.aqis)),
+      pm25: avg(g.pm25s),
+      pm10: avg(g.pm10s),
+      hcho: avg(g.hchos)
+    }
+  })
 }
 
 export default function LiveMapView() {
@@ -33,6 +108,8 @@ export default function LiveMapView() {
     )
   }
 
+  const districtMarkers = getDistrictMarkers(mapData.cells)
+
   return (
     <div className="h-[calc(100vh-140px)] flex flex-col space-y-4">
       {/* Controls Overlay Header */}
@@ -49,7 +126,7 @@ export default function LiveMapView() {
               onChange={() => setLayers({...layers, aqi: !layers.aqi})}
               className="accent-[#4b6bf5]"
             />
-            <span>AQI Grid</span>
+            <span>District Markers</span>
           </label>
           <label className="flex items-center space-x-2 cursor-pointer hover:text-slate-200">
             <input 
@@ -90,46 +167,59 @@ export default function LiveMapView() {
         >
           <TileLayer
             url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-            attribution='&copy; <a href="https://carto.com/">CARTO</a>'
+            className="theme-map-tile-layer"
           />
           
-          {/* 1. Draw Grid Cells as rectangular satellite pixels */}
-          {layers.aqi && mapData.cells && mapData.cells.map((cell) => {
-            const { color, label } = getCpcbColorAndLabel(cell.aqi)
-            const bounds = [
-              [cell.latitude - 0.075, cell.longitude - 0.075],
-              [cell.latitude + 0.075, cell.longitude + 0.075]
-            ];
+          {/* Clean, understandable, and consistent District markers */}
+          {layers.aqi && districtMarkers.map((marker) => {
+            const val = marker.aqi
+            const { color, label } = getCpcbColorAndLabel(val)
+
+            // Dynamic marker size based on value
+            const radius = 8 + (val / 40)
 
             return (
-              <Rectangle
-                key={`live-cell-${cell.cell_id}`}
-                bounds={bounds}
-                pathOptions={{
-                  fillColor: color,
-                  fillOpacity: 0.38,
-                  color: color,
-                  weight: 0.5,
-                  opacity: 0.1
-                }}
-              >
-                <Popup>
-                  <div className="text-xs space-y-1">
-                    <div className="font-bold text-white border-b border-slate-700/60 pb-1">{cell.district} ({cell.state})</div>
-                    <div className="text-slate-300 font-semibold">Estimated AQI: {cell.aqi} ({label})</div>
-                    <div className="text-[10px] text-slate-400 mt-1 border-t border-slate-700/45 pt-1 space-y-0.5">
-                      <div>PM2.5: {cell.pm25} µg/m³</div>
-                      <div>AOD: {cell.aod}</div>
-                      <div>Boundary Layer: {cell.blh} m</div>
-                      <div>HCHO Column: {cell.hcho.toFixed(4)}</div>
+              <React.Fragment key={`live-district-${marker.district}`}>
+                {/* Outer glowing hotspot halo */}
+                <Circle
+                  center={[marker.latitude, marker.longitude]}
+                  radius={15000}
+                  pathOptions={{
+                    color: color,
+                    weight: 1,
+                    fillColor: color,
+                    fillOpacity: 0.12
+                  }}
+                />
+                {/* Core marker */}
+                <CircleMarker
+                  center={[marker.latitude, marker.longitude]}
+                  radius={Math.min(22, Math.max(9, radius))}
+                  pathOptions={{
+                    fillColor: color,
+                    fillOpacity: 0.85,
+                    color: '#ffffff',
+                    weight: 1.5
+                  }}
+                >
+                  <Popup>
+                    <div className="text-xs space-y-1">
+                      <div className="font-bold text-white border-b border-slate-700/60 pb-1">{marker.district} ({marker.state})</div>
+                      <div className="text-slate-300 font-semibold mt-1">District Average Statistics:</div>
+                      <div className="text-[9px] text-slate-400 mt-2 space-y-0.5">
+                        <div>Estimated AQI: <span className="font-bold text-white">{marker.aqi} ({label})</span></div>
+                        <div>PM2.5: {Math.round(marker.pm25)} µg/m³</div>
+                        <div>PM10: {Math.round(marker.pm10)} µg/m³</div>
+                        <div>HCHO Density: {marker.hcho.toFixed(4)}</div>
+                      </div>
                     </div>
-                  </div>
-                </Popup>
-              </Rectangle>
+                  </Popup>
+                </CircleMarker>
+              </React.Fragment>
             )
           })}
 
-          {/* 2. Draw HCHO clusters */}
+          {/* Draw HCHO clusters */}
           {layers.hotspots && mapData.hotspots && mapData.hotspots.map((hot, idx) => (
             <Circle
               key={`live-hot-${idx}`}
@@ -153,7 +243,7 @@ export default function LiveMapView() {
             </Circle>
           ))}
 
-          {/* 3. Draw Active Fires */}
+          {/* Draw Active Fires */}
           {layers.fires && mapData.fires && mapData.fires.map((fire, idx) => (
             <CircleMarker
               key={`live-fire-${idx}`}
@@ -177,7 +267,7 @@ export default function LiveMapView() {
             </CircleMarker>
           ))}
 
-          {/* 4. Draw Trajectories */}
+          {/* Draw Trajectories */}
           {layers.plumes && mapData.plumes && mapData.plumes.map((plume, idx) => (
             <Polyline
               key={`live-plume-${idx}`}

@@ -15,7 +15,7 @@ import SettingsView from './components/SettingsView'
 import { 
   LayoutDashboard, Map, Compass, Activity, Flame, Wind, 
   Tag, BarChart3, FileSpreadsheet, BellRing, Database, Settings, HelpCircle,
-  Menu, X
+  Menu, X, Sun, Moon
 } from 'lucide-react'
 
 // Icon mapping for navigation links
@@ -45,10 +45,21 @@ export default function App() {
   } = useStore()
 
   const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark')
 
   useEffect(() => {
     fetchMetadata()
   }, [])
+
+  useEffect(() => {
+    if (theme === 'light') {
+      document.documentElement.classList.add('light')
+      localStorage.setItem('theme', 'light')
+    } else {
+      document.documentElement.classList.remove('light')
+      localStorage.setItem('theme', 'dark')
+    }
+  }, [theme])
 
   // Render active view
   const renderView = () => {
@@ -70,11 +81,11 @@ export default function App() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#05070f] text-slate-100 font-outfit select-none">
+    <div className="flex h-screen overflow-hidden bg-[var(--bg-color)] text-[var(--text-color)] font-outfit select-none transition-colors duration-300">
       {/* 1. LEFT SIDEBAR NAVIGATION */}
-      <aside className={`bg-[#080b16] border-r border-slate-800/60 flex flex-col justify-between p-4 flex-shrink-0 relative transition-all duration-300 ${sidebarOpen ? 'w-64' : 'w-18'}`}>
+      <aside className={`bg-[var(--sidebar-bg)] border-r border-[var(--panel-border)] flex flex-col justify-between p-4 flex-shrink-0 relative transition-all duration-300 ${sidebarOpen ? 'w-64' : 'w-18'}`}>
         <div className="space-y-6">
-          {/* Header Row: Logo & Modern Inside-Sidebar Toggle Button */}
+          {/* Header Row: Logo & Modern Inside-Sidebar Toggle Button + Theme Toggle */}
           <div className="flex items-center justify-between px-1 overflow-hidden">
             <div className="flex items-center space-x-2.5 overflow-hidden whitespace-nowrap">
               <span className="text-2xl flex-shrink-0">🛰️</span>
@@ -86,13 +97,23 @@ export default function App() {
               )}
             </div>
             
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-1.5 rounded-lg bg-slate-800/50 hover:bg-slate-700/60 text-slate-400 hover:text-white transition-colors focus:outline-none flex-shrink-0"
-              title={sidebarOpen ? "Collapse Sidebar" : "Expand Sidebar"}
-            >
-              <Menu size={16} />
-            </button>
+            <div className="flex items-center space-x-1.5 flex-shrink-0">
+              <button
+                onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+                className="p-1.5 rounded-lg bg-slate-800/20 hover:bg-slate-800/40 text-slate-400 hover:text-white transition-colors focus:outline-none"
+                title={theme === 'light' ? "Switch to Dark Mode" : "Switch to Light Mode"}
+              >
+                {theme === 'light' ? <Moon size={15} /> : <Sun size={15} />}
+              </button>
+
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="p-1.5 rounded-lg bg-slate-800/20 hover:bg-slate-800/40 text-slate-400 hover:text-white transition-colors focus:outline-none"
+                title={sidebarOpen ? "Collapse Sidebar" : "Expand Sidebar"}
+              >
+                <Menu size={15} />
+              </button>
+            </div>
           </div>
 
           {/* Links list */}

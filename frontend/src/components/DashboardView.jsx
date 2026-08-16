@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useStore } from '../store'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
-import { MapContainer, TileLayer, CircleMarker, Circle, Popup, Polyline, Rectangle } from 'react-leaflet'
+import { MapContainer, TileLayer, CircleMarker, Circle, Popup, Polyline } from 'react-leaflet'
 import { ShieldAlert, Play, ArrowUpRight, TrendingUp, TrendingDown, Clock, Activity, Flame, Sparkles } from 'lucide-react'
 
 // CPCB color & category helpers
@@ -48,6 +48,47 @@ const getCellColorAndLabel = (cell, layer) => {
   return { color: "#10b981", label: "Good" }
 }
 
+// Helper to aggregate grid cells into district centers
+const getDistrictMarkers = (cells) => {
+  if (!cells) return []
+  const groups = {}
+  cells.forEach(c => {
+    if (!groups[c.district]) {
+      groups[c.district] = {
+        district: c.district,
+        state: c.state,
+        lats: [],
+        lons: [],
+        aqis: [],
+        pm25s: [],
+        pm10s: [],
+        hchos: []
+      }
+    }
+    groups[c.district].lats.push(c.latitude)
+    groups[c.district].lons.push(c.longitude)
+    groups[c.district].aqis.push(c.aqi)
+    groups[c.district].pm25s.push(c.pm25)
+    groups[c.district].pm10s.push(c.pm10 || (c.pm25 * 1.5))
+    groups[c.district].hchos.push(c.hcho)
+  })
+
+  return Object.values(groups).map(g => {
+    const count = g.aqis.length
+    const avg = (arr) => arr.reduce((sum, val) => sum + val, 0) / count
+    return {
+      district: g.district,
+      state: g.state,
+      latitude: avg(g.lats),
+      longitude: avg(g.lons),
+      aqi: Math.round(avg(g.aqis)),
+      pm25: avg(g.pm25s),
+      pm10: avg(g.pm10s),
+      hcho: avg(g.hchos)
+    }
+  })
+}
+
 // Custom SVG Sparkline Generator
 const Sparkline = ({ values, color }) => {
   if (!values || values.length < 2) return null
@@ -89,7 +130,7 @@ const SVGGauge = ({ value, color, label }) => {
         <path
           d="M 10 60 A 50 50 0 0 1 110 60"
           fill="none"
-          stroke="rgba(255, 255, 255, 0.05)"
+          stroke="rgba(128, 128, 128, 0.1)"
           strokeWidth={strokeWidth}
           strokeLinecap="round"
         />
@@ -106,7 +147,7 @@ const SVGGauge = ({ value, color, label }) => {
         />
       </svg>
       <div className="absolute bottom-2 text-center">
-        <div className="text-3xl font-extrabold tracking-tight text-white">{value}</div>
+        <div className="text-3xl font-extrabold tracking-tight theme-adapt-text">{value}</div>
         <div className="text-[9px] font-bold uppercase tracking-wider mt-0.5" style={{ color }}>{label}</div>
       </div>
     </div>
@@ -171,9 +212,11 @@ export default function DashboardView() {
     'PM10': focus.trend.pm10[idx]
   })) : []
 
+  const districtMarkers = mapData ? getDistrictMarkers(mapData.cells) : []
+
   return (
     <div className="space-y-5">
-      {/* 1. KPIs Row - Cleaned to 4 detailed columns to avoid compression */}
+      {/* 1. KPIs Row */}
       <div className="grid grid-cols-12 gap-4">
         
         {/* KPI 1: Estimated AQI (Span 4) */}
@@ -182,7 +225,7 @@ export default function DashboardView() {
             <div>
               <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Estimated AQI</div>
               <div className="text-[10px] text-slate-500 font-semibold mt-0.5">Delhi NCR Basin</div>
-              <div className="text-4xl font-extrabold mt-1 text-white tracking-tight">{kpis.aqi}</div>
+              <div className="text-4xl font-extrabold mt-1 theme-adapt-text tracking-tight">{kpis.aqi}</div>
               <span className={`inline-block text-[9px] font-bold px-2 py-0.5 rounded-full mt-2 ${aqiDetails.badge}`}>
                 {aqiDetails.label.toUpperCase()}
               </span>
@@ -269,9 +312,9 @@ export default function DashboardView() {
 
       </div>
 
-      {/* AI Insight Box (Added intelligence layer) */}
+      {/* AI Insight Box */}
       {focus && (
-        <div className="glass-panel rounded-2xl p-4 border border-purple-500/20 bg-gradient-to-r from-purple-950/20 to-indigo-950/20 flex items-center space-x-3.5 relative overflow-hidden">
+        <div className="glass-panel rounded-2xl p-4 border border-purple-500/20 bg-gradient-to-r from-purple-950/10 to-indigo-950/10 flex items-center space-x-3.5 relative overflow-hidden">
           <div className="absolute right-0 top-0 text-slate-900/10 pointer-events-none translate-x-4 -translate-y-4">
             <Sparkles size={160} />
           </div>
@@ -280,9 +323,9 @@ export default function DashboardView() {
           </div>
           <div className="text-xs">
             <span className="font-extrabold text-purple-400 tracking-wide uppercase mr-2 text-[10px] px-2 py-0.5 rounded bg-purple-500/10 border border-purple-500/20">AI Atmosphere Insight</span>
-            <span className="text-slate-300 font-medium">
-              Stubble burning markers indicate an HCHO column density of <b className="text-slate-100">{focus.hcho_column.toFixed(2)}</b> in <b className="text-slate-100">{focus.district}</b>. 
-              Lagrangian wind analysis (u: {focus.wind_speed.toFixed(1)} km/h) forecasts downwind particulate transport carrying smoke plumes towards downwind receptors within <b className="text-slate-100">12–18 hours</b>.
+            <span className="text-slate-350 font-medium">
+              Stubble burning markers indicate an HCHO column density of <b className="text-slate-200">{focus.hcho_column.toFixed(2)}</b> in <b className="text-slate-200">{focus.district}</b>. 
+              Lagrangian wind analysis (u: {focus.wind_speed.toFixed(1)} km/h) forecasts downwind particulate transport carrying smoke plumes towards downwind receptors within <b className="text-slate-200">12–18 hours</b>.
             </span>
           </div>
         </div>
@@ -290,12 +333,12 @@ export default function DashboardView() {
 
       {/* 2. Middle Row: Map Container & Focus Right Panel */}
       <div className="grid grid-cols-12 gap-4">
-        {/* Map Body (Left 7 Cols - Enlarged) */}
+        {/* Map Body (Left 7 Cols) */}
         <div className="col-span-7 glass-panel rounded-2xl p-5 flex flex-col h-[570px] relative">
           <div className="flex justify-between items-center mb-3">
             <div>
               <div className="text-sm font-extrabold text-slate-200 tracking-tight">Geospatial GIS Atmospheric Overview</div>
-              <div className="text-[10px] text-slate-500 font-semibold mt-0.5">Interactive pixelated satellite grid</div>
+              <div className="text-[10px] text-slate-500 font-semibold mt-0.5">District centers AQI, HCHO, and PM overlay</div>
             </div>
             {/* Toggles */}
             <div className="flex bg-slate-900/50 border border-slate-800/80 rounded-lg p-0.5 text-xs text-slate-400">
@@ -308,7 +351,7 @@ export default function DashboardView() {
                     className={`px-3 py-1 rounded-md font-bold cursor-pointer transition-all ${
                       isActive 
                         ? 'bg-[#4b6bf5] text-white shadow-md' 
-                        : 'hover:text-slate-200'
+                        : 'hover:text-slate-250'
                     }`}
                   >
                     {layer}
@@ -329,60 +372,93 @@ export default function DashboardView() {
               >
                 <TileLayer
                   url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-                  attribution='&copy; <a href="https://carto.com/">CARTO</a>'
+                  className="theme-map-tile-layer"
                 />
                 
-                {/* 1. Draw Grid Cells as rectangular satellite pixels */}
-                {mapData.cells && mapData.cells.map((cell) => {
-                  const { color } = getCellColorAndLabel(cell, selectedLayer)
-                  const bounds = [
-                    [cell.latitude - 0.075, cell.longitude - 0.075],
-                    [cell.latitude + 0.075, cell.longitude + 0.075]
-                  ];
+                {/* Clean, understandable, and consistent District markers for all layers */}
+                {districtMarkers.map((marker) => {
+                  let val = marker.aqi
+                  let color = '#10b981'
+                  let label = 'Good'
+                  let unit = ''
+                  
+                  if (selectedLayer === 'AQI') {
+                    const res = getCpcbColorAndLabel(marker.aqi)
+                    color = res.color
+                    label = res.label
+                  } else if (selectedLayer === 'PM2.5') {
+                    val = marker.pm25
+                    const res = getCellColorAndLabel({ pm25: val }, 'PM2.5')
+                    color = res.color
+                    label = res.label
+                    unit = ' µg/m³'
+                  } else if (selectedLayer === 'PM10') {
+                    val = marker.pm10
+                    const res = getCellColorAndLabel({ pm10: val }, 'PM10')
+                    color = res.color
+                    label = res.label
+                    unit = ' µg/m³'
+                  } else if (selectedLayer === 'HCHO') {
+                    val = marker.hcho
+                    const res = getCellColorAndLabel({ hcho: val }, 'HCHO')
+                    color = res.color
+                    label = res.label
+                    unit = ' 10¹⁵ molec/cm²'
+                  }
+
+                  // Dynamic marker size based on value
+                  let radius = 10
+                  if (selectedLayer === 'AQI') radius = 8 + (val / 40)
+                  else if (selectedLayer === 'PM2.5') radius = 8 + (val / 20)
+                  else if (selectedLayer === 'PM10') radius = 8 + (val / 30)
+                  else if (selectedLayer === 'HCHO') radius = 8 + (val * 1.5)
 
                   return (
-                    <Rectangle
-                      key={`cell-${cell.cell_id}`}
-                      bounds={bounds}
-                      pathOptions={{
-                        fillColor: color,
-                        fillOpacity: 0.38,
-                        color: color,
-                        weight: 0.5,
-                        opacity: 0.1
-                      }}
-                    >
-                      <Popup>
-                        <div className="text-xs space-y-1">
-                          <div className="font-bold text-white border-b border-slate-700/60 pb-1">{cell.district} ({cell.state})</div>
-                          <div className="text-slate-300 font-semibold">{selectedLayer}: {selectedLayer === 'HCHO' ? cell.hcho.toFixed(4) : cell.aqi}</div>
-                          <div className="text-[10px] text-slate-400 mt-1 border-t border-slate-700/40 pt-1 space-y-0.5">
-                            <div>PM2.5: {cell.pm25} µg/m³</div>
-                            <div>Boundary Layer: {cell.blh} m</div>
+                    <React.Fragment key={`district-${marker.district}-${selectedLayer}`}>
+                      {/* Outer glowing hotspot halo */}
+                      <Circle
+                        center={[marker.latitude, marker.longitude]}
+                        radius={15000}
+                        pathOptions={{
+                          color: color,
+                          weight: 1,
+                          fillColor: color,
+                          fillOpacity: 0.12
+                        }}
+                      />
+                      {/* Core district indicator */}
+                      <CircleMarker
+                        center={[marker.latitude, marker.longitude]}
+                        radius={Math.min(22, Math.max(9, radius))}
+                        pathOptions={{
+                          fillColor: color,
+                          fillOpacity: 0.85,
+                          color: '#ffffff',
+                          weight: 1.5
+                        }}
+                      >
+                        <Popup>
+                          <div className="text-xs space-y-1">
+                            <div className="font-bold text-white border-b border-slate-700/60 pb-1">{marker.district} ({marker.state})</div>
+                            <div className="text-slate-350 font-semibold mt-1">Selected Metric ({selectedLayer}):</div>
+                            <div className="font-extrabold text-sm flex items-baseline space-x-1" style={{ color }}>
+                              <span>{selectedLayer === 'HCHO' ? val.toFixed(4) : Math.round(val)}</span>
+                              <span className="text-[9px] font-normal text-slate-400">{unit} ({label})</span>
+                            </div>
+                            <div className="text-[9px] text-slate-400 mt-2 border-t border-slate-750 pt-1.5 space-y-0.5">
+                              <div>AQI Index: {marker.aqi}</div>
+                              <div>PM2.5 Concentration: {Math.round(marker.pm25)} µg/m³</div>
+                              <div>PM10 Concentration: {Math.round(marker.pm10)} µg/m³</div>
+                              <div>HCHO Column Density: {marker.hcho.toFixed(4)}</div>
+                            </div>
                           </div>
-                        </div>
-                      </Popup>
-                    </Rectangle>
+                        </Popup>
+                      </CircleMarker>
+                    </React.Fragment>
                   )
                 })}
 
-                {/* 2. Hotspots - visually dominant */}
-                {mapData.hotspots && mapData.hotspots.map((hot, idx) => (
-                  <Circle
-                    key={`hot-${idx}`}
-                    center={[hot.latitude, hot.longitude]}
-                    radius={10000}
-                    pathOptions={{
-                      color: hot.is_biomass ? '#a855f7' : '#6366f1',
-                      weight: 2.5,
-                      fillColor: hot.is_biomass ? '#a855f7' : '#6366f1',
-                      fillOpacity: 0.22,
-                      dashArray: '3, 4'
-                    }}
-                  />
-                ))}
-
-                {/* 3. Draw Active Fires */}
+                {/* Draw Active Fires */}
                 {mapData.fires && mapData.fires.map((fire, idx) => (
                   <CircleMarker
                     key={`fire-${idx}`}
@@ -397,7 +473,7 @@ export default function DashboardView() {
                   />
                 ))}
 
-                {/* 4. Draw Trajectories */}
+                {/* Draw Trajectories */}
                 {mapData.plumes && mapData.plumes.map((plume, idx) => (
                   <Polyline
                     key={`plume-${idx}`}
@@ -443,14 +519,14 @@ export default function DashboardView() {
           <div className="scale-bar"></div>
         </div>
 
-        {/* Right Sidebar focus district view - Restructured hierarchy */}
+        {/* Right Sidebar focus district view */}
         <div className="col-span-5 glass-panel rounded-2xl p-5 flex flex-col justify-between h-[570px] overflow-y-auto space-y-4">
           
           {/* Dropdown Focus Selector */}
-          <div className="flex justify-between items-center border-b border-slate-800/40 pb-2">
+          <div className="flex justify-between items-center border-b border-slate-850 pb-2">
             <div>
               <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Analysis Target</div>
-              <div className="text-sm font-extrabold text-white tracking-tight">{focus ? focus.district : "No Selection"}</div>
+              <div className="text-sm font-extrabold theme-adapt-text tracking-tight">{focus ? focus.district : "No Selection"}</div>
             </div>
             <select
               value={selectedDistrict}
@@ -480,11 +556,11 @@ export default function DashboardView() {
                   const pct = Math.min(100, (p.value / p.max) * 100)
                   return (
                     <div key={p.name} className="mb-2">
-                      <div className="flex justify-between text-[10px] font-bold text-slate-300">
+                      <div className="flex justify-between text-[10px] font-bold text-slate-350">
                         <span>{p.name}</span>
-                        <span className="font-mono text-white">{p.value.toFixed(1)} <span className="text-[8px] text-slate-500 font-normal">µg</span></span>
+                        <span className="font-mono theme-adapt-text">{p.value.toFixed(1)} <span className="text-[8px] text-slate-500 font-normal">µg</span></span>
                       </div>
-                      <div className="w-full h-1.5 bg-slate-900 border border-slate-800/40 rounded-full overflow-hidden mt-1">
+                      <div className="w-full h-1.5 bg-slate-900 border border-slate-850 rounded-full overflow-hidden mt-1">
                         <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: p.color }}></div>
                       </div>
                     </div>
@@ -492,24 +568,24 @@ export default function DashboardView() {
                 })}
               </div>
 
-              {/* Section 3: Surface Gases (NO2, SO2, CO) */}
+              {/* Section 3: Surface Gases */}
               <div className="space-y-2">
                 <div className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-2">Surface Atmospheric Columns</div>
                 <div className="grid grid-cols-3 gap-2">
-                  <div className="bg-slate-900/40 border border-slate-800/80 rounded-xl p-2.5 text-center">
+                  <div className="bg-slate-900/40 border border-slate-850 rounded-xl p-2.5 text-center">
                     <div className="text-[8px] text-slate-500 font-bold uppercase">NO₂</div>
                     <div className="font-extrabold text-[#10b981] text-xs mt-0.5">{focus.no2.toFixed(1)}</div>
-                    <div className="text-[7px] text-slate-600">µg/m³</div>
+                    <div className="text-[7px] text-slate-500">µg/m³</div>
                   </div>
-                  <div className="bg-slate-900/40 border border-slate-800/80 rounded-xl p-2.5 text-center">
+                  <div className="bg-slate-900/40 border border-slate-850 rounded-xl p-2.5 text-center">
                     <div className="text-[8px] text-slate-500 font-bold uppercase">SO₂</div>
                     <div className="font-extrabold text-[#84cc16] text-xs mt-0.5">{focus.so2.toFixed(1)}</div>
-                    <div className="text-[7px] text-slate-600">µg/m³</div>
+                    <div className="text-[7px] text-slate-500">µg/m³</div>
                   </div>
-                  <div className="bg-slate-900/40 border border-slate-800/80 rounded-xl p-2.5 text-center">
+                  <div className="bg-slate-900/40 border border-slate-850 rounded-xl p-2.5 text-center">
                     <div className="text-[8px] text-slate-500 font-bold uppercase">CO</div>
                     <div className="font-extrabold text-[#0ea5e9] text-xs mt-0.5">{focus.co.toFixed(2)}</div>
-                    <div className="text-[7px] text-slate-600">mg/m³</div>
+                    <div className="text-[7px] text-slate-500">mg/m³</div>
                   </div>
                 </div>
               </div>
@@ -548,7 +624,7 @@ export default function DashboardView() {
           <div className="radar-container">
             <div className="radar-sweep w-full h-full bg-[conic-gradient(from_0deg,rgba(168,85,247,0.2)_0deg,transparent_90deg)]"></div>
           </div>
-          <div className="text-[10px] text-slate-500 flex items-center group-hover:text-slate-300">
+          <div className="text-[10px] text-slate-500 flex items-center group-hover:text-slate-355">
             View Details <ArrowUpRight size={10} className="ml-1" />
           </div>
         </div>
@@ -561,7 +637,7 @@ export default function DashboardView() {
           </div>
           {/* Fire pulsing glow */}
           <div className="fire-glow"></div>
-          <div className="text-[10px] text-slate-500 flex items-center group-hover:text-slate-300">
+          <div className="text-[10px] text-slate-500 flex items-center group-hover:text-slate-355">
             View Details <ArrowUpRight size={10} className="ml-1" />
           </div>
         </div>
@@ -576,7 +652,7 @@ export default function DashboardView() {
           <div className="wave-container">
             <div className="wave-line"></div>
           </div>
-          <div className="text-[10px] text-slate-500 flex items-center group-hover:text-slate-300">
+          <div className="text-[10px] text-slate-500 flex items-center group-hover:text-slate-355">
             View Details <ArrowUpRight size={10} className="ml-1" />
           </div>
         </div>
@@ -590,7 +666,7 @@ export default function DashboardView() {
                 <div className="text-xs font-bold text-slate-200 mt-1">Biomass Burning</div>
                 <div className="text-2xl font-bold" style={{ color: '#ff7043' }}>{intVal(focus.source_attribution.biomass)}%</div>
               </div>
-              <div className="text-[10px] text-slate-500 flex items-center group-hover:text-slate-300">
+              <div className="text-[10px] text-slate-500 flex items-center group-hover:text-slate-355">
                 View Details <ArrowUpRight size={10} className="ml-1" />
               </div>
             </div>
@@ -625,7 +701,7 @@ export default function DashboardView() {
             <div className="text-[9px] text-emerald-500 font-semibold uppercase mt-0.5">High Confidence</div>
           </div>
           <Sparkline values={[85, 87, 86, 88, 89, 89, 89]} color="#10b981" />
-          <div className="text-[10px] text-slate-500 flex items-center group-hover:text-slate-300">
+          <div className="text-[10px] text-slate-500 flex items-center group-hover:text-slate-355">
             View Details <ArrowUpRight size={10} className="ml-1" />
           </div>
         </div>
