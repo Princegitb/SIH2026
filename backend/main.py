@@ -46,17 +46,39 @@ def startup_event():
     global grid_df, fires_df, model_manager, explainer, attributor, transport, hotspot_detector
     logger.info("Initializing models and loading datasets...")
     
-    # Check if data exists
+    # Auto-generate data if missing (Crucial for fresh Render/cloud deployments)
     if not (os.path.exists("data/grid_data.csv") and os.path.exists("data/ground_stations.csv")):
-        logger.error("Simulation data files not found in data/ directory.")
-        raise FileNotFoundError("Simulation data not found. Run grid builder first.")
-        
+        logger.info("Simulation datasets not found. Triggering automated grid builder simulator...")
+        try:
+            from data_processing.grid_builder import simulate_data
+            simulate_data()
+            logger.info("Simulation dataset generated successfully!")
+        except Exception as e:
+            logger.error(f"Failed to auto-generate simulation datasets: {e}")
+            raise e
+            
+    # Load raw datasets
     grid_df_raw = pd.read_csv("data/grid_data.csv")
     fires_df = pd.read_csv("data/fire_events.csv")
     
-    # Initialize modeling instances
+    # Initialize model manager
     model_manager = AQIModelManager()
-    model_manager.load_models()
+    
+    # Auto-train models if missing
+    model_files = []
+    if os.path.exists("models/saved"):
+        model_files = [f for f in os.listdir("models/saved") if f.endswith(".pkl")]
+        
+    if len(model_files) < 6:
+        logger.info("Trained model files not found. Auto-training models on station data...")
+        try:
+            model_manager.train_models()
+            logger.info("Model auto-training complete!")
+        except Exception as e:
+            logger.error(f"Failed to auto-train models: {e}")
+            raise e
+    else:
+        model_manager.load_models()
     
     explainer = AQIExplainer(model_manager)
     explainer.initialize_explainers()
