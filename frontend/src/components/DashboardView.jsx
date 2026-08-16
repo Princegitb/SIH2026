@@ -164,7 +164,8 @@ export default function DashboardView() {
     mapData, 
     fetchDashboard, 
     fetchMapData,
-    setActiveTab
+    setActiveTab,
+    theme
   } = useStore()
 
   const [selectedLayer, setSelectedLayer] = useState('AQI')
@@ -369,10 +370,15 @@ export default function DashboardView() {
                 zoom={8} 
                 className="w-full h-full"
                 zoomControl={false}
+                key={`${theme}`}
               >
                 <TileLayer
-                  url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                  url={theme === 'light'
+                    ? "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                    : "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                  }
                   className="theme-map-tile-layer"
+                  key={theme}
                 />
                 
                 {/* Clean, understandable, and consistent District markers for all layers */}
@@ -417,6 +423,7 @@ export default function DashboardView() {
                     <React.Fragment key={`district-${marker.district}-${selectedLayer}`}>
                       {/* Outer glowing hotspot halo */}
                       <Circle
+                        key={`halo-${marker.district}-${selectedLayer}-${theme}`}
                         center={[marker.latitude, marker.longitude]}
                         radius={15000}
                         pathOptions={{
@@ -428,6 +435,7 @@ export default function DashboardView() {
                       />
                       {/* Core district indicator */}
                       <CircleMarker
+                        key={`marker-${marker.district}-${selectedLayer}-${theme}`}
                         center={[marker.latitude, marker.longitude]}
                         radius={Math.min(22, Math.max(9, radius))}
                         pathOptions={{

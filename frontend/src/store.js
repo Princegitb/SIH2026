@@ -5,6 +5,7 @@ export const useStore = create((set, get) => ({
   selectedDate: '2025-11-05',
   selectedState: 'All',
   selectedDistrict: 'Ambala',
+  theme: localStorage.getItem('theme') || 'dark',
   
   // Lists for Dropdowns
   dates: [],
@@ -20,6 +21,7 @@ export const useStore = create((set, get) => ({
   
   // Actions
   setActiveTab: (tab) => set({ activeTab: tab }),
+  setTheme: (theme) => set({ theme }),
   
   setSelectedDate: (date) => {
     set({ selectedDate: date });

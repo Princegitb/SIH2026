@@ -27,7 +27,7 @@ export default function TransportView() {
     return (
       <div className="flex items-center justify-center h-[50vh]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4b6bf5]"></div>
-        <span className="ml-3 text-slate-500">Loading plume dispersion modeling...</span>
+        <span className="ml-3 text-slate-400">Loading plume dispersion modeling...</span>
       </div>
     )
   }
@@ -42,7 +42,7 @@ export default function TransportView() {
   return (
     <div className="space-y-6">
       <div className="glass-panel rounded-xl p-5">
-        <h2 className="text-base font-bold text-slate-800 flex items-center">
+        <h2 className="text-base font-bold theme-adapt-text flex items-center">
           <Wind size={18} className="text-[#4b6bf5] mr-2" /> Lagrangian Smoke Plume Transport Analysis
         </h2>
         <p className="text-xs text-slate-500 font-medium">Causal influence of upwind stubble burning (Punjab/Haryana) on downwind receptor centers (Delhi-NCR)</p>
@@ -51,13 +51,13 @@ export default function TransportView() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Lag Correlation Chart */}
         <div className="glass-panel rounded-xl p-5 flex flex-col h-[320px]">
-          <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-4">Time-Lagged Cross-Correlation Coefficients</h3>
+          <h3 className="text-xs font-bold theme-adapt-text uppercase tracking-wider mb-4">Time-Lagged Cross-Correlation Coefficients</h3>
           <div className="flex-1">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData} margin={{ top: 5, right: 5, left: -25, bottom: 5 }}>
                 <XAxis dataKey="name" stroke="#64748b" fontSize={10} />
                 <YAxis stroke="#64748b" fontSize={10} />
-                <Tooltip contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e2e8f0', color: '#1e293b', fontSize: 11 }} />
+                <Tooltip contentStyle={{ backgroundColor: '#090d16', borderColor: '#1e293b', color: '#f8fafc', fontSize: 11 }} />
                 <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: 10 }} />
                 <Bar dataKey="Raw Pearson Correlation" fill="#38568c" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="Meteorology-Controlled Partial Correlation" fill="#ff7043" radius={[4, 4, 0, 0]} />
@@ -69,8 +69,8 @@ export default function TransportView() {
         {/* Physical explanation card */}
         <div className="glass-panel rounded-xl p-5 flex flex-col justify-between h-[320px]">
           <div className="space-y-4">
-            <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Causal transport insights</h3>
-            <div className="text-xs text-slate-700 space-y-3">
+            <h3 className="text-xs font-bold theme-adapt-text uppercase tracking-wider">Causal transport insights</h3>
+            <div className="text-xs text-slate-400 space-y-3">
               <p>
                 <b>Raw Pearson Correlation</b> measures the direct association between fire radiative power (FRP) in upwind districts and the AQI in Delhi. It shows a peak at <b>Lag 2 days</b> (typical transport duration under winter wind speeds).
               </p>
@@ -83,7 +83,7 @@ export default function TransportView() {
             </div>
           </div>
 
-          <div className="border border-sky-200 bg-sky-50 text-sky-800 rounded-lg p-3 flex items-start space-x-2.5 text-[11px] font-medium shadow-sm">
+          <div className="border border-sky-500/20 bg-sky-500/5 text-sky-400 rounded-lg p-3 flex items-start space-x-2.5 text-[11px] font-medium shadow-sm light-theme-info">
             <span className="text-sm">💡</span>
             <div>
               <b>Atmospheric Sync:</b> Calculated average wind vectors of <b>12.4 km/h</b> blowing from NW to SE align with the 48-hour transport duration over a 280km trajectory.

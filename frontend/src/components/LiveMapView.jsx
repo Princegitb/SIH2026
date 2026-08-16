@@ -87,7 +87,8 @@ const getDistrictMarkers = (cells) => {
 }
 
 export default function LiveMapView() {
-  const { mapData, fetchMapData, selectedDate, selectedState } = useStore()
+  const { mapData, fetchMapData, selectedDate, selectedState, theme } = useStore()
+  const [selectedLayer, setSelectedLayer] = useState('AQI')
   const [layers, setLayers] = useState({
     aqi: true,
     hotspots: true,
@@ -115,46 +116,70 @@ export default function LiveMapView() {
       {/* Controls Overlay Header */}
       <div className="glass-panel rounded-xl p-4 flex justify-between items-center z-10">
         <div>
-          <h2 className="text-base font-bold text-slate-200">Geospatial GIS Atmospheric Overview</h2>
+          <h2 className="text-base font-bold theme-adapt-text">Geospatial GIS Atmospheric Overview</h2>
           <p className="text-xs text-slate-500 font-medium">Active layers overlaying Sentinel-5P columns & MODIS fire counts</p>
         </div>
-        <div className="flex space-x-6 text-xs font-semibold text-slate-400">
-          <label className="flex items-center space-x-2 cursor-pointer hover:text-slate-200">
-            <input 
-              type="checkbox" 
-              checked={layers.aqi} 
-              onChange={() => setLayers({...layers, aqi: !layers.aqi})}
-              className="accent-[#4b6bf5]"
-            />
-            <span>District Markers</span>
-          </label>
-          <label className="flex items-center space-x-2 cursor-pointer hover:text-slate-200">
-            <input 
-              type="checkbox" 
-              checked={layers.hotspots} 
-              onChange={() => setLayers({...layers, hotspots: !layers.hotspots})}
-              className="accent-purple-600"
-            />
-            <span>HCHO Hotspots</span>
-          </label>
-          <label className="flex items-center space-x-2 cursor-pointer hover:text-slate-200">
-            <input 
-              type="checkbox" 
-              checked={layers.fires} 
-              onChange={() => setLayers({...layers, fires: !layers.fires})}
-              className="accent-orange-500"
-            />
-            <span>Active Fires</span>
-          </label>
-          <label className="flex items-center space-x-2 cursor-pointer hover:text-slate-200">
-            <input 
-              type="checkbox" 
-              checked={layers.plumes} 
-              onChange={() => setLayers({...layers, plumes: !layers.plumes})}
-              className="accent-amber-600"
-            />
-            <span>Plume Trajectories</span>
-          </label>
+        
+        <div className="flex items-center space-x-6">
+          {/* Base Layer Switcher */}
+          <div className="flex bg-slate-900/50 border border-slate-800/80 rounded-lg p-0.5 text-xs text-slate-400">
+            {['AQI', 'PM2.5', 'PM10', 'HCHO'].map((layer) => {
+              const isActive = selectedLayer === layer
+              return (
+                <span
+                  key={layer}
+                  onClick={() => setSelectedLayer(layer)}
+                  className={`px-3 py-1 rounded cursor-pointer transition-all ${
+                    isActive 
+                      ? 'bg-[#4b6bf5] text-white font-bold shadow-md' 
+                      : 'hover:text-slate-200'
+                  }`}
+                >
+                  {layer}
+                </span>
+              )
+            })}
+          </div>
+
+          {/* Visibility Toggles */}
+          <div className="flex space-x-6 text-xs font-semibold text-slate-400">
+            <label className="flex items-center space-x-2 cursor-pointer hover:text-slate-200">
+              <input 
+                type="checkbox" 
+                checked={layers.aqi} 
+                onChange={() => setLayers({...layers, aqi: !layers.aqi})}
+                className="accent-[#4b6bf5]"
+              />
+              <span>District Markers</span>
+            </label>
+            <label className="flex items-center space-x-2 cursor-pointer hover:text-slate-200">
+              <input 
+                type="checkbox" 
+                checked={layers.hotspots} 
+                onChange={() => setLayers({...layers, hotspots: !layers.hotspots})}
+                className="accent-purple-600"
+              />
+              <span>HCHO Hotspots</span>
+            </label>
+            <label className="flex items-center space-x-2 cursor-pointer hover:text-slate-200">
+              <input 
+                type="checkbox" 
+                checked={layers.fires} 
+                onChange={() => setLayers({...layers, fires: !layers.fires})}
+                className="accent-orange-500"
+              />
+              <span>Active Fires</span>
+            </label>
+            <label className="flex items-center space-x-2 cursor-pointer hover:text-slate-200">
+              <input 
+                type="checkbox" 
+                checked={layers.plumes} 
+                onChange={() => setLayers({...layers, plumes: !layers.plumes})}
+                className="accent-amber-600"
+              />
+              <span>Plume Trajectories</span>
+            </label>
+          </div>
         </div>
       </div>
 
@@ -164,24 +189,56 @@ export default function LiveMapView() {
           center={[30.1, 75.8]} 
           zoom={8} 
           className="w-full h-full"
+          key={`${theme}`}
         >
           <TileLayer
-            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+            url={theme === 'light'
+              ? "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+              : "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+            }
             className="theme-map-tile-layer"
+            key={theme}
           />
           
           {/* Clean, understandable, and consistent District markers */}
           {layers.aqi && districtMarkers.map((marker) => {
-            const val = marker.aqi
-            const { color, label } = getCpcbColorAndLabel(val)
+            let val = marker.aqi
+            let color = '#10b981'
+            let label = 'Good'
+            let unit = ''
+            
+            if (selectedLayer === 'AQI') {
+              const res = getCpcbColorAndLabel(marker.aqi)
+              color = res.color
+              label = res.label
+            } else if (selectedLayer === 'PM2.5') {
+              val = marker.pm25
+              const res = getCellColorAndLabel({ pm25: val }, 'PM2.5')
+              color = res.color
+              label = res.label
+              unit = ' µg/m³'
+            } else if (selectedLayer === 'PM10') {
+              val = marker.pm10
+              const res = getCellColorAndLabel({ pm10: val }, 'PM10')
+              color = res.color
+              label = res.label
+              unit = ' µg/m³'
+            } else if (selectedLayer === 'HCHO') {
+              val = marker.hcho
+              const res = getCellColorAndLabel({ hcho: val }, 'HCHO')
+              color = res.color
+              label = res.label
+              unit = ' 10¹⁵ molec/cm²'
+            }
 
             // Dynamic marker size based on value
             const radius = 8 + (val / 40)
 
             return (
-              <React.Fragment key={`live-district-${marker.district}`}>
+              <React.Fragment key={`live-district-${marker.district}-${selectedLayer}`}>
                 {/* Outer glowing hotspot halo */}
                 <Circle
+                  key={`live-halo-${marker.district}-${selectedLayer}-${theme}`}
                   center={[marker.latitude, marker.longitude]}
                   radius={15000}
                   pathOptions={{
@@ -193,6 +250,7 @@ export default function LiveMapView() {
                 />
                 {/* Core marker */}
                 <CircleMarker
+                  key={`live-marker-${marker.district}-${selectedLayer}-${theme}`}
                   center={[marker.latitude, marker.longitude]}
                   radius={Math.min(22, Math.max(9, radius))}
                   pathOptions={{
@@ -205,12 +263,16 @@ export default function LiveMapView() {
                   <Popup>
                     <div className="text-xs space-y-1">
                       <div className="font-bold text-white border-b border-slate-700/60 pb-1">{marker.district} ({marker.state})</div>
-                      <div className="text-slate-300 font-semibold mt-1">District Average Statistics:</div>
-                      <div className="text-[9px] text-slate-400 mt-2 space-y-0.5">
-                        <div>Estimated AQI: <span className="font-bold text-white">{marker.aqi} ({label})</span></div>
-                        <div>PM2.5: {Math.round(marker.pm25)} µg/m³</div>
-                        <div>PM10: {Math.round(marker.pm10)} µg/m³</div>
-                        <div>HCHO Density: {marker.hcho.toFixed(4)}</div>
+                      <div className="text-slate-350 font-semibold mt-1">Selected Metric ({selectedLayer}):</div>
+                      <div className="font-extrabold text-sm flex items-baseline space-x-1" style={{ color }}>
+                        <span>{selectedLayer === 'HCHO' ? val.toFixed(4) : Math.round(val)}</span>
+                        <span className="text-[9px] font-normal text-slate-400">{unit} ({label})</span>
+                      </div>
+                      <div className="text-[9px] text-slate-400 mt-2 border-t border-slate-750 pt-1.5 space-y-0.5">
+                        <div>AQI Index: {marker.aqi}</div>
+                        <div>PM2.5 Concentration: {Math.round(marker.pm25)} µg/m³</div>
+                        <div>PM10 Concentration: {Math.round(marker.pm10)} µg/m³</div>
+                        <div>HCHO Column Density: {marker.hcho.toFixed(4)}</div>
                       </div>
                     </div>
                   </Popup>

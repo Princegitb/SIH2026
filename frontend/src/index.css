@@ -342,3 +342,36 @@ body {
 .light .text-\[\#0ea5e9\] {
   color: #0369a1 !important;
 }
+
+/* Custom Alert and Warning banners */
+.theme-adapt-text {
+  color: #f1f5f9;
+}
+.light .theme-adapt-text {
+  color: #0f172a !important;
+}
+
+.light .light-theme-warning {
+  background-color: #fffbeb !important;
+  border-color: #fde68a !important;
+  color: #78350f !important;
+}
+
+.light .light-theme-info {
+  background-color: #f0f9ff !important;
+  border-color: #bae6fd !important;
+  color: #0369a1 !important;
+}
+
+.light .light-theme-banner {
+  background-color: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+.light .light-theme-critical-tag {
+  background-color: #fee2e2 !important;
+  color: #dc2626 !important;
+  border-color: #fecaca !important;
+}
+

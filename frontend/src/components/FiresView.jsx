@@ -26,7 +26,7 @@ export default function FiresView() {
     return (
       <div className="flex items-center justify-center h-[50vh]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4b6bf5]"></div>
-        <span className="ml-3 text-slate-500">Fetching MODIS/VIIRS thermal coordinates...</span>
+        <span className="ml-3 text-slate-400">Fetching MODIS/VIIRS thermal coordinates...</span>
       </div>
     )
   }
@@ -44,27 +44,27 @@ export default function FiresView() {
       {/* Overview stats */}
       <div className="grid grid-cols-3 gap-4">
         <div className="glass-panel rounded-xl p-5 flex flex-col justify-between h-[120px]">
-          <span className="text-[10px] font-bold text-slate-600 uppercase font-semibold">Thermal Anomalies</span>
+          <span className="text-[10px] font-bold text-slate-400 uppercase">Thermal Anomalies</span>
           <span className="text-3xl font-extrabold text-orange-500 flex items-center">
             {totalFires} <Flame className="ml-2 text-orange-500" size={20} />
           </span>
-          <span className="text-[10px] text-slate-600 font-medium">MODIS/VIIRS active fires detected</span>
+          <span className="text-[10px] text-slate-550 font-medium">MODIS/VIIRS active fires detected</span>
         </div>
         <div className="glass-panel rounded-xl p-5 flex flex-col justify-between h-[120px]">
-          <span className="text-[10px] font-bold text-slate-600 uppercase font-semibold">Peak Fire Energy</span>
+          <span className="text-[10px] font-bold text-slate-400 uppercase">Peak Fire Energy</span>
           <span className="text-3xl font-extrabold text-red-500">{maxFrp.toFixed(1)} <span className="text-sm font-normal text-slate-500">MW</span></span>
-          <span className="text-[10px] text-slate-600 font-medium">Max Fire Radiative Power recorded</span>
+          <span className="text-[10px] text-slate-550 font-medium">Max Fire Radiative Power recorded</span>
         </div>
         <div className="glass-panel rounded-xl p-5 flex flex-col justify-between h-[120px]">
-          <span className="text-[10px] font-bold text-slate-600 uppercase font-semibold">Average Detection Confidence</span>
-          <span className="text-3xl font-extrabold text-emerald-600">{avgConf}%</span>
-          <span className="text-[10px] text-slate-600 font-medium">Satellite measurement reliability index</span>
+          <span className="text-[10px] font-bold text-slate-400 uppercase">Average Detection Confidence</span>
+          <span className="text-3xl font-extrabold text-emerald-500">{avgConf}%</span>
+          <span className="text-[10px] text-slate-550 font-medium">Satellite measurement reliability index</span>
         </div>
       </div>
 
       {/* Critical fires list */}
       <div className="glass-panel rounded-xl p-5 space-y-4">
-        <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider border-b border-slate-200 pb-2 flex items-center">
+        <h3 className="text-sm font-bold theme-adapt-text uppercase tracking-wider border-b border-slate-800/60 pb-2 flex items-center">
           <AlertTriangle size={16} className="text-orange-500 mr-2" /> Peak Energetic Stubble Burning Points
         </h3>
 
@@ -78,17 +78,17 @@ export default function FiresView() {
               // Color base on FRP level
               const colorClass = fire.frp > 100 ? 'text-red-500' : 'text-orange-500'
               return (
-                <div key={idx} className="bg-slate-50 border border-slate-200 rounded-lg p-3 flex justify-between items-center text-xs">
+                <div key={idx} className="bg-slate-900/30 border border-slate-800/60 rounded-lg p-3 flex justify-between items-center text-xs light-theme-banner">
                   <div className="space-y-1">
                     <div className="flex items-center space-x-2">
-                      <span className="font-bold text-slate-800">Fire Event #{idx + 1}</span>
+                      <span className="font-bold theme-adapt-text">Fire Event #{idx + 1}</span>
                       {fire.frp > 100 && (
-                        <span className="bg-red-100 text-red-600 border border-red-200 text-[8px] font-bold px-1.5 py-0.5 rounded">
+                        <span className="bg-red-950/20 text-red-400 border border-red-500/20 text-[8px] font-bold px-1.5 py-0.5 rounded light-theme-critical-tag">
                           CRITICAL ENERGY
                         </span>
                       )}
                     </div>
-                    <div className="text-[10px] text-slate-600">
+                    <div className="text-[10px] text-slate-400">
                       Coordinates: <span className="font-mono">{fire.latitude.toFixed(4)}°N, {fire.longitude.toFixed(4)}°E</span>
                     </div>
                   </div>
@@ -100,11 +100,11 @@ export default function FiresView() {
                     </div>
                     <div>
                       <div className="text-[9px] text-slate-500 uppercase font-semibold">Confidence</div>
-                      <div className="font-bold font-mono text-emerald-600">{fire.confidence}%</div>
+                      <div className="font-bold font-mono text-emerald-500">{fire.confidence}%</div>
                     </div>
                     <div>
                       <div className="text-[9px] text-slate-500 uppercase font-semibold">Sensor</div>
-                      <div className="font-bold font-mono text-slate-700">{fire.sensor}</div>
+                      <div className="font-bold font-mono text-slate-400">{fire.sensor}</div>
                     </div>
                   </div>
                 </div>

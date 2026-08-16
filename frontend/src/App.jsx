@@ -41,11 +41,12 @@ export default function App() {
     selectedDate, 
     setSelectedDate, 
     dates, 
-    fetchMetadata 
+    fetchMetadata,
+    theme,
+    setTheme
   } = useStore()
 
   const [sidebarOpen, setSidebarOpen] = useState(true)
-  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark')
   const [showDiagnostic, setShowDiagnostic] = useState(false)
 
   useEffect(() => {
