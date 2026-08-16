@@ -231,115 +231,115 @@ body {
 }
 
 /* -------------------------------------------------------------
-   LIGHT MODE OVERRIDES - ELEGANT COMPATIBILITY
+   LIGHT MODE OVERRIDES - ELEGANT COMPATIBILITY (SCOPED TO DASHBOARD)
    ------------------------------------------------------------- */
-.light .text-white,
-.light .text-slate-100 {
+.light .app-workspace .text-white,
+.light .app-workspace .text-slate-100 {
   color: #0f172a !important;
 }
-.light .text-slate-200 {
+.light .app-workspace .text-slate-200 {
   color: #1e293b !important;
 }
-.light .text-slate-350 {
+.light .app-workspace .text-slate-350 {
   color: #334155 !important;
 }
-.light .text-slate-300 {
+.light .app-workspace .text-slate-300 {
   color: #334155 !important;
 }
-.light .text-slate-400 {
+.light .app-workspace .text-slate-400 {
   color: #475569 !important;
 }
-.light .text-slate-500 {
+.light .app-workspace .text-slate-500 {
   color: #64748b !important;
 }
-.light .text-slate-650 {
+.light .app-workspace .text-slate-650 {
   color: #475569 !important;
 }
-.light .text-slate-600 {
+.light .app-workspace .text-slate-600 {
   color: #475569 !important;
 }
 
-.light select {
+.light .app-workspace select {
   background-color: var(--input-bg) !important;
   color: var(--text-color) !important;
   border-color: var(--input-border) !important;
 }
 
-.light input {
+.light .app-workspace input {
   background-color: var(--input-bg) !important;
   color: var(--text-color) !important;
   border-color: var(--input-border) !important;
 }
 
-.light .bg-slate-900 {
+.light .app-workspace .bg-slate-900 {
   background-color: #e2e8f0 !important;
 }
-.light .bg-\[\#090d16\] {
+.light .app-workspace .bg-\[\#090d16\] {
   background-color: #ffffff !important;
   color: #0f172a !important;
   border-color: rgba(15, 23, 42, 0.1) !important;
 }
-.light .bg-\[\#0d1121\] {
+.light .app-workspace .bg-\[\#0d1121\] {
   background-color: #ffffff !important;
   color: #0f172a !important;
   border-color: rgba(15, 23, 42, 0.1) !important;
 }
-.light .bg-slate-950\/95 {
+.light .app-workspace .bg-slate-950\/95 {
   background-color: rgba(255, 255, 255, 0.95) !important;
   border-color: rgba(15, 23, 42, 0.1) !important;
   color: #0f172a !important;
 }
-.light .bg-slate-900\/40 {
+.light .app-workspace .bg-slate-900\/40 {
   background-color: rgba(0, 0, 0, 0.03) !important;
   border-color: rgba(0, 0, 0, 0.08) !important;
 }
-.light .bg-slate-900\/50 {
+.light .app-workspace .bg-slate-900\/50 {
   background-color: rgba(0, 0, 0, 0.04) !important;
 }
-.light .border-slate-800\/60 {
+.light .app-workspace .border-slate-800\/60 {
   border-color: var(--panel-border) !important;
 }
-.light .border-slate-800 {
+.light .app-workspace .border-slate-800 {
   border-color: var(--panel-border) !important;
 }
-.light .border-slate-700\/60 {
+.light .app-workspace .border-slate-700\/60 {
   border-color: var(--panel-border) !important;
 }
-.light .border-slate-700\/45 {
+.light .app-workspace .border-slate-700\/45 {
   border-color: var(--panel-border) !important;
 }
-.light .bg-slate-950\/20 {
+.light .app-workspace .bg-slate-950\/20 {
   background-color: rgba(0, 0, 0, 0.03) !important;
 }
-.light .bg-gradient-to-r {
+.light .app-workspace .bg-gradient-to-r {
   background-image: linear-gradient(to right, rgba(168, 85, 247, 0.08), rgba(99, 102, 241, 0.08)) !important;
   border-color: rgba(168, 85, 247, 0.2) !important;
 }
-.light .text-purple-400\/90 {
+.light .app-workspace .text-purple-400\/90 {
   color: #7c3aed !important;
 }
-.light .text-purple-400 {
+.light .app-workspace .text-purple-400 {
   color: #6d28d9 !important;
 }
-.light .text-emerald-400 {
+.light .app-workspace .text-emerald-400 {
   color: #047857 !important;
 }
-.light .text-orange-500 {
+.light .app-workspace .text-orange-500 {
   color: #c2410c !important;
 }
-.light .text-sky-400 {
+.light .app-workspace .text-sky-400 {
   color: #0369a1 !important;
 }
-.light .text-yellow-400 {
+.light .app-workspace .text-yellow-400 {
   color: #b45309 !important;
 }
-.light .text-\[\#10b981\] {
+.light .app-workspace .text-\[\#10b981\] {
   color: #059669 !important;
 }
-.light .text-\[\#84cc16\] {
+.light .app-workspace .text-\[\#84cc16\] {
   color: #4d7c0f !important;
 }
-.light .text-\[\#0ea5e9\] {
+.light .app-workspace .text-\[\#0ea5e9\] {
   color: #0369a1 !important;
 }
 
@@ -347,31 +347,30 @@ body {
 .theme-adapt-text {
   color: #f1f5f9;
 }
-.light .theme-adapt-text {
+.light .app-workspace .theme-adapt-text {
   color: #0f172a !important;
 }
 
-.light .light-theme-warning {
+.light .app-workspace .light-theme-warning {
   background-color: #fffbeb !important;
   border-color: #fde68a !important;
   color: #78350f !important;
 }
 
-.light .light-theme-info {
+.light .app-workspace .light-theme-info {
   background-color: #f0f9ff !important;
   border-color: #bae6fd !important;
   color: #0369a1 !important;
 }
 
-.light .light-theme-banner {
+.light .app-workspace .light-theme-banner {
   background-color: #f8fafc !important;
   border-color: #e2e8f0 !important;
   color: #0f172a !important;
 }
 
-.light .light-theme-critical-tag {
+.light .app-workspace .light-theme-critical-tag {
   background-color: #fee2e2 !important;
   color: #dc2626 !important;
   border-color: #fecaca !important;
 }
-

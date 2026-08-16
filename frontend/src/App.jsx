@@ -89,7 +89,7 @@ export default function App() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[var(--bg-color)] text-[var(--text-color)] font-outfit select-none transition-colors duration-300">
+    <div className="app-workspace flex h-screen overflow-hidden bg-[var(--bg-color)] text-[var(--text-color)] font-outfit select-none transition-colors duration-300">
       {/* 1. LEFT SIDEBAR NAVIGATION */}
       <aside className={`bg-[var(--sidebar-bg)] border-r border-[var(--panel-border)] flex flex-col justify-between p-4 flex-shrink-0 relative transition-all duration-300 ${sidebarOpen ? 'w-64' : 'w-18'}`}>
         <div className="space-y-6">

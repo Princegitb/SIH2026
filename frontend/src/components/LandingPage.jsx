@@ -34,7 +34,10 @@ export default function LandingPage({ onEnterDashboard }) {
   }, [])
 
   return (
-    <div className="min-h-screen bg-[#03050c] text-slate-100 font-outfit overflow-x-hidden relative flex flex-col justify-between selection:bg-[#4b6bf5]/30">
+    <div 
+      className="h-screen overflow-y-auto font-outfit overflow-x-hidden relative flex flex-col justify-between selection:bg-[#4b6bf5]/30"
+      style={{ backgroundColor: '#03050c', color: '#f1f5f9' }}
+    >
       
       {/* Background grids and glowing orbits */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(75,107,245,0.18),rgba(0,0,0,0))] pointer-events-none z-0"></div>
