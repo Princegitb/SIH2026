@@ -3,7 +3,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://vayudrishti-backend.onrender.com/api/$1"
+      "destination": "https://vayudrishti-backend-g12p.onrender.com/api/$1"
     },
     {
       "source": "/(.*)",
