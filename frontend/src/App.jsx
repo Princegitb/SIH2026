@@ -213,7 +213,7 @@ export default function App() {
               <h2 className="text-xl font-extrabold text-white tracking-tight">VayuShetra</h2>
               <div className="flex items-center space-x-2 text-xs text-slate-400 mt-1 font-medium">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
-                <span>India Atmospheric Monitoring • Updated 2 min ago</span>
+                <span>India's Atmospheric Intelligence • Updated 2 min ago</span>
               </div>
             </div>
             
