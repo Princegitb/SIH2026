@@ -34,11 +34,11 @@ export default function LandingPage({ onEnterDashboard }) {
   }, [])
 
   return (
-    <div 
+    <div
       className="h-screen overflow-y-auto font-outfit overflow-x-hidden relative flex flex-col justify-between selection:bg-[#4b6bf5]/30"
       style={{ backgroundColor: '#03050c', color: '#f1f5f9' }}
     >
-      
+
       {/* Background grids and glowing orbits */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(75,107,245,0.18),rgba(0,0,0,0))] pointer-events-none z-0"></div>
       <div className="absolute top-[20%] left-[-10%] w-[400px] h-[400px] bg-sky-500/5 rounded-full blur-[120px] pointer-events-none z-0"></div>
@@ -52,11 +52,11 @@ export default function LandingPage({ onEnterDashboard }) {
             <h1 className="text-base font-extrabold tracking-tight text-white flex items-center">
               VayuShetra
             </h1>
-            <span className="text-[9px] text-[#4b6bf5] font-bold tracking-widest uppercase block mt-0.5">India Atmospheric Monitoring</span>
+            <span className="text-[9px] text-[#4b6bf5] font-bold tracking-widest uppercase block mt-0.5">India's Atmospheric Intelligence</span>
           </div>
         </div>
 
-        <button 
+        <button
           onClick={onEnterDashboard}
           className="flex items-center space-x-2 bg-slate-900/60 border border-slate-800 hover:border-slate-700 hover:bg-slate-800/80 text-xs font-bold px-4 py-2 rounded-xl transition-all duration-300 shadow-lg text-slate-200 hover:text-white"
         >
@@ -67,7 +67,7 @@ export default function LandingPage({ onEnterDashboard }) {
 
       {/* 2. HERO GRID SECTION */}
       <main className="max-w-7xl mx-auto w-full px-6 py-10 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center flex-grow z-10 relative">
-        
+
         {/* Left Side: Pitch and Call to Actions (Span 6) */}
         <div className="lg:col-span-6 space-y-6">
           {/* Badge */}
@@ -89,7 +89,7 @@ export default function LandingPage({ onEnterDashboard }) {
 
           {/* Primary CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 pt-3">
-            <button 
+            <button
               onClick={onEnterDashboard}
               className="flex items-center justify-center space-x-2.5 bg-[#4b6bf5] hover:bg-[#3b56cf] hover:shadow-[0_0_25px_rgba(75,107,245,0.4)] text-white text-sm font-bold px-6 py-3.5 rounded-xl transition-all duration-350 transform active:scale-98"
             >
@@ -101,7 +101,7 @@ export default function LandingPage({ onEnterDashboard }) {
 
         {/* Right Side: Futuristic Animated Space Orbit Scan Visual (Span 6) */}
         <div className="lg:col-span-6 relative flex items-center justify-center min-h-[440px] lg:min-h-[500px]">
-          
+
           {/* The Orbiting/Radar Background Ring */}
           <div className="absolute w-[360px] h-[360px] sm:w-[440px] sm:h-[440px] border border-slate-800/40 rounded-full flex items-center justify-center z-0">
             <div className="w-[280px] h-[280px] sm:w-[340px] sm:h-[340px] border border-slate-800/20 rounded-full flex items-center justify-center">
@@ -133,12 +133,11 @@ export default function LandingPage({ onEnterDashboard }) {
           </div>
 
           {/* Floating Widget Card 1: AQI Status (Top Left) */}
-          <div 
+          <div
             onMouseEnter={() => setActiveCard(1)}
             onMouseLeave={() => setActiveCard(null)}
-            className={`absolute top-[8%] left-[2%] glass-panel rounded-2xl p-4 w-[160px] text-left transition-all duration-300 z-30 cursor-pointer ${
-              activeCard === 1 ? 'scale-105 border-[#4b6bf5]/50 shadow-[0_0_20px_rgba(75,107,245,0.2)]' : 'hover:translate-y-[-2px]'
-            }`}
+            className={`absolute top-[8%] left-[2%] glass-panel rounded-2xl p-4 w-[160px] text-left transition-all duration-300 z-30 cursor-pointer ${activeCard === 1 ? 'scale-105 border-[#4b6bf5]/50 shadow-[0_0_20px_rgba(75,107,245,0.2)]' : 'hover:translate-y-[-2px]'
+              }`}
           >
             <div className="text-[8px] font-bold text-slate-500 uppercase tracking-wider">AQI (Delhi NCR)</div>
             <div className="flex items-baseline space-x-1.5 mt-1">
@@ -152,12 +151,11 @@ export default function LandingPage({ onEnterDashboard }) {
           </div>
 
           {/* Floating Widget Card 2: Wind Speed (Bottom Center) */}
-          <div 
+          <div
             onMouseEnter={() => setActiveCard(2)}
             onMouseLeave={() => setActiveCard(null)}
-            className={`absolute bottom-[10%] left-[25%] -translate-x-1/2 glass-panel rounded-2xl p-3.5 w-[140px] text-left transition-all duration-300 z-30 cursor-pointer ${
-              activeCard === 2 ? 'scale-105 border-sky-500/50 shadow-[0_0_20px_rgba(56,189,248,0.2)]' : 'hover:translate-y-[-2px]'
-            }`}
+            className={`absolute bottom-[10%] left-[25%] -translate-x-1/2 glass-panel rounded-2xl p-3.5 w-[140px] text-left transition-all duration-300 z-30 cursor-pointer ${activeCard === 2 ? 'scale-105 border-sky-500/50 shadow-[0_0_20px_rgba(56,189,248,0.2)]' : 'hover:translate-y-[-2px]'
+              }`}
           >
             <div className="text-[8px] font-bold text-slate-500 uppercase tracking-wider flex items-center">
               <Wind size={10} className="mr-1 text-sky-400" /> Wind Velocity
@@ -169,12 +167,11 @@ export default function LandingPage({ onEnterDashboard }) {
           </div>
 
           {/* Floating Widget Card 3: Active Fires (Middle Right) */}
-          <div 
+          <div
             onMouseEnter={() => setActiveCard(3)}
             onMouseLeave={() => setActiveCard(null)}
-            className={`absolute top-[48%] right-[2%] glass-panel rounded-2xl p-4 w-[160px] text-left transition-all duration-300 z-30 cursor-pointer ${
-              activeCard === 3 ? 'scale-105 border-orange-500/50 shadow-[0_0_20px_rgba(249,115,22,0.2)]' : 'hover:translate-y-[-2px]'
-            }`}
+            className={`absolute top-[48%] right-[2%] glass-panel rounded-2xl p-4 w-[160px] text-left transition-all duration-300 z-30 cursor-pointer ${activeCard === 3 ? 'scale-105 border-orange-500/50 shadow-[0_0_20px_rgba(249,115,22,0.2)]' : 'hover:translate-y-[-2px]'
+              }`}
           >
             <div className="text-[8px] font-bold text-slate-500 uppercase tracking-wider flex items-center">
               <Flame size={10} className="mr-1 text-orange-500" /> Active Fires
@@ -196,7 +193,7 @@ export default function LandingPage({ onEnterDashboard }) {
       {/* 3. VALUE PROPOSITIONS FEATURE ROW */}
       <section className="max-w-7xl mx-auto w-full px-6 py-6 z-10 relative">
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          
+
           {/* Card 1: Satellite-Powered */}
           <div className="bg-[#080b16]/60 border border-slate-850/60 p-4 rounded-xl space-y-2 hover:border-slate-800 transition-all duration-200">
             <div className="w-8 h-8 rounded-lg bg-sky-500/10 flex items-center justify-center text-sky-400">
@@ -265,7 +262,7 @@ export default function LandingPage({ onEnterDashboard }) {
             <h3 className="text-base font-extrabold text-white tracking-tight">Better Data. Better Decisions. Better Tomorrow.</h3>
             <p className="text-[10px] text-slate-400">Join us in building a healthier, sustainable future through intelligent air monitoring.</p>
           </div>
-          <button 
+          <button
             onClick={onEnterDashboard}
             className="flex items-center space-x-2 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-extrabold px-6 py-3 rounded-xl transition-all duration-300 shadow-md whitespace-nowrap"
           >
