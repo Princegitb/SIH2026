@@ -626,7 +626,7 @@ export default function DashboardView() {
         <div className="bottom-card group cursor-pointer" onClick={() => setActiveTab('HCHO Hotspots')}>
           <div>
             <div className="kpi-title text-purple-400 group-hover:text-purple-300">HCHO Hotspots</div>
-            <div className="kpi-value text-purple-400">24 <span className="text-xs font-normal text-slate-500">Active</span></div>
+            <div className="kpi-value text-purple-400">{kpis.hcho} <span className="text-xs font-normal text-slate-500">Clusters</span></div>
           </div>
           {/* Radar scan animation */}
           <div className="radar-container">

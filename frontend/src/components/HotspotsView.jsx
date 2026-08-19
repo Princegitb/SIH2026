@@ -64,9 +64,9 @@ export default function HotspotsView() {
       {/* 1. Header Overview Stats */}
       <div className="grid grid-cols-3 gap-4">
         <div className="glass-panel rounded-xl p-5 flex flex-col justify-between h-[120px]">
-          <span className="text-[10px] font-bold text-slate-400 uppercase">DBSCAN Hotspots</span>
-          <span className="text-3xl font-extrabold text-purple-400">{hotspots.length}</span>
-          <span className="text-[10px] text-slate-500">Active anomalous grid cells detected</span>
+          <span className="text-[10px] font-bold text-slate-400 uppercase">DBSCAN Hotspot Clusters</span>
+          <span className="text-3xl font-extrabold text-purple-400">{clusterList.length}</span>
+          <span className="text-[10px] text-slate-500">Across {hotspots.length} active anomalous grid cells</span>
         </div>
         <div className="glass-panel rounded-xl p-5 flex flex-col justify-between h-[120px]">
           <span className="text-[10px] font-bold text-slate-400 uppercase">Biomass Driven Clusters</span>
