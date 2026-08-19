@@ -521,10 +521,21 @@ def refresh_live_data(date: str = None):
     """
     Triggers the live satellite, weather, and fire data ingestion pipeline.
     """
+    global grid_df, fires_df, model_manager, attributor
     try:
         from real_data_pipeline import run_real_data_pipeline
         success = run_real_data_pipeline(target_date=date)
-        return {"status": "success", "message": "Live data pipeline executed successfully", "date": date}
+        
+        # Reload memory caches
+        if os.path.exists("data/grid_data.csv"):
+            grid_df_raw = pd.read_csv("data/grid_data.csv")
+            fires_df = pd.read_csv("data/fire_events.csv")
+            if model_manager and attributor:
+                pred_df = model_manager.predict_grid(grid_df_raw)
+                grid_df = attributor.attribute_dataframe(pred_df)
+                
+        latest_date = str(grid_df["date"].max()) if grid_df is not None else date
+        return {"status": "success", "message": "Live data pipeline executed successfully", "latest_date": latest_date}
     except Exception as e:
         logger.error(f"Error running live data pipeline: {e}")
         raise HTTPException(status_code=500, detail=str(e))

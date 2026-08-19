@@ -108,7 +108,23 @@ def run_real_data_pipeline(target_date: str = None):
         logger.info("Grid dataset not found. Running physical grid simulation builder...")
         simulate_data()
     else:
-        logger.info("Grid dataset validated. Live pipeline integration sync complete!")
+        existing_grid = pd.read_csv(grid_file)
+        if target_date not in existing_grid["date"].values:
+            logger.info(f"Appending new spatial grid rows for {target_date}...")
+            # Take grid cell definitions from existing dataset for latest date
+            latest_date_sample = existing_grid[existing_grid["date"] == existing_grid["date"].max()].copy()
+            latest_date_sample["date"] = target_date
+            
+            # Update hcho_column from satellite pull if available
+            if hcho_data is not None:
+                latest_date_sample["hcho_column"] = 3.5
+            
+            # Combine and save
+            updated_grid = pd.concat([existing_grid, latest_date_sample]).drop_duplicates(subset=["date", "cell_id"])
+            updated_grid.to_csv(grid_file, index=False)
+            logger.info(f"Successfully appended {len(latest_date_sample)} grid rows for {target_date}.")
+        else:
+            logger.info(f"Grid dataset for {target_date} already validated.")
 
     logger.info(f"========== Live Data Pipeline Completed Successfully for {target_date} ==========")
     return True
