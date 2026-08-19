@@ -49,11 +49,16 @@ def run_real_data_pipeline(target_date: str = None):
     
     if fires_df is not None and not fires_df.empty:
         logger.info(f"Retrieved {len(fires_df)} live fire points from NASA FIRMS.")
+        if "date" not in fires_df.columns or fires_df["date"].isnull().all():
+            if "acq_date" in fires_df.columns:
+                fires_df["date"] = fires_df["acq_date"]
+            else:
+                fires_df["date"] = target_date
         # Ensure standard column format
         fires_file = os.path.join(ROOT_DIR, "data", "fire_events.csv")
         if os.path.exists(fires_file):
             existing_fires = pd.read_csv(fires_file)
-            combined_fires = pd.concat([existing_fires, fires_df]).drop_duplicates()
+            combined_fires = pd.concat([existing_fires, fires_df]).drop_duplicates(subset=["latitude", "longitude", "date"])
             combined_fires.to_csv(fires_file, index=False)
         else:
             fires_df.to_csv(fires_file, index=False)

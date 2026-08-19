@@ -132,9 +132,12 @@ def get_metadata():
     return {"dates": dates, "states": states, "districts": districts}
 
 @app.get("/api/dashboard")
-def get_dashboard(date: str = "2025-11-05", district: str = "Ambala"):
+def get_dashboard(date: str = None, district: str = "Ambala"):
     if grid_df is None:
-        raise HTTPException(status_code=503, detail="Service loading data.")
+        raise HTTPException(status_code=503, detail="Service loading data, try again shortly.")
+    
+    if not date or date not in grid_df["date"].values:
+        date = str(grid_df["date"].max())
         
     # 1. Delhi metrics for Top KPI cards (acting as reference)
     delhi_day = grid_df[(grid_df["date"] == date) & (grid_df["district"] == "Delhi")]
