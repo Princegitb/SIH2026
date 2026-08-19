@@ -29,7 +29,7 @@ class FIRMSIngestor:
 
         try:
             logger.info(f"FIRMS: Querying fire data from {source} for bbox {bbox_str} on {date_str}")
-            response = requests.get(url, timeout=15)
+            response = requests.get(url, timeout=45)
             response.raise_for_status()
             
             # FIRMS returns CSV format
@@ -42,8 +42,16 @@ class FIRMSIngestor:
             logger.info(f"Successfully retrieved {len(df)} active fire records from FIRMS.")
             return df
         except Exception as e:
-            logger.error(f"Failed to retrieve fire data: {e}")
-            return None
+            logger.warning(f"Initial FIRMS request attempt timed out/failed: {e}. Retrying with extended timeout...")
+            try:
+                response = requests.get(url, timeout=60)
+                response.raise_for_status()
+                df = pd.read_csv(io.StringIO(response.text))
+                logger.info(f"Successfully retrieved {len(df)} active fire records on retry.")
+                return df
+            except Exception as retry_err:
+                logger.error(f"Failed to retrieve fire data after retry: {retry_err}")
+                return None
 
 if __name__ == "__main__":
     ingestor = FIRMSIngestor()
