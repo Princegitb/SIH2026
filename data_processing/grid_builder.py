@@ -231,32 +231,33 @@ def simulate_data():
             smoke_impact = min(800.0, smoke_impact)
             
             # B. Base Concentrations based on Cell Type (urban, industrial, agricultural, rural)
-            winter_haze_factor = (date - start_date).days * 0.7
+            # November in North India (Delhi-NCR, Punjab, Haryana) is peak stubble burning winter haze season
+            winter_haze_factor = (date - start_date).days * 4.5
             
             if row["type"] == "urban":
-                base_pm25 = 55.0 + winter_haze_factor + np.random.normal(0, 5.0)
-                base_no2 = 45.0 + np.random.normal(0, 3.0)
-                base_so2 = 12.0 + np.random.normal(0, 1.0)
-                base_co = 0.8 + np.random.normal(0, 0.05)
-                base_o3 = 40.0 + np.random.normal(0, 4.0)
+                base_pm25 = 240.0 + winter_haze_factor + np.random.normal(0, 15.0)
+                base_no2 = 75.0 + np.random.normal(0, 5.0)
+                base_so2 = 22.0 + np.random.normal(0, 2.0)
+                base_co = 2.8 + np.random.normal(0, 0.2)
+                base_o3 = 45.0 + np.random.normal(0, 4.0)
             elif row["type"] == "industrial":
-                base_pm25 = 75.0 + winter_haze_factor + np.random.normal(0, 8.0)
-                base_no2 = 35.0 + np.random.normal(0, 3.0)
-                base_so2 = 35.0 + np.random.normal(0, 4.0)
-                base_co = 1.2 + np.random.normal(0, 0.1)
-                base_o3 = 30.0 + np.random.normal(0, 3.0)
+                base_pm25 = 280.0 + winter_haze_factor + np.random.normal(0, 20.0)
+                base_no2 = 65.0 + np.random.normal(0, 5.0)
+                base_so2 = 45.0 + np.random.normal(0, 6.0)
+                base_co = 3.5 + np.random.normal(0, 0.3)
+                base_o3 = 35.0 + np.random.normal(0, 3.0)
             elif row["type"] == "agricultural":
-                base_pm25 = 40.0 + winter_haze_factor + np.random.normal(0, 4.0)
-                base_no2 = 15.0 + np.random.normal(0, 1.5)
-                base_so2 = 8.0 + np.random.normal(0, 0.8)
-                base_co = 0.4 + np.random.normal(0, 0.03)
-                base_o3 = 45.0 + np.random.normal(0, 3.0)
+                base_pm25 = 210.0 + winter_haze_factor + np.random.normal(0, 15.0)
+                base_no2 = 35.0 + np.random.normal(0, 3.0)
+                base_so2 = 18.0 + np.random.normal(0, 2.0)
+                base_co = 1.8 + np.random.normal(0, 0.15)
+                base_o3 = 50.0 + np.random.normal(0, 4.0)
             else: # rural
-                base_pm25 = 35.0 + winter_haze_factor + np.random.normal(0, 3.0)
-                base_no2 = 10.0 + np.random.normal(0, 1.0)
-                base_so2 = 6.0 + np.random.normal(0, 0.5)
-                base_co = 0.3 + np.random.normal(0, 0.02)
-                base_o3 = 40.0 + np.random.normal(0, 3.0)
+                base_pm25 = 180.0 + winter_haze_factor + np.random.normal(0, 12.0)
+                base_no2 = 28.0 + np.random.normal(0, 2.5)
+                base_so2 = 14.0 + np.random.normal(0, 1.5)
+                base_co = 1.2 + np.random.normal(0, 0.1)
+                base_o3 = 42.0 + np.random.normal(0, 3.0)
                 
             # C. Boundary Layer Height Compression Effect
             blh_compression = 1000.0 / w["blh"]
