@@ -253,8 +253,8 @@ def get_dashboard(date: str = None, district: str = "Ambala"):
     is_live = str(date).startswith("2026")
     data_mode = {
         "is_live": is_live,
-        "mode": "LIVE" if is_live else "MOCK",
-        "label": "LIVE SATELLITE TELEMETRY" if is_live else "MOCK BASELINE SIMULATION"
+        "mode": "LIVE" if is_live else "HISTORICAL",
+        "label": "LIVE SATELLITE TELEMETRY" if is_live else "HISTORICAL STUBBLE BASELINE"
     }
 
     return {"kpis": kpis, "focus": focus_metrics, "data_mode": data_mode}
