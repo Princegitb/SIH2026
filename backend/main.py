@@ -274,6 +274,20 @@ def get_map_data(date: str = "2025-11-05", state: str = "All"):
             "hcho": float(r["hcho_column"])
         })
         
+def parse_confidence(val):
+    try:
+        if pd.isna(val):
+            return 80
+        return int(float(val))
+    except (ValueError, TypeError):
+        val_str = str(val).lower().strip()
+        if val_str == 'h':
+            return 90
+        elif val_str == 'l':
+            return 40
+        else:
+            return 80
+
     # Map active fires
     day_fires = fires_df[fires_df["date"] == date]
     fires = []
@@ -284,8 +298,8 @@ def get_map_data(date: str = "2025-11-05", state: str = "All"):
                 "latitude": float(f["latitude"]),
                 "longitude": float(f["longitude"]),
                 "frp": float(f["frp"]),
-                "confidence": int(f["confidence"]),
-                "sensor": f["sensor"]
+                "confidence": parse_confidence(f.get("confidence", 80)),
+                "sensor": str(f.get("sensor", "VIIRS"))
             })
             
     # Calculate HCHO Hotspots
@@ -364,8 +378,8 @@ def get_fires(date: str = "2025-11-05"):
             "latitude": float(f["latitude"]),
             "longitude": float(f["longitude"]),
             "frp": float(f["frp"]),
-            "confidence": int(f["confidence"]),
-            "sensor": f["sensor"]
+            "confidence": parse_confidence(f.get("confidence", 80)),
+            "sensor": str(f.get("sensor", "VIIRS"))
         })
     return {"fires": records, "count": len(records)}
 
