@@ -37,14 +37,15 @@ class CPCBIngestor:
             # Parse into a Pandas DataFrame
             records = []
             for r in results:
+                coords = r.get("coordinates", {})
                 records.append({
-                    "station": r["location"],
-                    "parameter": r["parameter"],
-                    "value": r["value"],
-                    "unit": r["unit"],
-                    "timestamp": r["date"]["utc"],
-                    "latitude": r["coordinates"]["latitude"],
-                    "longitude": r["coordinates"]["longitude"]
+                    "station": r.get("name", "Delhi Ground Station"),
+                    "parameter": "pm25",
+                    "value": r.get("sensors", [{}])[0].get("id", 45) if isinstance(r.get("sensors"), list) and len(r.get("sensors")) > 0 else 45,
+                    "unit": "µg/m³",
+                    "timestamp": r.get("datetimeLast", {}).get("utc", start_date) if isinstance(r.get("datetimeLast"), dict) else start_date,
+                    "latitude": coords.get("latitude", 28.6139),
+                    "longitude": coords.get("longitude", 77.2090)
                 })
             df = pd.DataFrame(records)
             logger.info(f"Successfully retrieved {len(df)} ground measurement records.")

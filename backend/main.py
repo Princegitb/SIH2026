@@ -131,7 +131,7 @@ def startup_event():
     
     logger.info("FastAPI Backend ready and cached in memory!")
 
-@app.get("/")
+@app.api_route("/", methods=["GET", "HEAD"])
 def read_root():
     return {"name": "VayuShetra Atmospheric Intelligence API", "status": "online", "version": "1.0.0"}
 
