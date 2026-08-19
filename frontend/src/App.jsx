@@ -218,19 +218,6 @@ export default function App() {
             </div>
             
             <div className="flex items-center space-x-3">
-              {/* LIVE vs HISTORICAL Data Feed Status Badge */}
-              {selectedDate?.startsWith('2026') ? (
-                <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-extrabold bg-emerald-500/15 text-emerald-400 border border-emerald-500/40 tracking-wider shadow-[0_0_12px_rgba(16,185,129,0.3)]">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 mr-1.5 animate-ping"></span>
-                  LIVE
-                </span>
-              ) : (
-                <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-extrabold bg-indigo-500/15 text-indigo-400 border border-indigo-500/40 tracking-wider">
-                  <span className="w-2 h-2 rounded-full bg-indigo-400 mr-1.5"></span>
-                  HISTORICAL
-                </span>
-              )}
-
               {/* Date selection selectbox */}
               <select
                 value={selectedDate}
