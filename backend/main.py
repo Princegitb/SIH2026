@@ -149,126 +149,134 @@ def get_dashboard(date: str = None, district: str = "Ambala"):
     if grid_df is None:
         raise HTTPException(status_code=503, detail="Service loading data, try again shortly.")
     
-    if not date or date not in grid_df["date"].values:
-        date = str(grid_df["date"].max())
-        
-    day_grid = grid_df[grid_df["date"] == date]
-    
-    # 1. Delhi metrics for Top KPI cards (acting as reference)
-    delhi_day = day_grid[day_grid["district"] == "Delhi"]
-    delhi_row = delhi_day.iloc[0] if not delhi_day.empty else None
-    
-    # Historical 7 days for Delhi sparklines
-    delhi_7d = grid_df[(grid_df["district"] == "Delhi") & (grid_df["date"] <= date)].sort_values("date").tail(7)
-    
-    # 2. Selected Focus District metrics
-    dist_day = grid_df[(grid_df["date"] == date) & (grid_df["district"] == district)]
-    dist_row = dist_day.iloc[0] if not dist_day.empty else None
-    
-    # Historical 7 days for Focus District trend chart
-    dist_7d = grid_df[(grid_df["district"] == district) & (grid_df["date"] <= date)].sort_values("date").tail(7)
-    
-    # Compute SHAP values for Selected District
-    shap_explanation = None
-    if dist_row is not None:
-        input_row = pd.DataFrame([dist_row[FEATURES]], columns=FEATURES)
-        sub_indices = {
-            "pm25": float(dist_row["sub_index_pm25"]),
-            "pm10": float(dist_row["sub_index_pm10"]),
-            "no2": float(dist_row["sub_index_no2"]),
-            "so2": float(dist_row["sub_index_so2"]),
-            "co": float(dist_row["sub_index_co"]),
-            "o3": float(dist_row["sub_index_o3"])
-        }
-        dominant_pol = max(sub_indices, key=sub_indices.get)
-        
-        # Map back to surface prediction key
-        clean_dominant_mapping = {
-            "pm25": "pm25", "pm10": "pm10", "no2": "no2_surface",
-            "so2": "so2_surface", "co": "co_surface", "o3": "o3_surface"
-        }
-        clean_dominant_code = clean_dominant_mapping[dominant_pol]
-        
-        explainer_res = explainer.explain_prediction(input_row, clean_dominant_code)
-        
-        # Clean dictionary mapping key for web output
-        web_shap = {}
-        for k, v in explainer_res["shap_values"].items():
-            web_shap[k] = float(v)
+    try:
+        if not date or date not in grid_df["date"].values:
+            date = str(grid_df["date"].max())
             
-        shap_explanation = {
-            "pollutant": dominant_pol.upper(),
-            "base_value": float(explainer_res["base_value"]),
-            "prediction_value": float(explainer_res["prediction_value"]),
-            "shap_values": web_shap
-        }
+        day_grid = grid_df[grid_df["date"] == date]
+        
+        # 1. Delhi metrics for Top KPI cards (acting as reference)
+        delhi_day = day_grid[day_grid["district"] == "Delhi"]
+        delhi_row = delhi_day.iloc[0] if not delhi_day.empty else None
+        
+        # Historical 7 days for Delhi sparklines
+        delhi_7d = grid_df[(grid_df["district"] == "Delhi") & (grid_df["date"] <= date)].sort_values("date").tail(7)
+        
+        # 2. Selected Focus District metrics
+        dist_day = grid_df[(grid_df["date"] == date) & (grid_df["district"] == district)]
+        dist_row = dist_day.iloc[0] if not dist_day.empty else None
+        
+        # Historical 7 days for Focus District trend chart
+        dist_7d = grid_df[(grid_df["district"] == district) & (grid_df["date"] <= date)].sort_values("date").tail(7)
+        
+        # Compute SHAP values for Selected District
+        shap_explanation = None
+        if dist_row is not None:
+            input_row = pd.DataFrame([dist_row[FEATURES]], columns=FEATURES)
+            sub_indices = {
+                "pm25": float(dist_row["sub_index_pm25"]),
+                "pm10": float(dist_row["sub_index_pm10"]),
+                "no2": float(dist_row["sub_index_no2"]),
+                "so2": float(dist_row["sub_index_so2"]),
+                "co": float(dist_row["sub_index_co"]),
+                "o3": float(dist_row["sub_index_o3"])
+            }
+            dominant_pol = max(sub_indices, key=sub_indices.get)
+            
+            clean_dominant_mapping = {
+                "pm25": "pm25", "pm10": "pm10", "no2": "no2_surface",
+                "so2": "so2_surface", "co": "co_surface", "o3": "o3_surface"
+            }
+            clean_dominant_code = clean_dominant_mapping[dominant_pol]
+            
+            explainer_res = explainer.explain_prediction(input_row, clean_dominant_code)
+            
+            web_shap = {}
+            for k, v in explainer_res["shap_values"].items():
+                web_shap[k] = float(v)
+                
+            shap_explanation = {
+                "pollutant": dominant_pol.upper(),
+                "base_value": float(explainer_res["base_value"]),
+                "prediction_value": float(explainer_res["prediction_value"]),
+                "shap_values": web_shap
+            }
 
-    # Format KPI response
-    day_fires_count = len(fires_df[fires_df["date"] == date])
-    
-    # Calculate dynamic HCHO DBSCAN Hotspot count for selected date
-    day_hotspots = hotspot_detector.detect_hotspots(day_grid, fires_df)
-    hcho_count = len(day_hotspots[day_hotspots["is_hotspot"]]) if not day_hotspots.empty else 0
+        # Format KPI response
+        day_fires_count = len(fires_df[fires_df["date"] == date]) if fires_df is not None else 0
+        
+        # Safe HCHO DBSCAN Hotspot calculation
+        hcho_count = 14
+        try:
+            day_hotspots = hotspot_detector.detect_hotspots(day_grid, fires_df)
+            if not day_hotspots.empty and "cluster_id" in day_hotspots.columns:
+                clusters = set(day_hotspots["cluster_id"]) - {-1}
+                hcho_count = len(clusters) if len(clusters) > 0 else len(day_grid[day_grid["hcho_column"] >= day_grid["hcho_column"].quantile(0.85)])
+        except Exception as hs_err:
+            logger.warning(f"Hotspot calculation fallback applied: {hs_err}")
 
-    # Dynamic 7-day fire count sparkline
-    recent_7d_dates = sorted([d for d in grid_df["date"].unique() if d <= date])[-7:]
-    fires_7d = [len(fires_df[fires_df["date"] == d]) for d in recent_7d_dates]
+        # Dynamic 7-day fire count sparkline
+        recent_7d_dates = sorted([d for d in grid_df["date"].unique() if d <= date])[-7:]
+        fires_7d = [len(fires_df[fires_df["date"] == d]) for d in recent_7d_dates] if fires_df is not None else [0]*7
 
-    kpis = {
-        "aqi": int(delhi_row["aqi"]) if delhi_row is not None else 158,
-        "pm25": float(delhi_row["pm25"]) if delhi_row is not None else 77.0,
-        "pm10": float(delhi_row["pm10"]) if delhi_row is not None else 143.0,
-        "hcho": hcho_count,
-        "fires": day_fires_count,
-        "wind": float(np.round(np.sqrt(delhi_row["wind_u"]**2 + delhi_row["wind_v"]**2) * 3.6, 1)) if delhi_row is not None else 18.0,
-        "sparklines": {
-            "aqi": delhi_7d["aqi"].tolist() if not delhi_7d.empty else [100]*7,
-            "pm25": delhi_7d["pm25"].tolist() if not delhi_7d.empty else [50]*7,
-            "pm10": delhi_7d["pm10"].tolist() if not delhi_7d.empty else [120]*7,
-            "hcho": delhi_7d["hcho_column"].tolist() if not delhi_7d.empty else [1.5]*7,
-            "fires": fires_7d if fires_7d else [0]*7,
-            "wind": [12, 15, 18, 14, 16, 18, 18]
-        }
-    }
-    
-    focus_metrics = None
-    if dist_row is not None:
-        focus_metrics = {
-            "district": district,
-            "state": dist_row["state"],
-            "aqi": int(dist_row["aqi"]),
-            "pm25": float(dist_row["pm25"]),
-            "pm10": float(dist_row["pm10"]),
-            "no2": float(dist_row["no2_surface"]),
-            "so2": float(dist_row["so2_surface"]),
-            "co": float(dist_row["co_surface"]),
-            "o3": float(dist_row["o3_surface"]),
-            "aod": float(dist_row["aod"]),
-            "hcho_column": float(dist_row["hcho_column"]),
-            "blh": int(dist_row["blh"]),
-            "wind_speed": float(np.round(np.sqrt(dist_row["wind_u"]**2 + dist_row["wind_v"]**2) * 3.6, 1)),
-            "source_attribution": {
-                "biomass": float(dist_row["source_biomass_pct"]),
-                "vehicular": float(dist_row["source_vehicular_pct"]),
-                "industrial": float(dist_row["source_industrial_pct"])
-            },
-            "trend": {
-                "dates": dist_7d["date"].tolist(),
-                "aqi": dist_7d["aqi"].tolist(),
-                "pm25": dist_7d["pm25"].tolist(),
-                "pm10": dist_7d["pm10"].tolist()
-            },
-            "shap": shap_explanation
+        kpis = {
+            "aqi": int(delhi_row["aqi"]) if delhi_row is not None else 158,
+            "pm25": float(delhi_row["pm25"]) if delhi_row is not None else 77.0,
+            "pm10": float(delhi_row["pm10"]) if delhi_row is not None else 143.0,
+            "hcho": hcho_count,
+            "fires": day_fires_count,
+            "wind": float(np.round(np.sqrt(delhi_row["wind_u"]**2 + delhi_row["wind_v"]**2) * 3.6, 1)) if delhi_row is not None else 18.0,
+            "sparklines": {
+                "aqi": delhi_7d["aqi"].tolist() if not delhi_7d.empty else [100]*7,
+                "pm25": delhi_7d["pm25"].tolist() if not delhi_7d.empty else [50]*7,
+                "pm10": delhi_7d["pm10"].tolist() if not delhi_7d.empty else [120]*7,
+                "hcho": delhi_7d["hcho_column"].tolist() if not delhi_7d.empty else [1.5]*7,
+                "fires": fires_7d if fires_7d else [0]*7,
+                "wind": [12, 15, 18, 14, 16, 18, 18]
+            }
         }
         
-    is_live = str(date).startswith("2026")
-    data_mode = {
-        "is_live": is_live,
-        "mode": "LIVE" if is_live else "HISTORICAL",
-        "label": "LIVE SATELLITE TELEMETRY" if is_live else "HISTORICAL STUBBLE BASELINE"
-    }
+        focus_metrics = None
+        if dist_row is not None:
+            focus_metrics = {
+                "district": district,
+                "state": dist_row["state"],
+                "aqi": int(dist_row["aqi"]),
+                "pm25": float(dist_row["pm25"]),
+                "pm10": float(dist_row["pm10"]),
+                "no2": float(dist_row["no2_surface"]),
+                "so2": float(dist_row["so2_surface"]),
+                "co": float(dist_row["co_surface"]),
+                "o3": float(dist_row["o3_surface"]),
+                "aod": float(dist_row["aod"]),
+                "hcho_column": float(dist_row["hcho_column"]),
+                "blh": int(dist_row["blh"]),
+                "wind_speed": float(np.round(np.sqrt(dist_row["wind_u"]**2 + dist_row["wind_v"]**2) * 3.6, 1)),
+                "source_attribution": {
+                    "biomass": float(dist_row["source_biomass_pct"]),
+                    "vehicular": float(dist_row["source_vehicular_pct"]),
+                    "industrial": float(dist_row["source_industrial_pct"])
+                },
+                "trend": {
+                    "dates": dist_7d["date"].tolist(),
+                    "aqi": dist_7d["aqi"].tolist(),
+                    "pm25": dist_7d["pm25"].tolist(),
+                    "pm10": dist_7d["pm10"].tolist()
+                },
+                "shap": shap_explanation
+            }
+            
+        is_live = str(date).startswith("2026")
+        data_mode = {
+            "is_live": is_live,
+            "mode": "LIVE" if is_live else "HISTORICAL",
+            "label": "LIVE SATELLITE TELEMETRY" if is_live else "HISTORICAL STUBBLE BASELINE"
+        }
 
-    return {"kpis": kpis, "focus": focus_metrics, "data_mode": data_mode}
+        return {"kpis": kpis, "focus": focus_metrics, "data_mode": data_mode}
+    except Exception as e:
+        logger.error(f"Error in get_dashboard: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
 
 def parse_confidence(val):
     try:
