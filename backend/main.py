@@ -89,6 +89,15 @@ def startup_event():
     grid_df_raw = pd.read_csv("data/grid_data.csv")
     fires_df = pd.read_csv("data/fire_events.csv")
     
+    # Auto-sync live date if missing
+    try:
+        from real_data_pipeline import run_real_data_pipeline
+        run_real_data_pipeline()
+        grid_df_raw = pd.read_csv("data/grid_data.csv")
+        fires_df = pd.read_csv("data/fire_events.csv")
+    except Exception as e:
+        logger.warning(f"Startup live data sync notice: {e}")
+        
     # Initialize model manager
     model_manager = AQIModelManager()
     
