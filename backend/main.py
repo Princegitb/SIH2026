@@ -8,6 +8,13 @@ from fastapi.middleware.cors import CORSMiddleware
 import logging
 
 
+# Load environment variables if available
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
 # Add project root to python path to resolve models imports
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, ROOT_DIR)
@@ -506,7 +513,21 @@ def get_data_explorer(page: int = 1, limit: int = 100):
         "total_records": len(grid_df)
     }
 
+@app.post("/api/refresh-live-data")
+def refresh_live_data(date: str = None):
+    """
+    Triggers the live satellite, weather, and fire data ingestion pipeline.
+    """
+    try:
+        from real_data_pipeline import run_real_data_pipeline
+        success = run_real_data_pipeline(target_date=date)
+        return {"status": "success", "message": "Live data pipeline executed successfully", "date": date}
+    except Exception as e:
+        logger.error(f"Error running live data pipeline: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 if __name__ == "__main__":
     import uvicorn
     # Start on port 8000
     uvicorn.run(app, host="127.0.0.1", port=8000)
+
