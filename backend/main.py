@@ -205,15 +205,16 @@ def get_dashboard(date: str = None, district: str = "Ambala"):
         # Format KPI response
         day_fires_count = len(fires_df[fires_df["date"] == date]) if fires_df is not None else 0
         
-        # Safe HCHO DBSCAN Hotspot calculation
-        hcho_count = 14
+        # Safe HCHO DBSCAN Hotspot cluster calculation
+        hcho_count = 0
         try:
             day_hotspots = hotspot_detector.detect_hotspots(day_grid, fires_df)
             if not day_hotspots.empty and "cluster_id" in day_hotspots.columns:
                 clusters = set(day_hotspots["cluster_id"]) - {-1}
-                hcho_count = len(clusters) if len(clusters) > 0 else len(day_grid[day_grid["hcho_column"] >= day_grid["hcho_column"].quantile(0.85)])
+                hcho_count = len(clusters)
         except Exception as hs_err:
             logger.warning(f"Hotspot calculation fallback applied: {hs_err}")
+            hcho_count = 0
 
         # Dynamic 7-day fire count sparkline
         recent_7d_dates = sorted([d for d in grid_df["date"].unique() if d <= date])[-7:]
