@@ -248,6 +248,20 @@ def get_dashboard(date: str = None, district: str = "Ambala"):
         
     return {"kpis": kpis, "focus": focus_metrics}
 
+def parse_confidence(val):
+    try:
+        if pd.isna(val):
+            return 80
+        return int(float(val))
+    except (ValueError, TypeError):
+        val_str = str(val).lower().strip()
+        if val_str == 'h':
+            return 90
+        elif val_str == 'l':
+            return 40
+        else:
+            return 80
+
 @app.get("/api/map-data")
 def get_map_data(date: str = "2025-11-05", state: str = "All"):
     if grid_df is None:
@@ -274,20 +288,6 @@ def get_map_data(date: str = "2025-11-05", state: str = "All"):
             "hcho": float(r["hcho_column"])
         })
         
-def parse_confidence(val):
-    try:
-        if pd.isna(val):
-            return 80
-        return int(float(val))
-    except (ValueError, TypeError):
-        val_str = str(val).lower().strip()
-        if val_str == 'h':
-            return 90
-        elif val_str == 'l':
-            return 40
-        else:
-            return 80
-
     # Map active fires
     day_fires = fires_df[fires_df["date"] == date]
     fires = []
