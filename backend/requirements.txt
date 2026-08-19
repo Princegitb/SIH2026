@@ -8,3 +8,7 @@ shap
 gunicorn
 python-dotenv
 requests
+earthengine-api
+cdsapi
+netcdf4
+

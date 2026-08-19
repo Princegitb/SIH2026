@@ -10,6 +10,13 @@ class ERA5Ingestor:
         self.has_cdsapi = False
         try:
             import cdsapi
+            # Auto-create ~/.cdsapirc if CDS_API_KEY environment variable is present
+            cdsapirc_path = os.path.expanduser("~/.cdsapirc")
+            cds_key = os.environ.get("CDS_API_KEY")
+            if cds_key and not os.path.exists(cdsapirc_path):
+                with open(cdsapirc_path, "w") as f:
+                    f.write(f"url: https://cds.climate.copernicus.eu/api\nkey: {cds_key.strip()}\n")
+            
             self.client = cdsapi.Client()
             self.has_cdsapi = True
         except ImportError:
