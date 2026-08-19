@@ -43,15 +43,18 @@ export const useStore = create((set, get) => ({
     try {
       const res = await fetch('/api/metadata');
       const data = await res.json();
+      const availableDates = data.dates || [];
+      const latestDate = availableDates.length > 0 ? availableDates[availableDates.length - 1] : '2025-11-05';
+      
       set({
-        dates: data.dates || [],
+        dates: availableDates,
         states: data.states || [],
-        districts: data.districts || []
+        districts: data.districts || [],
+        selectedDate: latestDate
       });
-      // Set initial values if empty
-      if (data.dates && data.dates.length > 0 && !get().selectedDate) {
-        set({ selectedDate: data.dates[0] });
-      }
+      
+      get().fetchDashboard();
+      get().fetchMapData();
     } catch (err) {
       console.error("Failed to fetch metadata:", err);
       set({ error: "Failed to load dropdown options from server." });
