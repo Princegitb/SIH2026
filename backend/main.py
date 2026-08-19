@@ -131,6 +131,10 @@ def startup_event():
     
     logger.info("FastAPI Backend ready and cached in memory!")
 
+@app.get("/")
+def read_root():
+    return {"name": "VayuShetra Atmospheric Intelligence API", "status": "online", "version": "1.0.0"}
+
 @app.get("/api/metadata")
 def get_metadata():
     if grid_df is None:

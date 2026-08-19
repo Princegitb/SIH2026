@@ -20,9 +20,17 @@ class GEEIngestor:
             # Check for GEE service account in environment
             service_account = os.environ.get("GEE_SERVICE_ACCOUNT")
             private_key_path = os.environ.get("GEE_PRIVATE_KEY_PATH")
+            private_key_json = os.environ.get("GEE_PRIVATE_KEY_JSON")
 
-            if service_account and private_key_path:
-                logger.info("Authenticating to GEE via Service Account...")
+            if service_account and private_key_json:
+                logger.info("Authenticating to GEE via Service Account JSON String...")
+                ee.Initialize(
+                    ee.ServiceAccountCredentials(service_account, key_data=private_key_json)
+                )
+                self.is_authenticated = True
+                logger.info("GEE Initialization Successful!")
+            elif service_account and private_key_path and os.path.exists(private_key_path):
+                logger.info("Authenticating to GEE via Service Account File Path...")
                 ee.Initialize(
                     ee.ServiceAccountCredentials(service_account, private_key_path)
                 )
