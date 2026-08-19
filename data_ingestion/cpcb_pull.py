@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 class CPCBIngestor:
     def __init__(self):
         self.api_key = os.environ.get("OPENAQ_API_KEY")
-        self.base_url = "https://api.openaq.org/v2"
+        self.base_url = "https://api.openaq.org/v3"
 
     def pull_ground_data(self, city: str, start_date: str, end_date: str):
         """
@@ -23,17 +23,9 @@ class CPCBIngestor:
             return None
 
         headers = {"X-API-Key": self.api_key}
-        params = {
-            "city": city,
-            "date_from": start_date,
-            "date_to": end_date,
-            "limit": 1000,
-            "parameters": ["pm25", "pm10", "no2", "so2", "co", "o3"]
-        }
-
         try:
             logger.info(f"OpenAQ: Querying ground measurements for {city} between {start_date} and {end_date}")
-            response = requests.get(f"{self.base_url}/measurements", headers=headers, params=params, timeout=15)
+            response = requests.get(f"{self.base_url}/locations", headers=headers, params={"limit": 50}, timeout=15)
             response.raise_for_status()
             data = response.json()
             

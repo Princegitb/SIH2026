@@ -11,6 +11,12 @@ dist/
 dist-ssr/
 *.local
 
+# Environment & API Keys Security
+.env
+.cdsapirc
+*-key.json
+*credentials*.json
+
 # Bulky Data Files (keep code lightweight, rebuild locally with grid_builder.py)
 data/
 
@@ -25,4 +31,3 @@ brain/
 *.log
 *.nc
 *.csv
-

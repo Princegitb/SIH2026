@@ -80,8 +80,9 @@ def run_real_data_pipeline(target_date: str = None):
     # 3. PULL GOOGLE EARTH ENGINE SATELLITE DENSITIES
     logger.info("--- Step 3: Querying Google Earth Engine (MODIS AOD & Sentinel-5P Gas Columns) ---")
     gee = GEEIngestor()
-    aod_data = gee.pull_aod_data(bbox=BBOX, start_date=target_date, end_date=target_date)
-    hcho_data = gee.pull_tropomi_gas(gas="HCHO", bbox=BBOX, start_date=target_date, end_date=target_date)
+    next_day = (datetime.strptime(target_date, "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
+    aod_data = gee.pull_aod_data(bbox=BBOX, start_date=target_date, end_date=next_day)
+    hcho_data = gee.pull_tropomi_gas(gas="HCHO", bbox=BBOX, start_date=target_date, end_date=next_day)
 
     # 4. PULL COPERNICUS CDS ERA5 WEATHER DATA
     logger.info("--- Step 4: Querying Copernicus CDS (ERA5 Meteorological Fields) ---")
