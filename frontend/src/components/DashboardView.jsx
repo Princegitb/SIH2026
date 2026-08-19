@@ -279,7 +279,7 @@ export default function DashboardView() {
             <div>
               <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">HCHO Hotspots</div>
               <div className="text-[10px] text-slate-500 font-semibold mt-0.5">DBSCAN Clusters</div>
-              <div className="text-3xl font-extrabold mt-1.5 text-purple-400 tracking-tight">24</div>
+              <div className="text-3xl font-extrabold mt-1.5 text-purple-400 tracking-tight">{kpis.hcho}</div>
             </div>
             <div className="w-2 h-2 rounded-full bg-purple-400 shadow-[0_0_8px_rgba(168,85,247,0.7)] animate-pulse"></div>
           </div>
