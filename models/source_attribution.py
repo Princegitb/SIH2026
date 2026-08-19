@@ -77,25 +77,43 @@ class SourceAttributor:
 
     def attribute_dataframe(self, df):
         """
-        Applies source attribution to a whole dataframe.
+        Applies vectorized source attribution to a whole dataframe for ultra-fast startup.
         """
-        b_pcts, v_pcts, i_pcts = [], [], []
-        
-        for idx, r in df.iterrows():
-            smoke = r.get("smoke_impact", 0.0)
-            res = self.compute_attribution(
-                r["hcho_column"], r["no2_column"], r["so2_column"], r["co_column"],
-                cell_type=r["type"], smoke_impact=smoke
-            )
-            b_pcts.append(res["biomass_pct"])
-            v_pcts.append(res["vehicular_pct"])
-            i_pcts.append(res["industrial_pct"])
-            
+        smoke = df["smoke_impact"].values if "smoke_impact" in df.columns else np.zeros(len(df))
+        cell_types = df["type"].values
+        hcho = df["hcho_column"].values
+        no2 = df["no2_column"].values
+        so2 = df["so2_column"].values
+        co = df["co_column"].values
+
+        # Base weights vectorization
+        base_v = np.select([cell_types == "urban", cell_types == "industrial", cell_types == "agricultural"], [60.0, 25.0, 20.0], default=40.0)
+        base_i = np.select([cell_types == "urban", cell_types == "industrial", cell_types == "agricultural"], [25.0, 65.0, 15.0], default=30.0)
+        base_b = np.select([cell_types == "urban", cell_types == "industrial", cell_types == "agricultural"], [15.0, 10.0, 65.0], default=30.0)
+
+        biomass_sig = hcho * 2.5 + (smoke * 0.08)
+        vehicular_sig = no2 * 3.5 + co * 0.8
+        industrial_sig = so2 * 6.0 + no2 * 0.5
+
+        weight_b = base_b + biomass_sig * 12.0
+        weight_v = base_v + vehicular_sig * 4.0
+        weight_i = base_i + industrial_sig * 5.0
+
+        heavy_smoke_mask = smoke > 30.0
+        smoke_factor = np.clip(smoke / 200.0, 0.0, 0.6)
+        weight_v = np.where(heavy_smoke_mask, weight_v * (1.0 - smoke_factor), weight_v)
+
+        total = weight_b + weight_v + weight_i
+        total = np.where(total == 0, 1.0, total)
+
+        b_pct = np.round((weight_b / total) * 100.0, 1)
+        v_pct = np.round((weight_v / total) * 100.0, 1)
+        i_pct = np.round(100.0 - (b_pct + v_pct), 1)
+
         out_df = df.copy()
-        out_df["source_biomass_pct"] = b_pcts
-        out_df["source_vehicular_pct"] = v_pcts
-        out_df["source_industrial_pct"] = i_pcts
-        
+        out_df["source_biomass_pct"] = b_pct
+        out_df["source_vehicular_pct"] = v_pct
+        out_df["source_industrial_pct"] = i_pct
         return out_df
 
 if __name__ == "__main__":
