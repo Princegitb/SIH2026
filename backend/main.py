@@ -152,8 +152,10 @@ def get_dashboard(date: str = None, district: str = "Ambala"):
     if not date or date not in grid_df["date"].values:
         date = str(grid_df["date"].max())
         
+    day_grid = grid_df[grid_df["date"] == date]
+    
     # 1. Delhi metrics for Top KPI cards (acting as reference)
-    delhi_day = grid_df[(grid_df["date"] == date) & (grid_df["district"] == "Delhi")]
+    delhi_day = day_grid[day_grid["district"] == "Delhi"]
     delhi_row = delhi_day.iloc[0] if not delhi_day.empty else None
     
     # Historical 7 days for Delhi sparklines
