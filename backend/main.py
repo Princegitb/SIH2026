@@ -203,11 +203,20 @@ def get_dashboard(date: str = None, district: str = "Ambala"):
 
     # Format KPI response
     day_fires_count = len(fires_df[fires_df["date"] == date])
+    
+    # Calculate dynamic HCHO DBSCAN Hotspot count for selected date
+    day_hotspots = hotspot_detector.detect_hotspots(day_grid, fires_df)
+    hcho_count = len(day_hotspots[day_hotspots["is_hotspot"]]) if not day_hotspots.empty else 0
+
+    # Dynamic 7-day fire count sparkline
+    recent_7d_dates = sorted([d for d in grid_df["date"].unique() if d <= date])[-7:]
+    fires_7d = [len(fires_df[fires_df["date"] == d]) for d in recent_7d_dates]
+
     kpis = {
         "aqi": int(delhi_row["aqi"]) if delhi_row is not None else 158,
         "pm25": float(delhi_row["pm25"]) if delhi_row is not None else 77.0,
         "pm10": float(delhi_row["pm10"]) if delhi_row is not None else 143.0,
-        "hcho": 24, # simulated hotspots count
+        "hcho": hcho_count,
         "fires": day_fires_count,
         "wind": float(np.round(np.sqrt(delhi_row["wind_u"]**2 + delhi_row["wind_v"]**2) * 3.6, 1)) if delhi_row is not None else 18.0,
         "sparklines": {
@@ -215,7 +224,7 @@ def get_dashboard(date: str = None, district: str = "Ambala"):
             "pm25": delhi_7d["pm25"].tolist() if not delhi_7d.empty else [50]*7,
             "pm10": delhi_7d["pm10"].tolist() if not delhi_7d.empty else [120]*7,
             "hcho": delhi_7d["hcho_column"].tolist() if not delhi_7d.empty else [1.5]*7,
-            "fires": [45, 60, 85, 127, 95, 110, 127], # simulated timeline
+            "fires": fires_7d if fires_7d else [0]*7,
             "wind": [12, 15, 18, 14, 16, 18, 18]
         }
     }
