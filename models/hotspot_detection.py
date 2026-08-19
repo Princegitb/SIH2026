@@ -29,8 +29,20 @@ class HotspotDetector:
             
         date_str = daily_grid_df["date"].iloc[0]
         
-        # 1. Filter cells above threshold percentile of HCHO
-        hcho_threshold = np.percentile(daily_grid_df["hcho_column"], self.percentile)
+        # 1. Filter cells above threshold percentile of HCHO with an absolute minimum anomaly cutoff (6.0)
+        min_absolute_hcho = 6.0
+        max_day_hcho = daily_grid_df["hcho_column"].max()
+        
+        if max_day_hcho < min_absolute_hcho:
+            logger.info(f"Date {date_str}: Clean atmospheric day (Max HCHO {max_day_hcho:.1f} < {min_absolute_hcho}). 0 hotspots detected.")
+            out_df = daily_grid_df.copy()
+            out_df["cluster_id"] = -1
+            out_df["is_hotspot"] = False
+            out_df["is_biomass_driven"] = False
+            out_df["associated_fires"] = 0
+            return out_df
+
+        hcho_threshold = max(min_absolute_hcho, np.percentile(daily_grid_df["hcho_column"], self.percentile))
         high_hcho_df = daily_grid_df[daily_grid_df["hcho_column"] >= hcho_threshold].copy()
         
         if len(high_hcho_df) < self.min_samples:
