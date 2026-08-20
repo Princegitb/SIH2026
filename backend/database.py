@@ -3,7 +3,7 @@ import sys
 import logging
 import pandas as pd
 import numpy as np
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # Load environment variables if available
 try:
@@ -24,6 +24,7 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 
 Base = declarative_base()
 
+# 1. Spatial Grid Observations (Master Atmospheric Telemetry)
 class GridObservation(Base):
     __tablename__ = "grid_observations"
 
@@ -64,6 +65,7 @@ class GridObservation(Base):
         Index("idx_date_cell", "date", "cell_id", unique=True),
     )
 
+# 2. NASA FIRMS Active Thermal Fire Anomalies
 class FireEvent(Base):
     __tablename__ = "fire_events"
 
@@ -80,6 +82,7 @@ class FireEvent(Base):
         Index("idx_fire_date_coord", "date", "latitude", "longitude"),
     )
 
+# 3. Sensitive Receptors (Hospitals, Schools Proximity Directory)
 class SensitiveReceptor(Base):
     __tablename__ = "sensitive_receptors"
 
@@ -89,6 +92,54 @@ class SensitiveReceptor(Base):
     district = Column(String(50), nullable=False, index=True)
     latitude = Column(Float, nullable=False)
     longitude = Column(Float, nullable=False)
+
+# 4. Ground Station Observations (CPCB / OpenAQ Sensor Measurements)
+class GroundMeasurement(Base):
+    __tablename__ = "ground_measurements"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    date = Column(String(12), nullable=False, index=True)
+    station_name = Column(String(100), nullable=False, index=True)
+    district = Column(String(50), nullable=True)
+    latitude = Column(Float, nullable=False)
+    longitude = Column(Float, nullable=False)
+    pm25 = Column(Float)
+    pm10 = Column(Float)
+    no2_surface = Column(Float)
+    so2_surface = Column(Float)
+    co_surface = Column(Float)
+    o3_surface = Column(Float)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+# 5. 48-Hour ML Forecast Records
+class ForecastRecord(Base):
+    __tablename__ = "forecast_records"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    date = Column(String(12), nullable=False, index=True)
+    district = Column(String(50), nullable=False, index=True)
+    current_aqi = Column(Integer, nullable=False)
+    day1_projected_aqi = Column(Integer, nullable=False)
+    day1_inversion_risk = Column(String(30))
+    day1_wind_speed = Column(Float)
+    day2_projected_aqi = Column(Integer, nullable=False)
+    day2_inversion_risk = Column(String(30))
+    day2_wind_speed = Column(Float)
+    model_name = Column(String(50), default="XGBoost-MultiStep-Lagged")
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+# 6. NCAP Compliance & Target Tracking Records
+class ComplianceRecord(Base):
+    __tablename__ = "ncap_compliance_records"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    date = Column(String(12), nullable=False, index=True)
+    district = Column(String(50), nullable=False, index=True)
+    rolling_30d_aqi = Column(Float, nullable=False)
+    target_aqi = Column(Float, default=120.0)
+    is_compliant = Column(Boolean, nullable=False)
+    margin_aqi = Column(Float)
+    created_at = Column(DateTime, default=datetime.utcnow)
 
 DEFAULT_RECEPTORS = [
     {"name": "Venkateshwar Hospital", "type": "Hospital", "district": "Delhi", "latitude": 28.5878, "longitude": 77.0622},
@@ -102,7 +153,7 @@ DEFAULT_RECEPTORS = [
     {"name": "Army Public School Ambala", "type": "School", "district": "Ambala", "latitude": 30.3620, "longitude": 76.7950}
 ]
 
-# Database Engine Configuration: Dual-Driver ORM (Supabase PostgreSQL / Local SQLite)
+# Database Engine Configuration
 def get_db_engine():
     db_url = os.environ.get("SUPABASE_DB_URL") or os.environ.get("DATABASE_URL")
     
@@ -139,10 +190,10 @@ def parse_conf(val):
 
 def init_db():
     """
-    Initializes database tables in Supabase (or SQLite) and default sensitive receptors.
+    Initializes all 6 database tables in Supabase and seeds initial directories.
     """
     Base.metadata.create_all(bind=engine)
-    logger.info("Supabase PostgreSQL Database tables initialized successfully.")
+    logger.info("All 6 Supabase PostgreSQL Database tables initialized successfully.")
     
     session = db_session()
     try:
@@ -157,16 +208,16 @@ def init_db():
     finally:
         session.close()
 
-def sync_dataframes_to_db(grid_df: pd.DataFrame, fires_df: pd.DataFrame = None):
+def sync_dataframes_to_db(grid_df: pd.DataFrame, fires_df: pd.DataFrame = None, ground_df: pd.DataFrame = None):
     """
-    Synchronizes in-memory and CSV dataframes directly to Supabase PostgreSQL.
+    Synchronizes in-memory and CSV dataframes directly to Supabase PostgreSQL across all tables.
     """
     if grid_df is None or grid_df.empty:
         return
         
     session = db_session()
     try:
-        # Check existing dates in DB
+        # 1. Sync Grid Observations
         existing_dates = set(r[0] for r in session.query(GridObservation.date).distinct().all())
         df_dates = set(grid_df["date"].unique())
         missing_dates = df_dates - existing_dates
@@ -207,7 +258,7 @@ def sync_dataframes_to_db(grid_df: pd.DataFrame, fires_df: pd.DataFrame = None):
                 session.commit()
                 logger.info(f"Successfully uploaded {len(obs_list)} grid rows for {d} to Supabase PostgreSQL.")
 
-        # Sync fire records
+        # 2. Sync Active Fire Events
         if fires_df is not None and not fires_df.empty:
             existing_fire_dates = set(r[0] for r in session.query(FireEvent.date).distinct().all())
             missing_fire_dates = set(fires_df["date"].unique()) - existing_fire_dates
@@ -229,6 +280,64 @@ def sync_dataframes_to_db(grid_df: pd.DataFrame, fires_df: pd.DataFrame = None):
                     session.bulk_save_objects(fire_list)
                     session.commit()
                     logger.info(f"Successfully uploaded {len(fire_list)} active fire events to Supabase PostgreSQL.")
+
+        # 3. Sync Ground Station Measurements
+        ground_file = "data/ground_stations.csv"
+        if os.path.exists(ground_file) and session.query(GroundMeasurement).count() == 0:
+            logger.info("Uploading Ground Station sensor measurements to Supabase...")
+            gdf_raw = pd.read_csv(ground_file)
+            g_list = []
+            for idx, g in gdf_raw.iterrows():
+                gm = GroundMeasurement(
+                    date=str(g.get("date", "2025-11-05")),
+                    station_name=str(g.get("station_name", f"Station {idx}")),
+                    district=str(g.get("district", "Delhi")),
+                    latitude=float(g["latitude"]),
+                    longitude=float(g["longitude"]),
+                    pm25=float(g.get("pm25", 60.0)),
+                    pm10=float(g.get("pm10", 110.0)),
+                    no2_surface=float(g.get("no2_surface", 35.0)),
+                    so2_surface=float(g.get("so2_surface", 15.0)),
+                    co_surface=float(g.get("co_surface", 1.2)),
+                    o3_surface=float(g.get("o3_surface", 35.0))
+                )
+                g_list.append(gm)
+            if g_list:
+                session.bulk_save_objects(g_list)
+                session.commit()
+                logger.info(f"Successfully uploaded {len(g_list)} ground station observations to Supabase PostgreSQL.")
+
+        # 4. Generate & Sync NCAP Compliance History
+        if session.query(ComplianceRecord).count() == 0:
+            logger.info("Calculating and uploading NCAP Compliance records to Supabase...")
+            districts = grid_df["district"].unique()
+            dates = grid_df["date"].unique()
+            comp_list = []
+            for d in dates:
+                day_sub = grid_df[grid_df["date"] == d]
+                for dist in districts:
+                    dist_rows = day_sub[day_sub["district"] == dist]
+                    if "aqi" in dist_rows.columns:
+                        avg_aqi = float(dist_rows["aqi"].mean())
+                    else:
+                        avg_p25 = float(dist_rows["pm25"].mean()) if not dist_rows.empty else 60.0
+                        avg_aqi = min(500.0, avg_p25 * 1.8)
+                    is_comp = avg_aqi <= 120.0
+                    margin = round(avg_aqi - 120.0, 1)
+                    cr = ComplianceRecord(
+                        date=str(d),
+                        district=str(dist),
+                        rolling_30d_aqi=round(avg_aqi, 1),
+                        target_aqi=120.0,
+                        is_compliant=is_comp,
+                        margin_aqi=margin
+                    )
+                    comp_list.append(cr)
+            if comp_list:
+                session.bulk_save_objects(comp_list)
+                session.commit()
+                logger.info(f"Successfully uploaded {len(comp_list)} NCAP compliance records to Supabase PostgreSQL.")
+
     except Exception as e:
         session.rollback()
         logger.error(f"Error syncing dataframes to database: {e}")
