@@ -366,7 +366,7 @@ def get_forecast(date: str = None, district: str = "Ambala"):
         "district": district
     }
     
-    fires_count = len(fires_df[fires_df["date"] == date]) if fires_df is not None and not fires_df.empty else 0
+    fires_count = len(fires_df[(fires_df["date"] == date) & (fires_df["district"] == district)]) if fires_df is not None and not fires_df.empty else 0
     predictions = forecast_engine.predict_forecast(dist_dict, fires_count=fires_count)
     return {"district": district, "date": date, "forecast": predictions}
 

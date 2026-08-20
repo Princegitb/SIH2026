@@ -394,12 +394,14 @@ def sync_dataframes_to_db(grid_df: pd.DataFrame, fires_df: pd.DataFrame = None, 
             
             for d in dates:
                 day_grid = grid_for_fc[grid_for_fc["date"] == d]
-                day_fires_cnt = len(fires_df[fires_df["date"] == d]) if fires_df is not None and not fires_df.empty else 0
                 
                 for dist in districts:
                     dist_rows = day_grid[day_grid["district"] == dist]
                     if dist_rows.empty:
                         continue
+                    
+                    dist_fires_cnt = len(fires_df[(fires_df["date"] == d) & (fires_df["district"] == dist)]) if fires_df is not None and not fires_df.empty else 0
+                    
                     r = dist_rows.iloc[0]
                     curr_aqi = int(r.get("aqi", 150))
                     blh = float(r.get("blh", 600.0))
@@ -420,7 +422,7 @@ def sync_dataframes_to_db(grid_df: pd.DataFrame, fires_df: pd.DataFrame = None, 
                         "district": str(dist)
                     }
                     
-                    pred = fe.predict_forecast(dist_dict, fires_count=day_fires_cnt)
+                    pred = fe.predict_forecast(dist_dict, fires_count=dist_fires_cnt)
                     
                     record = ForecastRecord(
                         date=str(d),

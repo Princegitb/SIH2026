@@ -89,15 +89,9 @@ class AQIForecastEngine:
         train_df = self._prepare_training_data(grid_df, fires_df)
         
         if len(train_df) < 10:
-            logger.warning("Insufficient sequence rows for ML forecast training. Initializing robust physics-based forecaster.")
-            self.model_day1 = XGBRegressor(n_estimators=60, learning_rate=0.08, max_depth=4, random_state=42)
-            self.model_day2 = XGBRegressor(n_estimators=60, learning_rate=0.08, max_depth=4, random_state=42)
-            # Train on synthetic base
-            X_syn = np.random.uniform(50, 400, (50, len(self.feature_cols)))
-            y1_syn = X_syn[:, 0] * np.random.uniform(0.9, 1.15, 50)
-            y2_syn = X_syn[:, 0] * np.random.uniform(0.85, 1.10, 50)
-            self.model_day1.fit(X_syn, y1_syn)
-            self.model_day2.fit(X_syn, y2_syn)
+            logger.warning("Insufficient sequence rows for ML forecast training. Falling back to robust physics-based forecaster.")
+            self.model_day1 = None
+            self.model_day2 = None
         else:
             X = train_df[self.feature_cols]
             y1 = train_df["target_aqi_day1"]
