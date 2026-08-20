@@ -158,9 +158,16 @@ export default function LiveMapView() {
     try {
       const res = await fetch(`/api/predict-location?lat=${lat}&lon=${lon}&date=${selectedDate}`)
       const data = await res.json()
-      setHyperlocalDetails(data)
+      if (res.ok && data && !data.detail) {
+        setHyperlocalDetails(data)
+      } else {
+        console.error("API returned error:", data)
+        setHyperlocalDetails(null)
+        alert("Prediction failed: " + (data.detail || "Server error"))
+      }
     } catch (err) {
       console.error("Failed to fetch hyperlocal prediction:", err)
+      setHyperlocalDetails(null)
     } finally {
       setLoadingHyperlocal(false)
     }
@@ -481,42 +488,40 @@ export default function LiveMapView() {
               <MapPin size={13} className="mr-1.5 text-sky-400" /> Rural & Urban Hyperlocal Search
             </h3>
             
-            <div className="flex gap-2">
-              <div className="relative flex-1">
-                <Search size={14} className="absolute left-3 top-2.5 text-slate-400" />
-                <input
-                  type="text"
-                  placeholder="Type village/locality..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onFocus={() => setShowSearchDropdown(true)}
-                  className="w-full bg-[#0d1121] border border-slate-800 rounded-lg pl-9 pr-3 py-2 text-xs text-slate-200 outline-none focus:border-[#4b6bf5] placeholder-slate-500 font-semibold"
-                />
-                
-                {/* Search Dropdown list */}
-                {showSearchDropdown && searchResults.length > 0 && (
-                  <div className="absolute left-0 right-0 mt-1.5 bg-[#090d1a] border border-slate-800 rounded-lg max-h-48 overflow-y-auto shadow-2xl z-50">
-                    {searchResults.map((village, idx) => (
-                      <div
-                        key={`v-res-${idx}`}
-                        onClick={() => handleSelectVillage(village)}
-                        className="px-3 py-2 text-xs text-slate-350 hover:bg-slate-800/40 hover:text-white cursor-pointer border-b border-slate-900/50 flex justify-between items-center"
-                      >
-                        <span className="font-bold">{village.name}</span>
-                        <span className="text-[9px] text-slate-500 uppercase tracking-wide font-semibold">{village.district}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+            <div className="relative w-full flex items-center">
+              <Search size={14} className="absolute left-3 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Type village/locality..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => setShowSearchDropdown(true)}
+                className="w-full bg-[#0d1121] border border-slate-800 rounded-lg pl-9 pr-10 py-2.5 text-xs text-slate-200 outline-none focus:border-[#4b6bf5] placeholder-slate-500 font-semibold shadow-inner"
+              />
               
               <button
                 onClick={handleGPSLocate}
-                className="bg-[#0f152d] border border-slate-800 hover:border-slate-700 p-2 rounded-lg text-slate-400 hover:text-[#4b6bf5] transition-all flex items-center justify-center shrink-0"
+                className="absolute right-2 p-1.5 rounded text-slate-400 hover:text-sky-400 hover:bg-slate-800/60 transition-all flex items-center justify-center"
                 title="Detect My Location"
               >
                 <Navigation size={14} className="rotate-45" />
               </button>
+              
+              {/* Search Dropdown list */}
+              {showSearchDropdown && searchResults.length > 0 && (
+                <div className="absolute top-full left-0 right-0 mt-1.5 bg-[#090d1a] border border-slate-800 rounded-lg max-h-48 overflow-y-auto shadow-2xl z-50">
+                  {searchResults.map((village, idx) => (
+                    <div
+                      key={`v-res-${idx}`}
+                      onClick={() => handleSelectVillage(village)}
+                      className="px-3 py-2 text-xs text-slate-350 hover:bg-slate-800/40 hover:text-white cursor-pointer border-b border-slate-900/50 flex justify-between items-center"
+                    >
+                      <span className="font-bold">{village.name}</span>
+                      <span className="text-[9px] text-slate-500 uppercase tracking-wide font-semibold">{village.district}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
             
             <div className="text-[10px] text-slate-500 font-semibold italic">
