@@ -338,6 +338,74 @@ def sync_dataframes_to_db(grid_df: pd.DataFrame, fires_df: pd.DataFrame = None, 
                 session.commit()
                 logger.info(f"Successfully uploaded {len(comp_list)} NCAP compliance records to Supabase PostgreSQL.")
 
+        # 5. Generate & Sync ML 48-Hour Forecast Records
+        if session.query(ForecastRecord).count() == 0:
+            logger.info("Generating and uploading ML 48-Hour Forecast records to Supabase...")
+            from models.forecast_model import AQIForecastEngine
+            from models.aqi_model import AQIModelManager
+            
+            grid_for_fc = grid_df.copy()
+            if "aqi" not in grid_for_fc.columns:
+                mm = AQIModelManager()
+                mm.load_models()
+                grid_for_fc = mm.predict_grid(grid_for_fc)
+                
+            fe = AQIForecastEngine()
+            fe.train_models(grid_for_fc, fires_df)
+            
+            districts = grid_for_fc["district"].unique()
+            dates = grid_for_fc["date"].unique()
+            fc_list = []
+            
+            for d in dates:
+                day_grid = grid_for_fc[grid_for_fc["date"] == d]
+                day_fires_cnt = len(fires_df[fires_df["date"] == d]) if fires_df is not None and not fires_df.empty else 0
+                
+                for dist in districts:
+                    dist_rows = day_grid[day_grid["district"] == dist]
+                    if dist_rows.empty:
+                        continue
+                    r = dist_rows.iloc[0]
+                    curr_aqi = int(r.get("aqi", 150))
+                    blh = float(r.get("blh", 600.0))
+                    w_spd = float(np.round(np.sqrt(float(r.get("wind_u", 2.0))**2 + float(r.get("wind_v", -1.5))**2) * 3.6, 1))
+                    
+                    dist_dict = {
+                        "aqi": curr_aqi,
+                        "pm25": float(r.get("pm25", 70.0)),
+                        "pm10": float(r.get("pm10", 130.0)),
+                        "blh": blh,
+                        "wind_speed": w_spd,
+                        "wind_u": float(r.get("wind_u", 2.0)),
+                        "wind_v": float(r.get("wind_v", -1.5)),
+                        "temperature": float(r.get("temperature", 28.0)),
+                        "humidity": float(r.get("humidity", 60.0)),
+                        "hcho_column": float(r.get("hcho_column", 3.0)),
+                        "date": str(d),
+                        "district": str(dist)
+                    }
+                    
+                    pred = fe.predict_forecast(dist_dict, fires_count=day_fires_cnt)
+                    
+                    record = ForecastRecord(
+                        date=str(d),
+                        district=str(dist),
+                        current_aqi=curr_aqi,
+                        day1_projected_aqi=int(pred["day1"]["aqi"]),
+                        day1_inversion_risk=str(pred["day1"]["inversion_risk"]),
+                        day1_wind_speed=float(pred["day1"]["wind_speed"]),
+                        day2_projected_aqi=int(pred["day2"]["aqi"]),
+                        day2_inversion_risk=str(pred["day2"]["inversion_risk"]),
+                        day2_wind_speed=float(pred["day2"]["wind_speed"]),
+                        model_name="XGBoost-MultiStep-Lagged"
+                    )
+                    fc_list.append(record)
+                    
+            if fc_list:
+                session.bulk_save_objects(fc_list)
+                session.commit()
+                logger.info(f"Successfully uploaded {len(fc_list)} ML forecast records to Supabase PostgreSQL.")
+
     except Exception as e:
         session.rollback()
         logger.error(f"Error syncing dataframes to database: {e}")
