@@ -1,6 +1,6 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { useStore } from '../store'
-import { Calendar, CloudSnow, Wind } from 'lucide-react'
+import { Calendar, CloudSnow, Wind, Sparkles } from 'lucide-react'
 
 const getCpcbColorAndLabel = (aqi) => {
   if (aqi <= 50) return { color: "#10b981", label: "Good" }
@@ -12,31 +12,54 @@ const getCpcbColorAndLabel = (aqi) => {
 }
 
 export default function ForecastView() {
-  const { dashboardData, selectedDistrict } = useStore()
+  const { selectedDate, selectedDistrict } = useStore()
+  const [forecastData, setForecastData] = useState(null)
+  const [loading, setLoading] = useState(true)
 
-  if (!dashboardData || !dashboardData.focus) {
+  useEffect(() => {
+    async function loadForecast() {
+      setLoading(true)
+      try {
+        const res = await fetch(`/api/forecast?date=${selectedDate}&district=${selectedDistrict}`)
+        if (res.ok) {
+          const data = await res.json()
+          setForecastData(data.forecast)
+        }
+      } catch (err) {
+        console.error("Failed to load ML forecast:", err)
+      }
+      setLoading(false)
+    }
+    loadForecast()
+  }, [selectedDate, selectedDistrict])
+
+  if (loading || !forecastData) {
     return (
       <div className="flex items-center justify-center h-[50vh]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4b6bf5]"></div>
-        <span className="ml-3 text-slate-400 font-medium">Loading forecast parameters...</span>
+        <span className="ml-3 text-slate-400 font-medium">Running 48-Hour ML atmospheric forecasting regressor...</span>
       </div>
     )
   }
 
-  const { focus } = dashboardData
+  const d1 = forecastData.day1 || { aqi: 150, inversion_risk: "Moderate Risk", wind_speed: 12.0 }
+  const d2 = forecastData.day2 || { aqi: 140, inversion_risk: "Low Risk", wind_speed: 14.0 }
 
-  // Predict tomorrow/day-after (simulated variations based on BLH and wind)
-  const tomorrowAqi = Math.round(focus.aqi * 1.08)
-  const dayAfterAqi = Math.round(focus.aqi * 0.95)
-
-  const tomDetails = getCpcbColorAndLabel(tomorrowAqi)
-  const dayDetails = getCpcbColorAndLabel(dayAfterAqi)
+  const tomDetails = getCpcbColorAndLabel(d1.aqi)
+  const dayDetails = getCpcbColorAndLabel(d2.aqi)
 
   return (
     <div className="space-y-6">
-      <div className="glass-panel rounded-xl p-5">
-        <h2 className="text-lg font-bold theme-adapt-text mb-1">Proactive 48-Hour AQI Forecasting Engine</h2>
-        <p className="text-xs text-slate-500 font-medium">Atmospheric forecasts adjusted for boundary layer height dynamics & thermal inversions</p>
+      <div className="glass-panel rounded-xl p-5 flex justify-between items-center">
+        <div>
+          <h2 className="text-lg font-bold theme-adapt-text mb-1 flex items-center">
+            <Sparkles size={18} className="text-[#4b6bf5] mr-2" /> Multi-Step ML 48-Hour AQI Forecasting Engine
+          </h2>
+          <p className="text-xs text-slate-500 font-medium">Atmospheric predictions derived from boundary layer height compression, upstream FRP, and wind vectors</p>
+        </div>
+        <span className="text-[10px] font-bold px-2.5 py-1 rounded bg-[#4b6bf5]/10 text-[#7c93fe] border border-[#4b6bf5]/25 uppercase tracking-wider">
+          XGBoost Time-Series Regressor
+        </span>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -44,7 +67,9 @@ export default function ForecastView() {
         <div className="glass-panel rounded-xl p-6 flex flex-col justify-between h-[280px]">
           <div className="flex justify-between items-start">
             <div>
-              <span className="bg-[#4b6bf5]/10 text-[#7c93fe] border border-[#4b6bf5]/20 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Day +1 Projection</span>
+              <span className="bg-[#4b6bf5]/10 text-[#7c93fe] border border-[#4b6bf5]/20 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">
+                Day +1 Projection (+24h)
+              </span>
               <h3 className="text-base font-bold theme-adapt-text mt-2">Tomorrow</h3>
               <p className="text-xs text-slate-500">{selectedDistrict} District</p>
             </div>
@@ -52,13 +77,18 @@ export default function ForecastView() {
           </div>
 
           <div className="text-center my-4">
-            <div className="text-5xl font-extrabold" style={{ color: tomDetails.color }}>{tomorrowAqi}</div>
+            <div className="text-5xl font-extrabold" style={{ color: tomDetails.color }}>{d1.aqi}</div>
             <div className="text-xs font-bold uppercase mt-1" style={{ color: tomDetails.color }}>{tomDetails.label}</div>
           </div>
 
           <div className="border-t border-slate-800/60 pt-3 flex justify-between text-xs text-slate-400">
-            <span className="flex items-center"><CloudSnow size={12} className="mr-1 text-slate-500" /> Temp Inversion: High Risk</span>
-            <span className="flex items-center"><Wind size={12} className="mr-1 text-slate-500" /> Wind: Light (8 km/h)</span>
+            <span className="flex items-center">
+              <CloudSnow size={12} className={`mr-1 ${d1.inversion_risk === 'High Risk' ? 'text-red-400' : 'text-slate-500'}`} /> 
+              Temp Inversion: <b className={`ml-1 ${d1.inversion_risk === 'High Risk' ? 'text-red-400' : 'text-slate-300'}`}>{d1.inversion_risk}</b>
+            </span>
+            <span className="flex items-center">
+              <Wind size={12} className="mr-1 text-slate-500" /> Wind: <b className="ml-1 text-slate-300">{d1.wind_speed} km/h</b>
+            </span>
           </div>
         </div>
 
@@ -66,7 +96,9 @@ export default function ForecastView() {
         <div className="glass-panel rounded-xl p-6 flex flex-col justify-between h-[280px]">
           <div className="flex justify-between items-start">
             <div>
-              <span className="bg-[#4b6bf5]/10 text-[#7c93fe] border border-[#4b6bf5]/20 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Day +2 Projection</span>
+              <span className="bg-[#4b6bf5]/10 text-[#7c93fe] border border-[#4b6bf5]/20 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">
+                Day +2 Projection (+48h)
+              </span>
               <h3 className="text-base font-bold theme-adapt-text mt-2">Day After Tomorrow</h3>
               <p className="text-xs text-slate-500">{selectedDistrict} District</p>
             </div>
@@ -74,22 +106,35 @@ export default function ForecastView() {
           </div>
 
           <div className="text-center my-4">
-            <div className="text-5xl font-extrabold" style={{ color: dayDetails.color }}>{dayAfterAqi}</div>
+            <div className="text-5xl font-extrabold" style={{ color: dayDetails.color }}>{d2.aqi}</div>
             <div className="text-xs font-bold uppercase mt-1" style={{ color: dayDetails.color }}>{dayDetails.label}</div>
           </div>
 
           <div className="border-t border-slate-800/60 pt-3 flex justify-between text-xs text-slate-400">
-            <span className="flex items-center"><CloudSnow size={12} className="mr-1 text-slate-500" /> Temp Inversion: Low Risk</span>
-            <span className="flex items-center"><Wind size={12} className="mr-1 text-slate-500" /> Wind: Moderate (14 km/h)</span>
+            <span className="flex items-center">
+              <CloudSnow size={12} className={`mr-1 ${d2.inversion_risk === 'High Risk' ? 'text-red-400' : 'text-slate-500'}`} /> 
+              Temp Inversion: <b className={`ml-1 ${d2.inversion_risk === 'High Risk' ? 'text-red-400' : 'text-slate-300'}`}>{d2.inversion_risk}</b>
+            </span>
+            <span className="flex items-center">
+              <Wind size={12} className="mr-1 text-slate-500" /> Wind: <b className="ml-1 text-slate-300">{d2.wind_speed} km/h</b>
+            </span>
           </div>
         </div>
       </div>
 
-      {/* Forecast Warning Banner */}
-      <div className="border border-amber-500/20 bg-amber-500/5 text-amber-400 rounded-xl p-4 flex items-start space-x-3 text-xs font-medium shadow-sm light-theme-warning">
-        <span className="text-base">⚠️</span>
+      {/* Dynamic Forecast Alert Banner */}
+      <div className={`border rounded-xl p-4 flex items-start space-x-3 text-xs font-medium shadow-sm ${
+        d1.inversion_risk === 'High Risk' 
+          ? 'border-red-500/30 bg-red-500/10 text-red-300' 
+          : 'border-emerald-500/20 bg-emerald-500/5 text-emerald-300'
+      }`}>
+        <span className="text-base">{d1.inversion_risk === 'High Risk' ? '⚠️' : '✅'}</span>
         <div>
-          <span className="font-bold">Meteorological Forecast Alert:</span> Projections indicate a <b>Temperature Inversion</b> tomorrow evening. The planetary boundary layer is forecasted to compress below 200 meters. This atmospheric compression will trap surface emissions, likely raising PM2.5 concentrations by 10-15%.
+          <span className="font-bold">Meteorological Forecast Alert:</span> {
+            d1.inversion_risk === 'High Risk'
+              ? 'Atmospheric boundary layer compression forecasted (< 250m). Surface thermal inversion will trap local and upwind particulates, raising PM concentrations.'
+              : 'Moderate-to-favorable planetary boundary layer dispersion expected. Atmospheric vertical mixing will maintain stable regional pollutant levels.'
+          }
         </div>
       </div>
     </div>

@@ -195,7 +195,7 @@ export default function App() {
             <>
               <div className="font-bold text-slate-200">Atmospheric Data Synced</div>
               <div className="text-[9px] text-slate-500 flex justify-between items-center">
-                <span>Updated 2 min ago</span>
+                <span>Database Engine Active</span>
                 <span className="text-sky-400 font-bold hover:underline">Info →</span>
               </div>
             </>
@@ -206,14 +206,14 @@ export default function App() {
       {/* 2. MAIN BODY PANEL */}
       <main className="flex-1 flex flex-col overflow-hidden relative">
         
-        {/* Global Header Row (Only renders for pages where global date picker is suitable, e.g. Dashboard) */}
+        {/* Global Header Row */}
         {activeTab === 'Dashboard' && (
           <header className="px-6 pt-5 pb-2 flex justify-between items-start flex-shrink-0 bg-transparent">
             <div>
               <h2 className="text-xl font-extrabold text-white tracking-tight">VayuShetra</h2>
               <div className="flex items-center space-x-2 text-xs text-slate-400 mt-1 font-medium">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
-                <span>India's Atmospheric Intelligence • Updated 2 min ago</span>
+                <span>India's Atmospheric Intelligence Platform • Geospatial Grid</span>
               </div>
             </div>
             

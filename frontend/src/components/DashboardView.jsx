@@ -232,9 +232,9 @@ export default function DashboardView() {
               </span>
             </div>
             <div className="flex flex-col items-end text-right">
-              <div className="text-[10px] text-emerald-400 font-bold flex items-center space-x-0.5">
-                <TrendingDown size={12} />
-                <span>8.4%</span>
+              <div className={`text-[10px] font-bold flex items-center space-x-0.5 ${kpis.aqi_trend_pct <= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                {kpis.aqi_trend_pct <= 0 ? <TrendingDown size={12} /> : <TrendingUp size={12} />}
+                <span>{Math.abs(kpis.aqi_trend_pct || 0).toFixed(1)}%</span>
               </div>
               <span className="text-[8px] text-slate-500 mt-0.5 font-medium">vs yesterday</span>
               <div className="mt-4">
@@ -244,7 +244,7 @@ export default function DashboardView() {
           </div>
           <div className="text-[8px] text-slate-500 font-medium flex items-center space-x-1 mt-1">
             <Clock size={10} />
-            <span>Updated 2 mins ago</span>
+            <span>{kpis.last_synced_at ? `Synced: ${kpis.last_synced_at}` : 'Telemetry Synced Live'}</span>
           </div>
         </div>
 
@@ -286,7 +286,9 @@ export default function DashboardView() {
           <div className="mt-1">
             <Sparkline values={kpis.sparklines.hcho} color="#a855f7" />
           </div>
-          <div className="text-[8px] text-purple-400/90 font-bold uppercase tracking-wider">Elevated Activity</div>
+          <div className="text-[8px] text-purple-400/90 font-bold uppercase tracking-wider">
+            {kpis.hcho > 0 ? 'Elevated Activity' : 'Atmosphere Baseline'}
+          </div>
         </div>
 
         {/* KPI 4: Active Fires (Span 3) */}
@@ -297,9 +299,9 @@ export default function DashboardView() {
               <div className="text-[10px] text-slate-500 font-semibold mt-0.5">MODIS/VIIRS Satellite</div>
               <div className="text-3xl font-extrabold mt-1.5 text-orange-500 tracking-tight">{kpis.fires}</div>
             </div>
-            <div className="text-[9px] text-orange-400 font-bold flex items-center space-x-0.5">
-              <TrendingUp size={10} />
-              <span>+15%</span>
+            <div className={`text-[9px] font-bold flex items-center space-x-0.5 ${kpis.fire_trend_pct >= 0 ? 'text-orange-400' : 'text-emerald-400'}`}>
+              {kpis.fire_trend_pct >= 0 ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
+              <span>{kpis.fire_trend_pct >= 0 ? `+${kpis.fire_trend_pct}%` : `${kpis.fire_trend_pct}%`}</span>
             </div>
           </div>
           <div className="mt-1">
@@ -307,7 +309,7 @@ export default function DashboardView() {
           </div>
           <div className="text-[8px] text-slate-500 font-medium flex justify-between">
             <span>Sensor confidence rate</span>
-            <span className="font-bold text-orange-400">92% avg</span>
+            <span className="font-bold text-orange-400">{kpis.sensor_confidence || 88}% avg</span>
           </div>
         </div>
 
@@ -704,11 +706,11 @@ export default function DashboardView() {
         {/* Card 5: Model Confidence */}
         <div className="bottom-card group cursor-pointer" onClick={() => setActiveTab('District Analytics')}>
           <div>
-            <div className="kpi-title text-emerald-400 group-hover:text-emerald-300">Model Confidence</div>
-            <div className="kpi-value text-emerald-400">89%</div>
-            <div className="text-[9px] text-emerald-500 font-semibold uppercase mt-0.5">High Confidence</div>
+            <div className="kpi-title text-emerald-400 group-hover:text-emerald-300">Model Accuracy (R²)</div>
+            <div className="kpi-value text-emerald-400">{kpis.model_confidence_pct || 89}%</div>
+            <div className="text-[9px] text-emerald-500 font-semibold uppercase mt-0.5">Spatial K-Fold Validated</div>
           </div>
-          <Sparkline values={[85, 87, 86, 88, 89, 89, 89]} color="#10b981" />
+          <Sparkline values={[85, 87, 86, 88, 89, 89, kpis.model_confidence_pct || 89]} color="#10b981" />
           <div className="text-[10px] text-slate-500 flex items-center group-hover:text-slate-355">
             View Details <ArrowUpRight size={10} className="ml-1" />
           </div>

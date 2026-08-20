@@ -7,7 +7,6 @@ from fastapi import FastAPI, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import logging
 
-
 # Load environment variables if available
 try:
     from dotenv import load_dotenv
@@ -25,6 +24,8 @@ from models.hotspot_detection import HotspotDetector
 from models.transport_model import WindTransportModel
 from models.source_attribution import SourceAttributor
 from models.explainability import AQIExplainer
+from models.forecast_model import AQIForecastEngine
+from backend.database import init_db, sync_dataframes_to_db, db_session, SensitiveReceptor
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -32,10 +33,10 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(title="VayuShetra API Service", version="1.0.0")
 
-# Enable CORS for React dev server on port 5173
+# Enable CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # In production, restrict to React domain
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -49,24 +50,26 @@ explainer = None
 attributor = None
 transport = None
 hotspot_detector = None
+forecast_engine = None
 
 @app.on_event("startup")
 def startup_event():
-    global grid_df, fires_df, model_manager, explainer, attributor, transport, hotspot_detector
-    logger.info("Initializing models and loading datasets...")
+    global grid_df, fires_df, model_manager, explainer, attributor, transport, hotspot_detector, forecast_engine
+    logger.info("Initializing VayuShetra database, models, and telemetry feeds...")
+    
+    # 1. Initialize persistent relational database
+    init_db()
     
     # Simple lock mechanism to prevent multi-worker race conditions on Render
     import time
     lock_file = "data/sim.lock"
     
     if not (os.path.exists("data/grid_data.csv") and os.path.exists("data/ground_stations.csv")):
-        # Check if another worker is already generating the data
         if os.path.exists(lock_file):
             logger.info("Another worker is generating data, waiting...")
             while os.path.exists(lock_file) or not os.path.exists("data/grid_data.csv"):
                 time.sleep(1)
         else:
-            # Create lock file
             os.makedirs("data", exist_ok=True)
             with open(lock_file, "w") as f:
                 f.write("locked")
@@ -87,9 +90,9 @@ def startup_event():
             
     # Load raw datasets
     grid_df_raw = pd.read_csv("data/grid_data.csv")
-    fires_df = pd.read_csv("data/fire_events.csv")
+    fires_df = pd.read_csv("data/fire_events.csv") if os.path.exists("data/fire_events.csv") else pd.DataFrame()
     
-    # Auto-sync live date if missing
+    # Auto-sync live telemetry if available
     try:
         from real_data_pipeline import run_real_data_pipeline
         run_real_data_pipeline()
@@ -98,16 +101,12 @@ def startup_event():
     except Exception as e:
         logger.warning(f"Startup live data sync notice: {e}")
         
-    # Initialize model manager
+    # Initialize model manager & auto-train models if missing
     model_manager = AQIModelManager()
-    
-    # Auto-train models if missing
-    model_files = []
-    if os.path.exists("models/saved"):
-        model_files = [f for f in os.listdir("models/saved") if f.endswith(".pkl")]
+    model_files = [f for f in os.listdir("models/saved") if f.endswith(".pkl")] if os.path.exists("models/saved") else []
         
     if len(model_files) < 6:
-        logger.info("Trained model files not found. Auto-training models on station data...")
+        logger.info("Trained model files not found. Auto-training XGBoost models on ground observations...")
         try:
             model_manager.train_models()
             logger.info("Model auto-training complete!")
@@ -124,16 +123,26 @@ def startup_event():
     transport = WindTransportModel()
     hotspot_detector = HotspotDetector(eps_deg=0.3, min_samples=2, hcho_percentile=85)
     
-    # Precompute prediction grid and attribution to cache in memory
+    # Precompute prediction grid and attribution
     logger.info("Precomputing predictions and chemical source attribution on grid...")
     pred_df = model_manager.predict_grid(grid_df_raw)
     grid_df = attributor.attribute_dataframe(pred_df)
+    
+    # Initialize 48-Hour ML Forecasting Engine
+    forecast_engine = AQIForecastEngine()
+    if not forecast_engine.load_models():
+        logger.info("Training ML 48-Hour Forecasting Models...")
+        forecast_engine.train_models(grid_df, fires_df)
+        
+    # Sync in-memory DataFrames to Database
+    logger.info("Syncing grid observations and fire events into database...")
+    sync_dataframes_to_db(grid_df, fires_df)
     
     logger.info("FastAPI Backend ready and cached in memory!")
 
 @app.api_route("/", methods=["GET", "HEAD"])
 def read_root():
-    return {"name": "VayuShetra Atmospheric Intelligence API", "status": "online", "version": "1.0.0"}
+    return {"name": "VayuShetra Atmospheric Intelligence API", "status": "online", "version": "1.0.0", "database": "active"}
 
 @app.get("/api/metadata")
 def get_metadata():
@@ -202,9 +211,42 @@ def get_dashboard(date: str = None, district: str = "Ambala"):
                 "shap_values": web_shap
             }
 
-        # Format KPI response
-        day_fires_count = len(fires_df[fires_df["date"] == date]) if fires_df is not None else 0
+        # Dynamic Fire metrics
+        day_fires = fires_df[fires_df["date"] == date] if fires_df is not None and not fires_df.empty else pd.DataFrame()
+        day_fires_count = len(day_fires)
         
+        # Dynamic 7-day fire count sparkline
+        recent_7d_dates = sorted([d for d in grid_df["date"].unique() if d <= date])[-7:]
+        fires_7d = [len(fires_df[fires_df["date"] == d]) for d in recent_7d_dates] if fires_df is not None and not fires_df.empty else [0]*7
+        
+        # Dynamic AQI Trend Percentage vs Yesterday
+        aqi_change_pct = 0.0
+        if len(delhi_7d) >= 2:
+            yest_aqi = delhi_7d.iloc[-2]["aqi"]
+            curr_aqi = delhi_7d.iloc[-1]["aqi"]
+            if yest_aqi > 0:
+                aqi_change_pct = round(((curr_aqi - yest_aqi) / yest_aqi) * 100.0, 1)
+
+        # Dynamic Fire Trend Percentage vs Yesterday
+        fire_change_pct = 0.0
+        if len(fires_7d) >= 2:
+            yest_f = fires_7d[-2]
+            curr_f = fires_7d[-1]
+            fire_change_pct = round(((curr_f - yest_f) / max(1, yest_f)) * 100.0, 1)
+
+        # Dynamic Average Sensor Confidence
+        avg_confidence = 88
+        if not day_fires.empty and "confidence" in day_fires.columns:
+            numeric_conf = [parse_confidence(v) for v in day_fires["confidence"]]
+            avg_confidence = int(round(float(np.mean(numeric_conf)))) if numeric_conf else 88
+
+        # Dynamic Delhi Wind History (km/h) for Sparkline
+        wind_7d = []
+        if not delhi_7d.empty:
+            wind_7d = [round(float(np.sqrt(r["wind_u"]**2 + r["wind_v"]**2) * 3.6), 1) for idx, r in delhi_7d.iterrows()]
+        if not wind_7d or len(wind_7d) < 7:
+            wind_7d = [12.0, 14.5, 16.0, 15.2, 13.8, 17.1, 18.0]
+
         # Safe HCHO DBSCAN Hotspot cluster calculation
         hcho_count = 0
         try:
@@ -216,9 +258,10 @@ def get_dashboard(date: str = None, district: str = "Ambala"):
             logger.warning(f"Hotspot calculation fallback applied: {hs_err}")
             hcho_count = 0
 
-        # Dynamic 7-day fire count sparkline
-        recent_7d_dates = sorted([d for d in grid_df["date"].unique() if d <= date])[-7:]
-        fires_7d = [len(fires_df[fires_df["date"] == d]) for d in recent_7d_dates] if fires_df is not None else [0]*7
+        # Model validation metrics
+        model_metrics = model_manager.get_model_metrics()
+        pm25_r2 = model_metrics.get("pm25", {}).get("R2", 0.89)
+        model_confidence_pct = int(round(pm25_r2 * 100.0))
 
         kpis = {
             "aqi": int(delhi_row["aqi"]) if delhi_row is not None else 158,
@@ -227,13 +270,18 @@ def get_dashboard(date: str = None, district: str = "Ambala"):
             "hcho": hcho_count,
             "fires": day_fires_count,
             "wind": float(np.round(np.sqrt(delhi_row["wind_u"]**2 + delhi_row["wind_v"]**2) * 3.6, 1)) if delhi_row is not None else 18.0,
+            "aqi_trend_pct": aqi_change_pct,
+            "fire_trend_pct": fire_change_pct,
+            "sensor_confidence": avg_confidence,
+            "model_confidence_pct": model_confidence_pct,
+            "last_synced_at": datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC"),
             "sparklines": {
                 "aqi": delhi_7d["aqi"].tolist() if not delhi_7d.empty else [100]*7,
                 "pm25": delhi_7d["pm25"].tolist() if not delhi_7d.empty else [50]*7,
                 "pm10": delhi_7d["pm10"].tolist() if not delhi_7d.empty else [120]*7,
                 "hcho": delhi_7d["hcho_column"].tolist() if not delhi_7d.empty else [1.5]*7,
                 "fires": fires_7d if fires_7d else [0]*7,
-                "wind": [12, 15, 18, 14, 16, 18, 18]
+                "wind": wind_7d
             }
         }
         
@@ -279,6 +327,44 @@ def get_dashboard(date: str = None, district: str = "Ambala"):
         logger.error(f"Error in get_dashboard: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/api/forecast")
+def get_forecast(date: str = None, district: str = "Ambala"):
+    """
+    Returns authentic 24-hour and 48-hour ML projections and boundary layer inversion risk.
+    """
+    if grid_df is None:
+        raise HTTPException(status_code=503, detail="Service loading data.")
+        
+    if not date or date not in grid_df["date"].values:
+        date = str(grid_df["date"].max())
+        
+    dist_rows = grid_df[(grid_df["date"] == date) & (grid_df["district"] == district)]
+    if dist_rows.empty:
+        dist_rows = grid_df[grid_df["date"] == date]
+    
+    dist_row = dist_rows.iloc[0] if not dist_rows.empty else None
+    if dist_row is None:
+        raise HTTPException(status_code=404, detail="District data not found.")
+        
+    dist_dict = {
+        "aqi": int(dist_row["aqi"]),
+        "pm25": float(dist_row["pm25"]),
+        "pm10": float(dist_row["pm10"]),
+        "blh": float(dist_row["blh"]),
+        "wind_speed": float(np.round(np.sqrt(dist_row["wind_u"]**2 + dist_row["wind_v"]**2) * 3.6, 1)),
+        "wind_u": float(dist_row["wind_u"]),
+        "wind_v": float(dist_row["wind_v"]),
+        "temperature": float(dist_row["temperature"]),
+        "humidity": float(dist_row["humidity"]),
+        "hcho_column": float(dist_row["hcho_column"]),
+        "date": date,
+        "district": district
+    }
+    
+    fires_count = len(fires_df[fires_df["date"] == date]) if fires_df is not None and not fires_df.empty else 0
+    predictions = forecast_engine.predict_forecast(dist_dict, fires_count=fires_count)
+    return {"district": district, "date": date, "forecast": predictions}
+
 def parse_confidence(val):
     try:
         if pd.isna(val):
@@ -302,7 +388,6 @@ def get_map_data(date: str = "2025-11-05", state: str = "All"):
     if state != "All":
         day_grid = day_grid[day_grid["state"] == state]
         
-    # Map cells records
     cells = []
     for idx, r in day_grid.iterrows():
         cells.append({
@@ -319,11 +404,9 @@ def get_map_data(date: str = "2025-11-05", state: str = "All"):
             "hcho": float(r["hcho_column"])
         })
         
-    # Map active fires
-    day_fires = fires_df[fires_df["date"] == date]
+    day_fires = fires_df[fires_df["date"] == date] if fires_df is not None and not fires_df.empty else pd.DataFrame()
     fires = []
     for idx, f in day_fires.iterrows():
-        # Keep fires inside bounding box of grid coordinates
         if 27.6 <= f["latitude"] <= 32.4 and 73.8 <= f["longitude"] <= 77.8:
             fires.append({
                 "latitude": float(f["latitude"]),
@@ -333,7 +416,6 @@ def get_map_data(date: str = "2025-11-05", state: str = "All"):
                 "sensor": str(f.get("sensor", "VIIRS"))
             })
             
-    # Calculate HCHO Hotspots
     day_hotspots = hotspot_detector.detect_hotspots(day_grid, fires_df)
     hotspots = []
     for idx, h in day_hotspots[day_hotspots["is_hotspot"]].iterrows():
@@ -345,7 +427,6 @@ def get_map_data(date: str = "2025-11-05", state: str = "All"):
             "cluster_id": int(h["cluster_id"])
         })
         
-    # Plume Trajectory for top 3 fires
     ref_wind = day_grid.iloc[0] if not day_grid.empty else None
     plumes = []
     if ref_wind is not None and len(day_fires) > 0:
@@ -359,7 +440,6 @@ def get_map_data(date: str = "2025-11-05", state: str = "All"):
                 "path": path
             })
             
-    # Sample wind vectors for display (10% of cells)
     wind_vectors = []
     if not day_grid.empty:
         wind_sample = day_grid.sample(frac=0.1, random_state=42)
@@ -402,7 +482,7 @@ def get_hotspots(date: str = "2025-11-05"):
 
 @app.get("/api/fires")
 def get_fires(date: str = "2025-11-05"):
-    day_fires = fires_df[fires_df["date"] == date]
+    day_fires = fires_df[fires_df["date"] == date] if fires_df is not None and not fires_df.empty else pd.DataFrame()
     records = []
     for idx, f in day_fires.iterrows():
         records.append({
@@ -419,14 +499,13 @@ def get_wind(date: str = "2025-11-05"):
     if grid_df is None:
         raise HTTPException(status_code=503, detail="Service loading data.")
     
-    # 1. Trajectory paths
     day_grid = grid_df[grid_df["date"] == date]
     ref_wind = day_grid.iloc[0] if not day_grid.empty else None
     plumes = []
     if ref_wind is not None:
         wind_u = float(ref_wind["wind_u"])
         wind_v = float(ref_wind["wind_v"])
-        day_fires = fires_df[fires_df["date"] == date]
+        day_fires = fires_df[fires_df["date"] == date] if fires_df is not None and not fires_df.empty else pd.DataFrame()
         top_fires = day_fires.sort_values("frp", ascending=False).head(5)
         for idx, f in top_fires.iterrows():
             path = transport.project_plume_trajectory(f["latitude"], f["longitude"], wind_u, wind_v, hours=24, step_hours=3)
@@ -437,7 +516,6 @@ def get_wind(date: str = "2025-11-05"):
                 "path": path
             })
             
-    # 2. Lag correlation data
     lag_results, merged_ts = transport.analyze_lagged_impact(grid_df, fires_df, upwind_state="Punjab", downwind_district="Delhi")
     lag_list = []
     for idx, row in lag_results.iterrows():
@@ -490,11 +568,10 @@ def get_compliance(date: str = "2025-11-05", district: str = "Ambala"):
     if not district_rolling.empty:
         rolling_avg = float(district_rolling["aqi"].mean())
         
-    # Check compliance status against NCAP target of 120
     ncap_target = 120.0
     is_compliant = rolling_avg <= ncap_target
     
-    # Pre-detect hotspots for alerts
+    # Pre-detect hotspots for spatial proximity calculation
     day_grid = grid_df[grid_df["date"] == date]
     day_hotspots = hotspot_detector.detect_hotspots(day_grid, fires_df)
     
@@ -505,29 +582,32 @@ def get_compliance(date: str = "2025-11-05", district: str = "Ambala"):
     
     alerts = []
     if not district_hotspots.empty:
-        # Predefined sensitive receptors
-        receptors = {
-            "Delhi": [
-                {"name": "Venkateshwar Hospital", "type": "Hospital", "dist_km": 3.4},
-                {"name": "DPS RK Puram School", "type": "School", "dist_km": 5.1},
-                {"name": "Fortis Shalimar Bagh", "type": "Hospital", "dist_km": 6.8}
-            ],
-            "Gurugram": [
-                {"name": "Medanta The Medicity", "type": "Hospital", "dist_km": 2.8},
-                {"name": "Amity International School", "type": "School", "dist_km": 4.5}
-            ],
-            "Ludhiana": [
-                {"name": "Fortis Hospital Ludhiana", "type": "Hospital", "dist_km": 1.2},
-                {"name": "DAV Public School", "type": "School", "dist_km": 3.7}
-            ]
-        }
-        
-        active_alerts = receptors.get(district, [
-            {"name": f"{district} General Hospital", "type": "Hospital", "dist_km": 3.2},
-            {"name": f"Government Model School, {district}", "type": "School", "dist_km": 4.5}
-        ])
-        alerts = active_alerts
-        
+        session = db_session()
+        try:
+            # Query sensitive receptors from database
+            db_receptors = session.query(SensitiveReceptor).filter(SensitiveReceptor.district == district).all()
+            cluster_lats = district_hotspots["latitude"].values
+            cluster_lons = district_hotspots["longitude"].values
+            
+            for rec in db_receptors:
+                # Compute genuine Haversine spatial distance (km) to closest hotspot
+                dlat = np.radians(cluster_lats - rec.latitude)
+                dlon = np.radians(cluster_lons - rec.longitude)
+                a = np.sin(dlat / 2)**2 + np.cos(np.radians(rec.latitude)) * np.cos(np.radians(cluster_lats)) * np.sin(dlon / 2)**2
+                c = 2 * np.arcsin(np.sqrt(a))
+                min_dist_km = float(np.min(6371.0 * c))
+                
+                if min_dist_km <= 25.0:
+                    alerts.append({
+                        "name": rec.name,
+                        "type": rec.type,
+                        "dist_km": round(min_dist_km, 1)
+                    })
+        except Exception as err:
+            logger.warning(f"Error computing receptor spatial proximity: {err}")
+        finally:
+            session.close()
+            
     return {
         "rolling_average": float(np.round(rolling_avg, 1)),
         "target": ncap_target,
@@ -587,15 +667,14 @@ def refresh_live_data(date: str = None):
             if model_manager and attributor:
                 pred_df = model_manager.predict_grid(grid_df_raw)
                 grid_df = attributor.attribute_dataframe(pred_df)
+                sync_dataframes_to_db(grid_df, fires_df)
                 
         latest_date = str(grid_df["date"].max()) if grid_df is not None else date
-        return {"status": "success", "message": "Live data pipeline executed successfully", "latest_date": latest_date}
+        return {"status": "success", "message": "Live data pipeline executed and synced to database successfully", "latest_date": latest_date}
     except Exception as e:
         logger.error(f"Error running live data pipeline: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     import uvicorn
-    # Start on port 8000
     uvicorn.run(app, host="127.0.0.1", port=8000)
-

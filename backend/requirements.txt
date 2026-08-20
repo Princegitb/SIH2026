@@ -11,4 +11,5 @@ requests
 earthengine-api
 cdsapi
 netcdf4
-
+sqlalchemy
+psycopg2-binary
