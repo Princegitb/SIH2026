@@ -15,29 +15,46 @@ export default function ForecastView() {
   const { selectedDate, selectedDistrict } = useStore()
   const [forecastData, setForecastData] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     async function loadForecast() {
       setLoading(true)
+      setError(null)
       try {
         const res = await fetch(`/api/forecast?date=${selectedDate}&district=${selectedDistrict}`)
-        if (res.ok) {
-          const data = await res.json()
+        const data = await res.json()
+        if (res.ok && data && data.forecast) {
           setForecastData(data.forecast)
+        } else {
+          setError(data?.detail || "Service temporary unavailable or loading data.")
         }
       } catch (err) {
         console.error("Failed to load ML forecast:", err)
+        setError("Network error: Could not reach backend forecast service.")
       }
       setLoading(false)
     }
     loadForecast()
   }, [selectedDate, selectedDistrict])
 
-  if (loading || !forecastData) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center h-[50vh]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4b6bf5]"></div>
         <span className="ml-3 text-slate-400 font-medium">Running 48-Hour ML atmospheric forecasting regressor...</span>
+      </div>
+    )
+  }
+
+  if (error || !forecastData) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[50vh] text-center px-4 space-y-3">
+        <span className="text-2xl">⚠️</span>
+        <h3 className="text-sm font-bold text-white uppercase tracking-wider">Forecast Engine Notice</h3>
+        <p className="text-xs text-slate-400 max-w-md font-semibold">
+          {error || "No forecast metrics available for the selected parameters."}
+        </p>
       </div>
     )
   }
