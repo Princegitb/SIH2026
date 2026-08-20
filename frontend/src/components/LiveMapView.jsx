@@ -659,7 +659,7 @@ export default function LiveMapView() {
                   </div>
 
                   <div className="bg-[#0b0e1c] border border-slate-800/80 p-2.5 rounded-lg">
-                    <div className="text-[9px] text-slate-500 font-extrabold uppercase">Day +2 Parson</div>
+                    <div className="text-[9px] text-slate-500 font-extrabold uppercase">Day +2 Day After Tomorrow</div>
                     <div className="font-extrabold text-white mt-1 text-sm">{hyperlocalDetails.forecast_48h.day2.aqi} AQI</div>
                     <div className="text-[8px] font-bold text-slate-400 mt-1 flex items-center">
                       🍃 Wind: {hyperlocalDetails.forecast_48h.day2.wind_speed} km/h

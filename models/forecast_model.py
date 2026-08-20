@@ -171,6 +171,21 @@ class AQIForecastEngine:
         pred_day1 = int(round(float(self.model_day1.predict(X_input)[0])))
         pred_day2 = int(round(float(self.model_day2.predict(X_input)[0])))
 
+        # Robust logical guardrails to prevent unrealistic day-over-day spikes/drops
+        max_inc_d1 = 1.18
+        if blh < 300:
+            max_inc_d1 += 0.12  # Temperature inversion risk
+        if fires_count > 0:
+            max_inc_d1 += min(0.30, fires_count * 0.04)  # Active stubble burning impact
+            
+        min_dec_d1 = 0.82
+        if wind_spd > 18.0:
+            min_dec_d1 -= 0.08  # High wind dilution
+            
+        # Constrain predictions relative to current AQI
+        pred_day1 = max(int(curr_aqi * min_dec_d1), min(int(curr_aqi * max_inc_d1), pred_day1))
+        pred_day2 = max(int(pred_day1 * min_dec_d1), min(int(pred_day1 * max_inc_d1), pred_day2))
+
         # Thermal boundary layer inversion assessment
         inversion_risk_d1 = "High Risk" if blh < 280 else ("Moderate Risk" if blh < 500 else "Low Risk")
         inversion_risk_d2 = "High Risk" if (blh < 250 and wind_spd < 8) else ("Moderate Risk" if blh < 450 else "Low Risk")
