@@ -141,6 +141,41 @@ class ComplianceRecord(Base):
     margin_aqi = Column(Float)
     created_at = Column(DateTime, default=datetime.utcnow)
 
+# 7. Hyperlocal GPS & Village Point Predictions
+class HyperlocalPrediction(Base):
+    __tablename__ = "hyperlocal_predictions"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    date = Column(String(12), nullable=False, index=True)
+    latitude = Column(Float, nullable=False)
+    longitude = Column(Float, nullable=False)
+    location_name = Column(String(150), nullable=False, index=True)
+    locality_type = Column(String(50), default="Rural / Village")
+    district = Column(String(50), index=True)
+    state = Column(String(50))
+    aqi = Column(Integer, nullable=False)
+    aqi_category = Column(String(30))
+    pm25 = Column(Float)
+    pm10 = Column(Float)
+    no2 = Column(Float)
+    so2 = Column(Float)
+    co = Column(Float)
+    o3 = Column(Float)
+    hcho_column = Column(Float)
+    aod = Column(Float)
+    dominant_source = Column(String(100))
+    source_biomass_pct = Column(Float)
+    source_vehicular_pct = Column(Float)
+    source_industrial_pct = Column(Float)
+    forecast_day1_aqi = Column(Integer)
+    forecast_day2_aqi = Column(Integer)
+    inversion_risk = Column(String(30))
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    __table_args__ = (
+        Index("idx_hyperlocal_date_coord", "date", "latitude", "longitude"),
+    )
+
 DEFAULT_RECEPTORS = [
     {"name": "Venkateshwar Hospital", "type": "Hospital", "district": "Delhi", "latitude": 28.5878, "longitude": 77.0622},
     {"name": "DPS RK Puram School", "type": "School", "district": "Delhi", "latitude": 28.5670, "longitude": 77.1720},

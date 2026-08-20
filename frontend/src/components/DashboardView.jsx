@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useStore } from '../store'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { MapContainer, TileLayer, CircleMarker, Circle, Popup, Polyline } from 'react-leaflet'
-import { ShieldAlert, Play, ArrowUpRight, TrendingUp, TrendingDown, Clock, Activity, Flame, Sparkles } from 'lucide-react'
+import { ShieldAlert, Play, ArrowUpRight, TrendingUp, TrendingDown, Clock, Activity, Flame, Sparkles, MapPin } from 'lucide-react'
 
 // CPCB color & category helpers
 const getCpcbColorAndLabel = (aqi) => {
@@ -313,6 +313,28 @@ export default function DashboardView() {
           </div>
         </div>
 
+      </div>
+
+      {/* Hyperlocal GPS & Village Intelligence Toggler Card */}
+      <div className="glass-panel rounded-2xl p-4 border border-slate-800 bg-[#0c0f1e]/80 flex flex-col md:flex-row justify-between items-center gap-4 relative overflow-hidden">
+        <div className="flex items-center space-x-3.5">
+          <div className="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/35 flex items-center justify-center text-sky-400 flex-shrink-0 animate-pulse">
+            <MapPin size={18} />
+          </div>
+          <div>
+            <h3 className="text-xs font-extrabold text-white uppercase tracking-wider">Hyperlocal GPS & Village Intelligence</h3>
+            <p className="text-[10px] text-slate-400 font-semibold mt-0.5">
+              Verify continuous air quality predictions for any agricultural village, tehsil, or custom farm GPS coordinate in real-time.
+            </p>
+          </div>
+        </div>
+        
+        <button
+          onClick={() => setActiveTab('Live Map')}
+          className="w-full md:w-auto bg-[#4b6bf5] hover:bg-[#3b56cf] text-white text-xs font-bold px-5 py-2.5 rounded-lg transition-all shadow-lg flex items-center justify-center space-x-1.5 shrink-0"
+        >
+          <span>📍 Pinpoint Village Air Quality</span>
+        </button>
       </div>
 
       {/* AI Insight Box */}

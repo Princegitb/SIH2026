@@ -25,6 +25,7 @@ from models.transport_model import WindTransportModel
 from models.source_attribution import SourceAttributor
 from models.explainability import AQIExplainer
 from models.forecast_model import AQIForecastEngine
+from models.hyperlocal_engine import HyperlocalPredictor
 from backend.database import init_db, sync_dataframes_to_db, db_session, SensitiveReceptor
 
 # Setup logging
@@ -51,10 +52,11 @@ attributor = None
 transport = None
 hotspot_detector = None
 forecast_engine = None
+hyperlocal_predictor = None
 
 @app.on_event("startup")
 def startup_event():
-    global grid_df, fires_df, model_manager, explainer, attributor, transport, hotspot_detector, forecast_engine
+    global grid_df, fires_df, model_manager, explainer, attributor, transport, hotspot_detector, forecast_engine, hyperlocal_predictor
     logger.info("Initializing VayuShetra database, models, and telemetry feeds...")
     
     # 1. Initialize persistent relational database
@@ -134,6 +136,9 @@ def startup_event():
         logger.info("Training ML 48-Hour Forecasting Models...")
         forecast_engine.train_models(grid_df, fires_df)
         
+    # Initialize Hyperlocal GPS & Village Point Predictor
+    hyperlocal_predictor = HyperlocalPredictor()
+    
     # Sync in-memory DataFrames to Database
     logger.info("Syncing grid observations and fire events into database...")
     sync_dataframes_to_db(grid_df, fires_df)
@@ -674,6 +679,45 @@ def refresh_live_data(date: str = None):
     except Exception as e:
         logger.error(f"Error running live data pipeline: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/predict-location")
+def predict_location(lat: float, lon: float, date: str = None):
+    """
+    Hyperlocal GPS and Village Point Prediction Endpoint.
+    Performs spatial inverse distance weighting across satellite rasters and runs
+    XGBoost machine learning inference to compute exact AQI, pollutants, and 48-hour forecast
+    for ANY unmonitored rural village or GPS coordinate in India.
+    """
+    if grid_df is None:
+        raise HTTPException(status_code=503, detail="Service loading data.")
+        
+    if not date or date not in grid_df["date"].values:
+        date = str(grid_df["date"].max())
+        
+    try:
+        res = hyperlocal_predictor.predict_at_coordinate(
+            lat=lat,
+            lon=lon,
+            date=date,
+            grid_df=grid_df,
+            fires_df=fires_df,
+            model_manager=model_manager,
+            forecast_engine=forecast_engine
+        )
+        return res
+    except Exception as err:
+        logger.error(f"Error in predict_location: {err}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(err))
+
+@app.get("/api/village-search")
+def search_villages(q: str = "", limit: int = 10):
+    """
+    Autocomplete search for Indian villages, tehsils, and rural localities.
+    """
+    if hyperlocal_predictor is None:
+        return {"results": []}
+    results = hyperlocal_predictor.search_localities(query=q, limit=limit)
+    return {"results": results, "count": len(results)}
 
 if __name__ == "__main__":
     import uvicorn

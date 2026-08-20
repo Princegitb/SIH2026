@@ -29,9 +29,12 @@ class AQIExplainer:
                 logger.warning(f"Training data not found at {self.training_data_path}. Cannot initialize SHAP explainer reference.")
                 return False
 
-            # Load training data and select feature columns
+            # Load reference data and select feature columns
             from models.aqi_model import FEATURES
-            train_df = pd.read_csv(self.training_data_path)
+            if os.path.exists("data/grid_data.csv"):
+                train_df = pd.read_csv("data/grid_data.csv")
+            else:
+                train_df = pd.read_csv(self.training_data_path)
             self.reference_data = train_df[FEATURES]
             
             # Sample reference data to speed up SHAP calculation (e.g. 100 rows)
