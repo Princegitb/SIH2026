@@ -11,11 +11,10 @@ import DistrictAnalyticsView from './components/DistrictAnalyticsView'
 import ReportsView from './components/ReportsView'
 import AlertsView from './components/AlertsView'
 import DataExplorerView from './components/DataExplorerView'
-import SettingsView from './components/SettingsView'
 import LandingPage from './components/LandingPage'
 import { 
   LayoutDashboard, Map, Compass, Activity, Flame, Wind, 
-  Tag, BarChart3, FileSpreadsheet, BellRing, Database, Settings, HelpCircle,
+  Tag, BarChart3, FileSpreadsheet, BellRing, Database, HelpCircle,
   Menu, X, Sun, Moon, Info, Calendar
 } from 'lucide-react'
 
@@ -32,7 +31,6 @@ const navItems = [
   { name: 'Reports', value: 'Reports', icon: FileSpreadsheet },
   { name: 'Alerts', value: 'Alerts', icon: BellRing },
   { name: 'Data Explorer', value: 'Data Explorer', icon: Database },
-  { name: 'Settings', value: 'Settings', icon: Settings },
 ]
 
 export default function App() {
@@ -88,7 +86,6 @@ export default function App() {
       case 'Reports': return <ReportsView />
       case 'Alerts': return <AlertsView />
       case 'Data Explorer': return <DataExplorerView />
-      case 'Settings': return <SettingsView />
       default: return <DashboardView />
     }
   }

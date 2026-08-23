@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useStore } from '../store'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { MapContainer, TileLayer, CircleMarker, Circle, Popup, Polyline } from 'react-leaflet'
-import { ShieldAlert, Play, ArrowUpRight, TrendingUp, TrendingDown, Clock, Activity, Flame, Sparkles, MapPin } from 'lucide-react'
+import { ShieldAlert, Play, ArrowUpRight, TrendingUp, TrendingDown, Clock, Activity, Flame, Sparkles, MapPin, BarChart3 } from 'lucide-react'
 
 // CPCB color & category helpers
 const getCpcbColorAndLabel = (aqi) => {
@@ -707,22 +707,25 @@ export default function DashboardView() {
           </div>
         )}
 
-        {/* Card 5: GRAP Air Compliance Protocol */}
-        <div className="bottom-card group cursor-pointer" onClick={() => setActiveTab('Alerts')}>
+        {/* Card 5: District Analytics */}
+        <div className="bottom-card group cursor-pointer" onClick={() => setActiveTab('District Analytics')}>
           <div>
-            <div className="kpi-title text-emerald-400 group-hover:text-emerald-300 flex items-center justify-between">
-              <span>GRAP Compliance</span>
-              <ShieldAlert size={12} className={focus?.aqi > 200 ? "text-orange-400" : "text-emerald-400"} />
+            <div className="kpi-title text-cyan-400 group-hover:text-cyan-300 flex items-center justify-between">
+              <span>District Analytics</span>
+              <BarChart3 size={12} className="text-cyan-400" />
             </div>
-            <div className="kpi-value text-emerald-400 text-lg mt-1">
-              {focus?.aqi <= 100 ? "Stage 0 (Normal)" : focus?.aqi <= 200 ? "Stage I (Moderate)" : focus?.aqi <= 300 ? "Stage II (Poor)" : "Stage III (Severe)"}
+            <div className="kpi-value text-cyan-400 text-lg mt-1 flex items-baseline">
+              <span>15</span>
+              <span className="text-xs font-normal text-slate-400 ml-1.5 font-sans">Districts</span>
             </div>
-            <div className="text-[9px] text-slate-400 font-semibold mt-1 tracking-tight truncate">
-              {focus?.aqi <= 100 ? "Clean Air Protocol • Routine Sweeping" : focus?.aqi <= 200 ? "Maintain Mechanical Sweeping" : "Enforce Dust & Emission Curbs"}
+            <div className="text-[9px] text-slate-400 font-semibold mt-1 tracking-tight truncate flex items-center space-x-1">
+              <span className="text-slate-300 font-bold">{focus?.district || 'Delhi'}:</span>
+              <span className="text-cyan-300 font-bold">{focus?.aqi || 91} AQI</span>
+              <span className="text-slate-500">• Spatial Spread</span>
             </div>
           </div>
           <div className="text-[10px] text-slate-500 flex items-center group-hover:text-slate-355 pt-2 border-t border-slate-800/40">
-            View Action Alerts <ArrowUpRight size={10} className="ml-1" />
+            View District Analytics <ArrowUpRight size={10} className="ml-1" />
           </div>
         </div>
 
