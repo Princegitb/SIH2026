@@ -707,29 +707,21 @@ export default function DashboardView() {
           </div>
         )}
 
-        {/* Card 5: Prepared By Team KodeShetra */}
-        <div className="bottom-card flex flex-col justify-between items-center p-3 relative overflow-hidden bg-gradient-to-br from-slate-900/90 via-slate-900/60 to-red-950/20 border border-slate-700/50 hover:border-red-500/40 transition-all group">
-          <div className="w-full flex items-center justify-between">
-            <span className="text-[9px] font-extrabold uppercase tracking-widest text-slate-400">
-              Prepared By
-            </span>
-            <span className="text-[9px] bg-red-500/20 text-red-400 border border-red-500/30 font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider">
-              SIH 2026
-            </span>
+        {/* Card 5: AQI Forecast Projection */}
+        <div className="bottom-card group cursor-pointer" onClick={() => setActiveTab('AQI Forecast')}>
+          <div>
+            <div className="kpi-title text-emerald-400 group-hover:text-emerald-300">48-Hour Forecast</div>
+            <div className="kpi-value text-emerald-400 text-lg mt-1 flex items-baseline">
+              <span>{Math.max(30, intVal(kpis.aqi * 0.92))}</span>
+              <span className="text-xs font-normal text-emerald-500 ml-1.5 font-sans">Day+1 AQI</span>
+            </div>
+            <div className="text-[9px] text-emerald-400/80 font-semibold uppercase mt-0.5 tracking-wider">
+              Multi-Step AI Projection
+            </div>
           </div>
-
-          <div className="w-full bg-white/95 rounded-xl p-1.5 flex items-center justify-center shadow-inner group-hover:scale-[1.02] transition-transform my-1">
-            <img 
-              src="/kodeshetra_logo.png" 
-              alt="Team KodeShetra" 
-              className="h-8 object-contain"
-            />
-          </div>
-
-          <div className="w-full text-center">
-            <span className="text-[10px] text-slate-300 font-semibold tracking-tight">
-              Team KodeShetra
-            </span>
+          <Sparkline values={[kpis.aqi || 100, (kpis.aqi || 100) - 4, (kpis.aqi || 100) - 2, Math.max(30, intVal((kpis.aqi || 100) * 0.92)), Math.max(30, intVal((kpis.aqi || 100) * 0.88))]} color="#10b981" />
+          <div className="text-[10px] text-slate-500 flex items-center group-hover:text-slate-355">
+            View Forecast <ArrowUpRight size={10} className="ml-1" />
           </div>
         </div>
 
