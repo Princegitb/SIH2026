@@ -25,9 +25,12 @@ def verify_pipeline():
     logger.info(f"Model validation complete. Spatial CV results: {val_results}")
     
     # Check that model files exist
-    model_files = [f for f in os.listdir("models/saved") if f.endswith(".pkl")]
-    logger.info(f"Saved model files: {model_files}")
-    assert len(model_files) == 6, "Expected 6 trained model pickle files."
+    pollutant_models = [f for f in os.listdir("models/saved") if f.endswith("_xgb.pkl") and not f.startswith("forecast")]
+    forecast_models = [f for f in os.listdir("models/saved") if f.startswith("forecast")]
+    logger.info(f"Saved pollutant models ({len(pollutant_models)}): {pollutant_models}")
+    logger.info(f"Saved forecast models ({len(forecast_models)}): {forecast_models}")
+    assert len(pollutant_models) == 6, "Expected 6 trained pollutant model pickle files."
+    assert len(forecast_models) >= 2, "Expected 2 trained forecast model pickle files."
     
     # Load and predict on grid slice
     grid_df = pd.read_csv("data/grid_data.csv")

@@ -105,16 +105,16 @@ def run_real_data_pipeline(target_date: str = None):
             new_date_rows = sampled_satellite_grid.copy()
             new_date_rows["date"] = target_date
             
-            # Atmospheric weather parameters (meteorological base)
-            month = int(target_date.split("-")[1])
-            is_monsoon = month in [6, 7, 8, 9]
+            # 4. Pull live ECMWF / Open-Meteo Atmospheric Weather (BLH, Wind vectors, Temp, Humidity)
+            era5 = ERA5Ingestor()
+            weather_grid = era5.pull_live_meteorology_grid(sampled_satellite_grid, target_date)
             
-            new_date_rows["temperature"] = np.round(np.random.normal(29.0 if is_monsoon else 18.0, 1.5, len(new_date_rows)), 1)
-            new_date_rows["humidity"] = np.round(np.random.normal(72.0 if is_monsoon else 55.0, 3.0, len(new_date_rows)), 1)
-            new_date_rows["blh"] = np.round(np.random.normal(950.0 if is_monsoon else 350.0, 40.0, len(new_date_rows)), 1)
-            new_date_rows["wind_u"] = np.round(np.random.normal(2.1, 0.4, len(new_date_rows)), 2)
-            new_date_rows["wind_v"] = np.round(np.random.normal(-1.8, 0.4, len(new_date_rows)), 2)
-            new_date_rows["precipitation"] = np.round(np.random.choice([0.0, 0.0, 2.5, 0.0], len(new_date_rows)), 2)
+            new_date_rows["temperature"] = weather_grid["temperature"]
+            new_date_rows["humidity"] = weather_grid["humidity"]
+            new_date_rows["blh"] = weather_grid["blh"]
+            new_date_rows["wind_u"] = weather_grid["wind_u"]
+            new_date_rows["wind_v"] = weather_grid["wind_v"]
+            new_date_rows["precipitation"] = weather_grid["precipitation"]
             
             # Trace gas columns (Sentinel-5P proportional ratios)
             new_date_rows["no2_column"] = np.round(np.clip(new_date_rows["aod"] * 4.2 + np.random.normal(0, 0.2, len(new_date_rows)), 0.8, 8.5), 4)

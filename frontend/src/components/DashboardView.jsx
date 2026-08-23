@@ -317,21 +317,38 @@ export default function DashboardView() {
 
 
 
-      {/* AI Insight Box */}
+      {/* Dynamic Atmospheric Intelligence Box */}
       {focus && (
-        <div className="glass-panel rounded-2xl p-4 border border-purple-500/20 bg-gradient-to-r from-purple-950/10 to-indigo-950/10 flex items-center space-x-3.5 relative overflow-hidden">
+        <div className="glass-panel rounded-2xl p-4 border border-purple-500/20 bg-gradient-to-r from-purple-950/10 to-indigo-950/10 flex items-start space-x-3.5 relative overflow-hidden">
           <div className="absolute right-0 top-0 text-slate-900/10 pointer-events-none translate-x-4 -translate-y-4">
             <Sparkles size={160} />
           </div>
-          <div className="w-9 h-9 rounded-xl bg-purple-500/10 border border-purple-500/35 flex items-center justify-center text-purple-400 flex-shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-purple-500/10 border border-purple-500/35 flex items-center justify-center text-purple-400 flex-shrink-0 mt-0.5">
             <Sparkles size={18} />
           </div>
-          <div className="text-xs">
-            <span className="font-extrabold text-purple-400 tracking-wide uppercase mr-2 text-[10px] px-2 py-0.5 rounded bg-purple-500/10 border border-purple-500/20">AI Atmosphere Insight</span>
-            <span className="text-slate-350 font-medium">
-              Stubble burning markers indicate an HCHO column density of <b className="text-slate-200">{focus.hcho_column.toFixed(2)}</b> in <b className="text-slate-200">{focus.district}</b>. 
-              Lagrangian wind analysis (u: {focus.wind_speed.toFixed(1)} km/h) forecasts downwind particulate transport carrying smoke plumes towards downwind receptors within <b className="text-slate-200">12–18 hours</b>.
-            </span>
+          <div className="text-xs space-y-1">
+            <div className="flex items-center space-x-2">
+              <span className="font-extrabold text-purple-400 tracking-wide uppercase text-[10px] px-2 py-0.5 rounded bg-purple-500/10 border border-purple-500/20">
+                Atmospheric Intelligence Synthesis
+              </span>
+              {focus.insight?.inversion_status && (
+                <span className={`text-[9px] font-bold px-2 py-0.5 rounded border ${
+                  focus.insight.inversion_status.includes("Critical") 
+                    ? "text-red-400 border-red-500/30 bg-red-500/10" 
+                    : "text-emerald-400 border-emerald-500/30 bg-emerald-500/10"
+                }`}>
+                  {focus.insight.inversion_status}
+                </span>
+              )}
+            </div>
+            <p className="text-slate-300 font-medium">
+              {focus.insight?.summary || `Stubble burning markers indicate an HCHO column density of ${focus.hcho_column?.toFixed(2)} in ${focus.district}.`}
+            </p>
+            {focus.insight?.recommendation && (
+              <p className="text-[11px] text-purple-300/90 font-semibold flex items-center pt-0.5">
+                <span className="mr-1.5 font-bold text-purple-400">⚡ Action Item:</span> {focus.insight.recommendation}
+              </p>
+            )}
           </div>
         </div>
       )}

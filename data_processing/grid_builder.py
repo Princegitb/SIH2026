@@ -71,12 +71,12 @@ def simulate_data():
     grid_df = generate_spatial_grid()
     
     start_date = datetime(2025, 11, 1)
-    end_date = datetime(2025, 11, 8)
+    end_date = datetime(2025, 11, 30)
     days = (end_date - start_date).days + 1
     
     date_list = [start_date + timedelta(days=x) for x in range(days)]
     
-    logger.info(f"Generated {len(grid_df)} grid cells. Simulating {days} days from Nov 1 to Nov 8...")
+    logger.info(f"Generated {len(grid_df)} grid cells. Simulating {days} days from Nov 1 to Nov 30...")
     
     # 1. Simulate Fire Events for the period
     np.random.seed(42)
@@ -336,20 +336,41 @@ def simulate_data():
     grid_df_all.to_csv("data/grid_data.csv", index=False)
     logger.info(f"Simulated {len(grid_df_all)} daily grid rows and saved to data/grid_data.csv")
     
-    # 3. Simulate Sparse CPCB Ground Station Locations
+    # 3. Simulate Comprehensive CPCB Ground Station Network (28 Active Stations)
     station_locations = [
+        # Delhi-NCR Stations
         {"station_name": "CPCB Delhi - Mandir Marg", "district": "Delhi", "lat": 28.6139, "lon": 77.2090},
+        {"station_name": "CPCB Delhi - Anand Vihar", "district": "Delhi", "lat": 28.6476, "lon": 77.3158},
+        {"station_name": "CPCB Delhi - RK Puram", "district": "Delhi", "lat": 28.5632, "lon": 77.1869},
+        {"station_name": "CPCB Delhi - Punjabi Bagh", "district": "Delhi", "lat": 28.6740, "lon": 77.1310},
+        {"station_name": "CPCB Delhi - Bawana Industrial", "district": "Delhi", "lat": 28.7762, "lon": 77.0510},
         {"station_name": "CPCB Gurugram - Sector 51", "district": "Gurugram", "lat": 28.4595, "lon": 77.0266},
+        {"station_name": "CPCB Gurugram - Vikas Sadan", "district": "Gurugram", "lat": 28.4502, "lon": 77.0210},
         {"station_name": "CPCB Faridabad - Sector 16A", "district": "Faridabad", "lat": 28.4089, "lon": 77.3178},
+        {"station_name": "CPCB Faridabad - New Industrial Town", "district": "Faridabad", "lat": 28.3890, "lon": 77.2980},
+        
+        # Haryana Stations
         {"station_name": "HSPCB Panipat - Sector 18", "district": "Panipat", "lat": 29.3909, "lon": 76.9635},
+        {"station_name": "HSPCB Panipat - Industrial Area", "district": "Panipat", "lat": 29.4120, "lon": 76.9810},
         {"station_name": "HSPCB Karnal - Sector 12", "district": "Karnal", "lat": 29.6857, "lon": 76.9905},
+        {"station_name": "HSPCB Karnal - Model Town", "district": "Karnal", "lat": 29.7020, "lon": 76.9750},
         {"station_name": "HSPCB Rohtak - Vikas Nagar", "district": "Rohtak", "lat": 28.8955, "lon": 76.6066},
+        {"station_name": "HSPCB Rohtak - MD University", "district": "Rohtak", "lat": 28.8780, "lon": 76.6210},
+        {"station_name": "HSPCB Hisar - Mini Secretariat", "district": "Hisar", "lat": 29.1486, "lon": 75.7217},
+        {"station_name": "HSPCB Ambala - Poly Hospital", "district": "Ambala", "lat": 30.3782, "lon": 76.7767},
+        {"station_name": "HSPCB Ambala - Cantt Air Base", "district": "Ambala", "lat": 30.3340, "lon": 76.8120},
+        
+        # Punjab Stations
         {"station_name": "PPCB Amritsar - Golden Temple", "district": "Amritsar", "lat": 31.6340, "lon": 74.8723},
+        {"station_name": "PPCB Amritsar - Civil Lines", "district": "Amritsar", "lat": 31.6480, "lon": 74.8620},
         {"station_name": "PPCB Ludhiana - Punjab Agri Univ", "district": "Ludhiana", "lat": 30.9010, "lon": 75.8573},
+        {"station_name": "PPCB Ludhiana - Focal Point", "district": "Ludhiana", "lat": 30.8750, "lon": 75.9120},
         {"station_name": "PPCB Patiala - Civil Lines", "district": "Patiala", "lat": 30.3398, "lon": 76.3869},
+        {"station_name": "PPCB Patiala - Punjabi University", "district": "Patiala", "lat": 30.3580, "lon": 76.4420},
         {"station_name": "PPCB Jalandhar - Model Town", "district": "Jalandhar", "lat": 31.3260, "lon": 75.5762},
         {"station_name": "PPCB Sangrur - City Center", "district": "Sangrur", "lat": 30.2290, "lon": 75.8412},
         {"station_name": "PPCB Bathinda - Civil Station", "district": "Bathinda", "lat": 30.2110, "lon": 74.9454},
+        {"station_name": "PPCB Firozpur - Border Road", "district": "Firozpur", "lat": 30.9256, "lon": 74.6212},
     ]
     
     station_records = []
