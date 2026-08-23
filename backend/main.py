@@ -207,15 +207,26 @@ def get_dashboard(date: str = None, district: str = "Ambala"):
         delhi_day = day_grid[day_grid["district"] == "Delhi"]
         delhi_row = delhi_day.iloc[0] if not delhi_day.empty else None
         
-        # Historical 7 days for Delhi sparklines
-        delhi_7d = grid_df[(grid_df["district"] == "Delhi") & (grid_df["date"] <= date)].sort_values("date").tail(7)
+        # Historical 7 days for Delhi sparklines (grouped across distinct dates)
+        delhi_7d = grid_df[(grid_df["district"] == "Delhi") & (grid_df["date"] <= date)].groupby("date").agg({
+            "aqi": "mean",
+            "pm25": "mean",
+            "pm10": "mean",
+            "hcho_column": "mean",
+            "wind_u": "mean",
+            "wind_v": "mean"
+        }).reset_index().sort_values("date").tail(7)
         
         # 2. Selected Focus District metrics
         dist_day = grid_df[(grid_df["date"] == date) & (grid_df["district"] == district)]
         dist_row = dist_day.iloc[0] if not dist_day.empty else None
         
-        # Historical 7 days for Focus District trend chart
-        dist_7d = grid_df[(grid_df["district"] == district) & (grid_df["date"] <= date)].sort_values("date").tail(7)
+        # Historical 7 days for Focus District trend chart (grouped across distinct dates)
+        dist_7d = grid_df[(grid_df["district"] == district) & (grid_df["date"] <= date)].groupby("date").agg({
+            "aqi": "mean",
+            "pm25": "mean",
+            "pm10": "mean"
+        }).reset_index().sort_values("date").tail(7)
         
         # Compute SHAP values for Selected District
         shap_explanation = None

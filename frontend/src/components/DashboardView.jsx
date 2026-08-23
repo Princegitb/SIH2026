@@ -707,18 +707,6 @@ export default function DashboardView() {
           </div>
         )}
 
-        {/* Card 5: Model Confidence */}
-        <div className="bottom-card group cursor-pointer" onClick={() => setActiveTab('District Analytics')}>
-          <div>
-            <div className="kpi-title text-emerald-400 group-hover:text-emerald-300">Model Accuracy (R²)</div>
-            <div className="kpi-value text-emerald-400">{kpis.model_confidence_pct || 89}%</div>
-            <div className="text-[9px] text-emerald-500 font-semibold uppercase mt-0.5">Spatial K-Fold Validated</div>
-          </div>
-          <Sparkline values={[85, 87, 86, 88, 89, 89, kpis.model_confidence_pct || 89]} color="#10b981" />
-          <div className="text-[10px] text-slate-500 flex items-center group-hover:text-slate-355">
-            View Details <ArrowUpRight size={10} className="ml-1" />
-          </div>
-        </div>
       </div>
     </div>
   )
