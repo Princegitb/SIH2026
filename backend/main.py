@@ -145,7 +145,39 @@ def startup_event():
     logger.info("Syncing grid observations and fire events into database...")
     sync_dataframes_to_db(grid_df, fires_df)
     
+    # Start automated background daily ingestion worker
+    import asyncio
+    asyncio.create_task(auto_daily_sync_worker())
+    
     logger.info("FastAPI Backend ready and cached in memory!")
+
+async def auto_daily_sync_worker():
+    """
+    Background worker that runs continuously.
+    Automatically checks if a new calendar day has started.
+    If today's date is not yet in grid_df, it automatically executes the live ingestion pipeline,
+    predicts the grid with XGBoost models, and updates the in-memory cache without restarting the server.
+    """
+    global grid_df, fires_df
+    while True:
+        try:
+            today_str = datetime.utcnow().strftime("%Y-%m-%d")
+            if grid_df is not None and today_str not in grid_df["date"].values:
+                logger.info(f"[Auto-Daily-Sync] New day detected ({today_str}). Ingesting live atmospheric telemetry...")
+                from real_data_pipeline import run_real_data_pipeline
+                run_real_data_pipeline(today_str)
+                
+                fresh_raw = pd.read_csv("data/grid_data.csv")
+                fresh_fires = pd.read_csv("data/fire_events.csv") if os.path.exists("data/fire_events.csv") else pd.DataFrame()
+                
+                pred_df = model_manager.predict_grid(fresh_raw)
+                grid_df = attributor.attribute_dataframe(pred_df)
+                fires_df = fresh_fires
+                logger.info(f"[Auto-Daily-Sync] Successfully ingested {today_str}. Dropdown now automatically includes {today_str}!")
+        except Exception as e:
+            logger.warning(f"[Auto-Daily-Sync] Background sync check notice: {e}")
+            
+        await asyncio.sleep(1800)
 
 @app.api_route("/", methods=["GET", "HEAD"])
 def read_root():
