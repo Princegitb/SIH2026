@@ -18,7 +18,7 @@ export default function AttributionView() {
       try {
         const res = await fetch(`/api/attribution?date=${selectedDate}&state=${selectedState}`)
         const resData = await res.json()
-        setData(resData.attribution || [])
+        setData(resData.attribution || resData.attributions || [])
       } catch (err) {
         console.error("Failed to load attribution:", err)
       }

@@ -678,18 +678,20 @@ def get_attribution(date: str = None, state: str = "All"):
             "vehicular": float(np.round(r["source_vehicular_pct"], 1)),
             "industrial": float(np.round(r["source_industrial_pct"], 1))
         })
-    return {"attributions": records, "date": date}
+    return {"attribution": records, "attributions": records, "date": date}
 
 @app.get("/api/compliance")
-def get_compliance(date: str = "2025-11-05", district: str = "Ambala"):
+def get_compliance(date: str = None, district: str = "Ambala"):
     if grid_df is None:
         raise HTTPException(status_code=503, detail="Service loading data.")
+    if not date or date not in grid_df["date"].values:
+        date = str(grid_df["date"].max())
         
     sel_date_obj = datetime.strptime(date, "%Y-%m-%d")
     rolling_30_dates = [(sel_date_obj - timedelta(days=x)).strftime("%Y-%m-%d") for x in range(30)]
     
     district_rolling = grid_df[
-        (grid_df["district"] == district) &
+        (grid_df["district"] == district) & 
         (grid_df["date"].isin(rolling_30_dates))
     ]
     
@@ -704,10 +706,12 @@ def get_compliance(date: str = "2025-11-05", district: str = "Ambala"):
     day_grid = grid_df[grid_df["date"] == date]
     day_hotspots = hotspot_detector.detect_hotspots(day_grid, fires_df)
     
-    district_hotspots = day_hotspots[
-        (day_hotspots["district"] == district) & 
-        (day_hotspots["is_hotspot"])
-    ]
+    district_hotspots = pd.DataFrame()
+    if not day_hotspots.empty and "is_hotspot" in day_hotspots.columns and "district" in day_hotspots.columns:
+        district_hotspots = day_hotspots[
+            (day_hotspots["district"] == district) & 
+            (day_hotspots["is_hotspot"])
+        ]
     
     alerts = []
     if not district_hotspots.empty:
