@@ -125,20 +125,24 @@ class AQIForecastEngine:
             return True
         return False
 
-    def predict_forecast(self, current_district_row: dict, fires_data = None) -> dict:
+    def predict_forecast(self, current_district_row: dict, fires_data = None, fires_count: int = None, **kwargs) -> dict:
         """
         Generates genuine 24-hour and 48-hour atmospheric forecasts and dynamic inversion risk.
         """
         # Determine actual fires count and total upstream FRP
-        if isinstance(fires_data, pd.DataFrame):
+        if fires_count is not None:
+            fires_cnt = int(fires_count)
+            fire_frp = float(fires_cnt * 35.0)
+        elif isinstance(fires_data, pd.DataFrame):
             fire_frp = float(fires_data["frp"].sum()) if ("frp" in fires_data.columns and not fires_data.empty) else 0.0
-            fires_count = len(fires_data)
+            fires_cnt = len(fires_data)
         elif isinstance(fires_data, (int, float)):
-            fires_count = int(fires_data)
-            fire_frp = float(fires_count * 35.0)
+            fires_cnt = int(fires_data)
+            fire_frp = float(fires_cnt * 35.0)
         else:
-            fires_count = 0
+            fires_cnt = 0
             fire_frp = 0.0
+        fires_count = fires_cnt
 
         if self.model_day1 is None or self.model_day2 is None:
             if not self.load_models():
