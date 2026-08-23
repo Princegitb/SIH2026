@@ -16,7 +16,7 @@ import LandingPage from './components/LandingPage'
 import { 
   LayoutDashboard, Map, Compass, Activity, Flame, Wind, 
   Tag, BarChart3, FileSpreadsheet, BellRing, Database, Settings, HelpCircle,
-  Menu, X, Sun, Moon, Info
+  Menu, X, Sun, Moon, Info, Calendar
 } from 'lucide-react'
 
 // Icon mapping for navigation links
@@ -248,13 +248,26 @@ export default function App() {
             
             <div className="flex items-center space-x-3">
               {/* Date selection selectbox */}
-              <select
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                className="bg-[#0d1121] border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 outline-none focus:border-[#4b6bf5] cursor-pointer shadow-sm font-semibold"
-              >
-                {dates.map(d => <option key={d} value={d}>{d}</option>)}
-              </select>
+              <div className="relative flex items-center">
+                <Calendar size={13} className="absolute left-3 text-[#4b6bf5] pointer-events-none" />
+                <select
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  className="bg-[#0d1121] border border-slate-800/90 hover:border-slate-700 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-200 outline-none focus:border-[#4b6bf5] cursor-pointer shadow-sm font-semibold min-w-[145px]"
+                >
+                  {dates && dates.length > 0 ? (
+                    dates.map(d => (
+                      <option key={d} value={d} className="bg-[#0d1121] text-slate-200">
+                        {d}
+                      </option>
+                    ))
+                  ) : (
+                    <option value={selectedDate} className="bg-[#0d1121] text-slate-200">
+                      {selectedDate || "2025-11-30"}
+                    </option>
+                  )}
+                </select>
+              </div>
               <button 
                 onClick={() => alert('NCAP Compliance report prepared for export!')}
                 className="bg-[#4b6bf5] hover:bg-[#3b56cf] text-white text-xs font-semibold px-4.5 py-1.5 rounded-lg transition-colors shadow-sm"
