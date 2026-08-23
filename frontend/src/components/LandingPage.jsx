@@ -283,29 +283,85 @@ export default function LandingPage({ onEnterDashboard }) {
           <div className="absolute w-[380px] h-[380px] sm:w-[460px] sm:h-[460px] rounded-full border border-transparent border-t-emerald-500/20 border-r-emerald-500/25 animate-spin duration-[20s] ease-linear pointer-events-none z-0"></div>
           <div className="absolute w-[380px] h-[380px] sm:w-[460px] sm:h-[460px] rounded-full border border-transparent border-b-sky-500/20 border-l-sky-500/25 animate-spin duration-[12s] ease-linear pointer-events-none z-0"></div>
 
-          {/* Central Satellite Scanned Earth Sphere with 3D Parallax Tilt */}
+          {/* Central Satellite Scanned Earth Sphere with 3D Parallax Tilt & Fiery Hotspot Corona */}
           <div 
             ref={earthRef}
-            className="absolute w-[180px] h-[180px] sm:w-[240px] sm:h-[240px] bg-slate-900 border border-slate-800 rounded-full overflow-hidden shadow-[0_0_80px_rgba(75,107,245,0.22)] flex items-center justify-center z-10 transition-transform duration-200 ease-out group cursor-grab active:cursor-grabbing"
+            className={`absolute w-[180px] h-[180px] sm:w-[240px] sm:h-[240px] bg-slate-900 border rounded-full overflow-hidden flex items-center justify-center z-10 transition-all duration-500 ease-out group cursor-grab active:cursor-grabbing ${
+              fireActive 
+                ? 'border-orange-500/80 shadow-[0_0_90px_rgba(249,115,22,0.65),0_0_140px_rgba(220,38,38,0.45),inset_0_0_45px_rgba(249,115,22,0.4)]' 
+                : 'border-slate-800 shadow-[0_0_80px_rgba(75,107,245,0.22)]'
+            }`}
           >
+            {/* Blazing Flame Corona Around the Earth when Fire Awakens */}
+            {fireActive && (
+              <div className="absolute -inset-4 rounded-full bg-[radial-gradient(circle_at_50%_50%,rgba(254,240,138,0.3)_0%,rgba(249,115,22,0.45)_40%,rgba(220,38,38,0.3)_70%,transparent_100%)] pointer-events-none animate-pulse z-0"></div>
+            )}
+
             {/* Atmospheric Rim Glow */}
-            <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(75,107,245,0.35),rgba(56,189,248,0.15),transparent_70%)] pointer-events-none"></div>
+            <div className={`absolute inset-0 rounded-full transition-all duration-500 pointer-events-none ${
+              fireActive 
+                ? 'bg-[radial-gradient(circle_at_35%_35%,rgba(249,115,22,0.45),rgba(239,68,68,0.3),transparent_70%)]' 
+                : 'bg-[radial-gradient(circle_at_30%_30%,rgba(75,107,245,0.35),rgba(56,189,248,0.15),transparent_70%)]'
+            }`}></div>
             
             {/* Holographic Earth mesh overlay */}
             <div className="absolute inset-0 bg-gradient-to-tr from-slate-950 via-slate-900/90 to-[#4b6bf5]/25 mix-blend-screen pointer-events-none"></div>
             
             {/* Grid Line Scans */}
-            <div className="absolute w-full h-[2px] bg-sky-500/35 top-0 animate-[scan_3s_infinite_linear]"></div>
+            <div className={`absolute w-full h-[2px] top-0 animate-[scan_3s_infinite_linear] transition-colors duration-500 ${
+              fireActive ? 'bg-orange-400/60 shadow-[0_0_10px_#f97316]' : 'bg-sky-500/35'
+            }`}></div>
+            
             <span className="text-7xl select-none filter drop-shadow-[0_0_22px_rgba(75,107,245,0.45)] opacity-90 transition-transform duration-500 group-hover:scale-110">🌏</span>
+
+            {/* Active Satellite-Detected Thermal Hotspots Around & On the Earth */}
+            {fireActive && (
+              <div className="absolute inset-0 pointer-events-none z-20">
+                {/* Hotspot 1: NW Burning Cluster */}
+                <div className="absolute top-[28%] left-[44%] -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
+                  <span className="w-4 h-4 rounded-full bg-orange-500/40 animate-ping absolute"></span>
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-300 shadow-[0_0_10px_#ea580c] relative z-10 animate-pulse"></span>
+                </div>
+
+                {/* Hotspot 2: Punjab Core Hotspot */}
+                <div className="absolute top-[36%] left-[54%] -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
+                  <span className="w-5 h-5 rounded-full bg-red-500/50 animate-ping absolute" style={{ animationDelay: '0.3s' }}></span>
+                  <span className="w-3 h-3 rounded-full bg-orange-400 shadow-[0_0_12px_#ef4444] relative z-10 animate-bounce"></span>
+                </div>
+
+                {/* Hotspot 3: NCR Downwind Receptor */}
+                <div className="absolute top-[48%] left-[62%] -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
+                  <span className="w-3.5 h-3.5 rounded-full bg-amber-500/40 animate-ping absolute" style={{ animationDelay: '0.6s' }}></span>
+                  <span className="w-2 h-2 rounded-full bg-yellow-200 shadow-[0_0_8px_#f97316] relative z-10"></span>
+                </div>
+              </div>
+            )}
           </div>
+
+          {/* Active Fire Orbit Corona Ring encircling the Earth when Fire Awakens */}
+          {fireActive && (
+            <div className="absolute w-[290px] h-[290px] sm:w-[360px] sm:h-[360px] rounded-full border border-orange-500/40 pointer-events-none z-10 animate-[spin_10s_linear_infinite]">
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-orange-500 shadow-[0_0_20px_#ea580c] animate-pulse"></div>
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-amber-400 shadow-[0_0_15px_#facc15] animate-ping"></div>
+              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-red-500 shadow-[0_0_15px_#dc2626] animate-pulse"></div>
+            </div>
+          )}
 
           {/* Orbiting Scanning Satellite Model */}
           <div className="absolute w-full h-full animate-[spin_32s_linear_infinite] pointer-events-none z-20">
             <div className="absolute top-[8%] left-[25%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center space-y-1 transform rotate-[-45deg] pointer-events-auto">
-              <div className="w-9 h-9 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-sky-400 shadow-lg hover:border-sky-500/40 hover:text-sky-300 transition-colors">
+              <div className={`w-9 h-9 rounded-xl bg-slate-900 border flex items-center justify-center shadow-lg transition-all duration-300 ${
+                fireActive 
+                  ? 'border-orange-500 text-orange-400 shadow-[0_0_20px_rgba(249,115,22,0.4)]' 
+                  : 'border-slate-800 text-sky-400 hover:border-sky-500/40 hover:text-sky-300'
+              }`}>
                 <Satellite size={16} className="animate-pulse" />
               </div>
-              <div className="w-[1.5px] h-32 bg-gradient-to-b from-sky-400/40 to-transparent animate-[laser_2s_infinite]"></div>
+              <div className={`w-[1.5px] h-32 animate-[laser_2s_infinite] transition-all duration-300 ${
+                fireActive 
+                  ? 'bg-gradient-to-b from-orange-500/80 via-red-500/50 to-transparent' 
+                  : 'bg-gradient-to-b from-sky-400/40 to-transparent'
+              }`}></div>
             </div>
           </div>
 
@@ -395,13 +451,13 @@ export default function LandingPage({ onEnterDashboard }) {
             }}
             className={`absolute top-[48%] right-[2%] glass-panel rounded-2xl p-4 w-[160px] text-left transition-all duration-300 z-30 cursor-pointer relative overflow-hidden ${
               fireActive 
-                ? 'scale-105 border-orange-500 shadow-[0_0_35px_rgba(249,115,22,0.4),inset_0_0_20px_rgba(239,68,68,0.2)]' 
+                ? 'scale-105 border-orange-500 shadow-[0_0_40px_rgba(249,115,22,0.55),inset_0_0_25px_rgba(239,68,68,0.3)] bg-gradient-to-br from-orange-950/40 via-slate-900/90 to-red-950/30' 
                 : 'hover:translate-y-[-2px] border-slate-800'
             }`}
           >
             {/* Ambient Fire Aura Glow in background */}
             {fireActive && (
-              <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-gradient-to-t from-orange-500/30 via-red-500/20 to-transparent rounded-full blur-xl pointer-events-none animate-pulse"></div>
+              <div className="absolute -bottom-6 -right-6 w-28 h-28 bg-gradient-to-t from-orange-500/40 via-red-500/30 to-transparent rounded-full blur-xl pointer-events-none animate-pulse"></div>
             )}
 
             {/* Rising Animated Ember Sparks Particle Layer */}
@@ -414,8 +470,8 @@ export default function LandingPage({ onEnterDashboard }) {
                   bottom: '10px',
                   width: `${ember.size}px`,
                   height: `${ember.size}px`,
-                  backgroundColor: Math.random() > 0.4 ? '#f97316' : '#facc15',
-                  boxShadow: '0 0 6px #ea580c',
+                  backgroundColor: Math.random() > 0.4 ? '#fbbf24' : '#f97316',
+                  boxShadow: '0 0 8px #ea580c, 0 0 12px #facc15',
                   '--ember-drift': `${ember.drift}px`,
                   animationDuration: `${ember.duration}s`
                 }}
@@ -425,25 +481,25 @@ export default function LandingPage({ onEnterDashboard }) {
             <div className="text-[8px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between relative z-10">
               <span className="flex items-center">
                 <Flame 
-                  size={12} 
+                  size={13} 
                   className={`mr-1 transition-all duration-300 ${
-                    fireActive ? 'text-orange-400 scale-125 drop-shadow-[0_0_8px_#f97316] animate-bounce' : 'text-orange-500'
+                    fireActive ? 'text-amber-300 scale-125 drop-shadow-[0_0_12px_#ea580c] animate-bounce' : 'text-orange-500'
                   }`} 
                 /> 
                 Active Fires
               </span>
               {fireActive && (
-                <span className="text-[7px] bg-orange-500/20 text-orange-400 border border-orange-500/40 px-1 rounded font-bold uppercase animate-pulse">
+                <span className="text-[7px] bg-orange-500/30 text-amber-300 border border-orange-400/50 px-1.5 py-0.5 rounded font-extrabold uppercase animate-pulse shadow-[0_0_10px_rgba(249,115,22,0.4)]">
                   IGNITED
                 </span>
               )}
             </div>
 
             <div className="flex items-baseline space-x-1.5 mt-1 relative z-10">
-              <span className={`text-2xl font-extrabold transition-colors duration-300 ${fireActive ? 'text-orange-400 drop-shadow-[0_0_10px_rgba(249,115,22,0.6)]' : 'text-orange-500'}`}>
+              <span className={`text-2xl font-black transition-colors duration-300 ${fireActive ? 'text-amber-300 drop-shadow-[0_0_14px_rgba(245,158,11,0.8)]' : 'text-orange-500'}`}>
                 3
               </span>
-              <span className="text-[8px] font-bold text-orange-400 uppercase">Detected</span>
+              <span className={`text-[8px] font-extrabold uppercase ${fireActive ? 'text-orange-300' : 'text-orange-400'}`}>Detected</span>
             </div>
 
             <div className="flex justify-between items-center mt-2.5 pt-1 border-t border-slate-850 relative z-10">
