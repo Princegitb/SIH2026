@@ -602,7 +602,28 @@ def get_wind(date: str = "2025-11-05"):
             "partial_correlation": float(row["partial_correlation"])
         })
         
-    return {"plumes": plumes, "lag_analysis": lag_list}
+    # Calculate dynamic speed & direction for the date
+    mean_u = float(day_grid["wind_u"].mean()) if not day_grid.empty else 2.1
+    mean_v = float(day_grid["wind_v"].mean()) if not day_grid.empty else -1.8
+    speed_kmh = round(float(np.sqrt(mean_u**2 + mean_v**2) * 3.6), 1)
+    
+    angle = np.degrees(np.arctan2(mean_u, mean_v))
+    if angle < 0: angle += 360
+    directions = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"]
+    dir_idx = int((angle + 11.25) / 22.5) % 16
+    dominant_dir = directions[dir_idx]
+    
+    peak_lag = 2
+    if not lag_results.empty:
+        peak_lag = int(lag_results.loc[lag_results["partial_correlation"].abs().idxmax()]["lag_days"])
+
+    return {
+        "plumes": plumes,
+        "lag_analysis": lag_list,
+        "wind_speed_kmh": speed_kmh,
+        "wind_direction": f"{dominant_dir} Corridor",
+        "peak_lag_days": peak_lag
+    }
 
 @app.get("/api/attribution")
 def get_attribution(date: str = "2025-11-05", state: str = "All"):

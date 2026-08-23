@@ -89,9 +89,11 @@ export default function TransportView() {
             <ArrowUpRight size={18} className="text-blue-400" />
           </div>
           <div className="mt-3">
-            <h3 className="text-xl font-extrabold text-white tracking-tight">12.4 km/h • NW → SE</h3>
+            <h3 className="text-xl font-extrabold text-white tracking-tight">
+              {data.wind_speed_kmh || 12.4} km/h • {data.wind_direction || "NW Corridor"}
+            </h3>
             <span className="text-xs text-slate-300 font-medium block mt-0.5">
-              Dominant North-Westerly corridor towards Delhi-NCR
+              Kinematic wind trajectory towards downwind receptor basins
             </span>
           </div>
         </div>
@@ -105,9 +107,11 @@ export default function TransportView() {
             <Activity size={18} className="text-orange-400" />
           </div>
           <div className="mt-3">
-            <h3 className="text-xl font-extrabold text-white tracking-tight">36 – 48 Hours (Lag-2d)</h3>
+            <h3 className="text-xl font-extrabold text-white tracking-tight">
+              {data.peak_lag_days * 24} Hours (Lag-{data.peak_lag_days}d)
+            </h3>
             <span className="text-xs text-slate-300 font-medium block mt-0.5">
-              Maximum downwind surface concentration impact
+              Maximum downwind surface concentration arrival time
             </span>
           </div>
         </div>
