@@ -712,14 +712,14 @@ export default function DashboardView() {
           <div>
             <div className="kpi-title text-emerald-400 group-hover:text-emerald-300">48-Hour Forecast</div>
             <div className="kpi-value text-emerald-400 text-lg mt-1 flex items-baseline">
-              <span>{Math.max(30, intVal(kpis.aqi * 0.92))}</span>
+              <span>{focus?.forecast?.day1?.aqi || 92}</span>
               <span className="text-xs font-normal text-emerald-500 ml-1.5 font-sans">Day+1 AQI</span>
             </div>
             <div className="text-[9px] text-emerald-400/80 font-semibold uppercase mt-0.5 tracking-wider">
-              Multi-Step AI Projection
+              {focus?.forecast?.day1?.inversion_risk || 'Multi-Step AI Projection'}
             </div>
           </div>
-          <Sparkline values={[kpis.aqi || 100, (kpis.aqi || 100) - 4, (kpis.aqi || 100) - 2, Math.max(30, intVal((kpis.aqi || 100) * 0.92)), Math.max(30, intVal((kpis.aqi || 100) * 0.88))]} color="#10b981" />
+          <Sparkline values={[focus?.aqi || 91, focus?.forecast?.day1?.aqi || 92, focus?.forecast?.day2?.aqi || 96, (focus?.forecast?.day2?.aqi || 96) - 3, (focus?.forecast?.day2?.aqi || 96) + 2]} color="#10b981" />
           <div className="text-[10px] text-slate-500 flex items-center group-hover:text-slate-355">
             View Forecast <ArrowUpRight size={10} className="ml-1" />
           </div>

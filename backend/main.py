@@ -338,6 +338,23 @@ def get_dashboard(date: str = None, district: str = "Ambala"):
         
         focus_metrics = None
         if dist_row is not None:
+            # Dynamic forecast for focus district
+            dist_dict = {
+                "aqi": int(dist_row["aqi"]),
+                "pm25": float(dist_row["pm25"]),
+                "pm10": float(dist_row["pm10"]),
+                "blh": float(dist_row["blh"]),
+                "wind_speed": float(np.round(np.sqrt(dist_row["wind_u"]**2 + dist_row["wind_v"]**2) * 3.6, 1)),
+                "wind_u": float(dist_row["wind_u"]),
+                "wind_v": float(dist_row["wind_v"]),
+                "temperature": float(dist_row["temperature"]),
+                "humidity": float(dist_row["humidity"]),
+                "hcho_column": float(dist_row["hcho_column"]),
+                "date": date,
+                "district": district
+            }
+            dist_forecast = forecast_engine.predict_forecast(dist_dict, fires_df)
+
             focus_metrics = {
                 "district": district,
                 "state": dist_row["state"],
@@ -364,6 +381,7 @@ def get_dashboard(date: str = None, district: str = "Ambala"):
                     "pm10": dist_7d["pm10"].tolist()
                 },
                 "shap": shap_explanation,
+                "forecast": dist_forecast,
                 "insight": insight_engine.generate_insight(
                     district_data=dist_row.to_dict(),
                     fire_count=day_fires_count,
