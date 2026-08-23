@@ -707,6 +707,32 @@ export default function DashboardView() {
           </div>
         )}
 
+        {/* Card 5: Prepared By Team KodeShetra */}
+        <div className="bottom-card flex flex-col justify-between items-center p-3 relative overflow-hidden bg-gradient-to-br from-slate-900/90 via-slate-900/60 to-red-950/20 border border-slate-700/50 hover:border-red-500/40 transition-all group">
+          <div className="w-full flex items-center justify-between">
+            <span className="text-[9px] font-extrabold uppercase tracking-widest text-slate-400">
+              Prepared By
+            </span>
+            <span className="text-[9px] bg-red-500/20 text-red-400 border border-red-500/30 font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider">
+              SIH 2026
+            </span>
+          </div>
+
+          <div className="w-full bg-white/95 rounded-xl p-1.5 flex items-center justify-center shadow-inner group-hover:scale-[1.02] transition-transform my-1">
+            <img 
+              src="/kodeshetra_logo.png" 
+              alt="Team KodeShetra" 
+              className="h-8 object-contain"
+            />
+          </div>
+
+          <div className="w-full text-center">
+            <span className="text-[10px] text-slate-300 font-semibold tracking-tight">
+              Team KodeShetra
+            </span>
+          </div>
+        </div>
+
       </div>
     </div>
   )
