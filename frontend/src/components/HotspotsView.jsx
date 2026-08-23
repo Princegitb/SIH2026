@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useStore } from '../store'
-import { Flame, Building2, ChevronDown, ChevronUp } from 'lucide-react'
+import { Flame, Building2, ChevronDown, ChevronUp, Radio, AlertCircle, Layers } from 'lucide-react'
 
 export default function HotspotsView() {
   const { selectedDate } = useStore()
@@ -26,8 +26,8 @@ export default function HotspotsView() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-[50vh]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500"></div>
-        <span className="ml-3 text-slate-400">Running DBSCAN clustering calculations...</span>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4b6bf5]"></div>
+        <span className="ml-3 text-slate-300 font-medium">Running DBSCAN spatial hotspot clustering calculations...</span>
       </div>
     )
   }
@@ -62,34 +62,44 @@ export default function HotspotsView() {
   return (
     <div className="space-y-6">
       {/* 1. Header Overview Stats */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="glass-panel rounded-xl p-5 flex flex-col justify-between h-[120px]">
-          <span className="text-[10px] font-bold text-slate-400 uppercase">DBSCAN Hotspot Clusters</span>
-          <span className="text-3xl font-extrabold text-purple-400">{clusterList.length}</span>
-          <span className="text-[10px] text-slate-500">Across {hotspots.length} active anomalous grid cells</span>
-        </div>
-        <div className="glass-panel rounded-xl p-5 flex flex-col justify-between h-[120px]">
-          <span className="text-[10px] font-bold text-slate-400 uppercase">Biomass Driven Clusters</span>
-          <span className="text-3xl font-extrabold text-orange-500 flex items-center">
-            {totalBiomass} <Flame className="ml-2 text-orange-500 animate-pulse" size={20} />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="glass-panel rounded-2xl p-5 border-purple-500/30 bg-gradient-to-br from-purple-950/30 via-slate-900/60 to-slate-900/90 flex flex-col justify-between h-[135px]">
+          <span className="text-[11px] font-extrabold text-purple-300 uppercase tracking-wider flex items-center">
+            <Radio size={12} className="mr-1.5 animate-pulse text-purple-400" /> Active Hotspot Clusters
           </span>
-          <span className="text-[10px] text-slate-500">Attributed to active stubble fires</span>
+          <span className="text-4xl font-black text-purple-400 tracking-tight">{clusterList.length}</span>
+          <span className="text-xs text-slate-300 font-medium">Across {hotspots.length} anomalous monitoring grid cells</span>
         </div>
-        <div className="glass-panel rounded-xl p-5 flex flex-col justify-between h-[120px]">
-          <span className="text-[10px] font-bold text-slate-400 uppercase">Industrial/Urban Clusters</span>
-          <span className="text-3xl font-extrabold text-sky-400 flex items-center">
-            {totalIndustrial} <Building2 className="ml-2 text-sky-400" size={20} />
+
+        <div className="glass-panel rounded-2xl p-5 border-orange-500/30 bg-gradient-to-br from-orange-950/30 via-slate-900/60 to-slate-900/90 flex flex-col justify-between h-[135px]">
+          <span className="text-[11px] font-extrabold text-orange-300 uppercase tracking-wider flex items-center">
+            <Flame size={12} className="mr-1.5 text-orange-400" /> Biomass Driven Clusters
           </span>
-          <span className="text-[10px] text-slate-500">Attributed to vehicular or factory stack emissions</span>
+          <span className="text-4xl font-black text-orange-400 flex items-center tracking-tight">
+            {totalBiomass} <Flame className="ml-2 text-orange-400 animate-pulse" size={24} />
+          </span>
+          <span className="text-xs text-slate-300 font-medium">Attributed to active stubble combustion</span>
+        </div>
+
+        <div className="glass-panel rounded-2xl p-5 border-sky-500/30 bg-gradient-to-br from-sky-950/30 via-slate-900/60 to-slate-900/90 flex flex-col justify-between h-[135px]">
+          <span className="text-[11px] font-extrabold text-sky-300 uppercase tracking-wider flex items-center">
+            <Building2 size={12} className="mr-1.5 text-sky-400" /> Industrial & Urban Clusters
+          </span>
+          <span className="text-4xl font-black text-sky-400 flex items-center tracking-tight">
+            {totalIndustrial} <Building2 className="ml-2 text-sky-400" size={24} />
+          </span>
+          <span className="text-xs text-slate-300 font-medium">Attributed to vehicular or factory stack sources</span>
         </div>
       </div>
 
       {/* 2. Interactive Cluster Grid */}
       <div className="space-y-4">
-        <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider border-b border-slate-800/40 pb-2">Identified HCHO Clusters</h3>
+        <h3 className="text-sm font-extrabold text-white uppercase tracking-wider border-b border-slate-800/80 pb-2 flex items-center">
+          <Layers size={16} className="text-[#4b6bf5] mr-2" /> Spatial Cluster Decomposition
+        </h3>
         {clusterList.length === 0 ? (
-          <div className="glass-panel rounded-xl p-8 text-center text-slate-500">
-            No HCHO column hotspots detected on this date.
+          <div className="glass-panel rounded-2xl p-8 text-center text-slate-300 font-medium">
+            No anomalous HCHO column hotspots detected on this date. Clean atmospheric baseline.
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -98,72 +108,39 @@ export default function HotspotsView() {
               return (
                 <div 
                   key={c.id} 
-                  className={`glass-panel rounded-xl p-5 transition-all duration-300 ${isExpanded ? 'border-purple-500/50 bg-purple-950/20' : ''}`}
+                  className="glass-panel rounded-2xl p-5 border border-slate-800 hover:border-slate-700 transition-all space-y-3 cursor-pointer"
+                  onClick={() => setExpandedCluster(isExpanded ? null : c.id)}
                 >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <div className="flex items-center space-x-2">
-                        <span className="font-bold text-slate-100">Cluster #{c.id}</span>
-                        {c.isBiomass ? (
-                          <span className="flex items-center bg-orange-950/20 text-orange-400 border border-orange-500/30 text-[9px] font-bold px-2 py-0.5 rounded">
-                            <Flame size={10} className="mr-1" /> Biomass
-                          </span>
-                        ) : (
-                          <span className="flex items-center bg-sky-950/20 text-sky-400 border border-sky-500/30 text-[9px] font-bold px-2 py-0.5 rounded">
-                            <Building2 size={10} className="mr-1" /> Industrial
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-[10px] text-slate-400 mt-1">Contains {c.members.length} district coordinates</p>
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center space-x-2">
+                      <span className="font-extrabold text-sm text-white">Cluster #{c.id + 1}</span>
+                      <span className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border ${
+                        c.isBiomass 
+                          ? 'bg-orange-500/15 text-orange-400 border-orange-500/30' 
+                          : 'bg-sky-500/15 text-sky-400 border-sky-500/30'
+                      }`}>
+                        {c.isBiomass ? 'Biomass Burning' : 'Industrial / Urban'}
+                      </span>
                     </div>
-
-                    <button 
-                      onClick={() => setExpandedCluster(isExpanded ? null : c.id)}
-                      className="p-1.5 text-slate-400 hover:text-white bg-slate-900 border border-slate-800/60 rounded shadow-sm focus:outline-none"
-                    >
-                      {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                    </button>
+                    {isExpanded ? <ChevronUp size={16} className="text-slate-400" /> : <ChevronDown size={16} className="text-slate-400" />}
                   </div>
 
-                  {/* Avg HCHO Progress Indicator */}
-                  <div className="mt-4">
-                    <div className="flex justify-between text-xs text-slate-400 mb-1">
-                      <span>Average HCHO column density</span>
-                      <span className="font-mono font-bold text-purple-400">{c.avgHcho.toFixed(4)} molecules/cm²</span>
-                    </div>
-                    <div className="w-full h-1.5 bg-slate-900 border border-slate-800/40 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full rounded-full bg-purple-500" 
-                        style={{ width: `${Math.min(100, (c.avgHcho / 8.0) * 100)}%` }}
-                      ></div>
-                    </div>
+                  <div className="flex justify-between text-xs text-slate-300 font-medium">
+                    <span>Cells: <b className="text-white font-bold">{c.members.length}</b></span>
+                    <span>Mean HCHO: <b className="text-purple-400 font-bold">{c.avgHcho.toFixed(2)}</b> <span className="text-[10px] text-slate-400">10¹⁵ molec/cm²</span></span>
                   </div>
 
-                  {/* Expanded district members table */}
                   {isExpanded && (
-                    <div className="mt-4 border-t border-slate-850 pt-3 overflow-x-auto">
-                      <table className="min-w-full text-xs text-slate-400">
-                        <thead>
-                          <tr className="border-b border-slate-800 text-slate-500 text-left">
-                            <th className="pb-1.5 font-bold">District</th>
-                            <th className="pb-1.5 font-bold">State</th>
-                            <th className="pb-1.5 font-bold text-right">Latitude</th>
-                            <th className="pb-1.5 font-bold text-right">Longitude</th>
-                            <th className="pb-1.5 font-bold text-right">HCHO Column</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {c.members.map((m, mIdx) => (
-                            <tr key={mIdx} className="hover:bg-slate-800/40 border-b border-slate-800/20">
-                              <td className="py-1.5 text-slate-200 font-semibold">{m.district}</td>
-                              <td className="py-1.5">{m.state}</td>
-                              <td className="py-1.5 text-right font-mono">{m.latitude.toFixed(2)}</td>
-                              <td className="py-1.5 text-right font-mono">{m.longitude.toFixed(2)}</td>
-                              <td className="py-1.5 text-right font-mono text-purple-400 font-bold">{m.hcho_column.toFixed(4)}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                    <div className="border-t border-slate-800/80 pt-3 space-y-2 text-xs">
+                      <div className="text-[11px] font-bold text-slate-400 uppercase">Cluster Cell Coordinates:</div>
+                      <div className="grid grid-cols-2 gap-2 max-h-[140px] overflow-y-auto pr-1">
+                        {c.members.map((m, idx) => (
+                          <div key={idx} className="bg-slate-900/60 border border-slate-800 rounded-lg p-2 text-[11px] flex justify-between">
+                            <span className="text-slate-300 font-medium">{m.district || `Cell ${m.cell_id}`}</span>
+                            <span className="text-purple-400 font-mono font-bold">{m.hcho_column.toFixed(1)}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
