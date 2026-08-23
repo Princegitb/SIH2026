@@ -199,10 +199,17 @@ export default function LandingPage({ onEnterDashboard }) {
       style={{ backgroundColor: '#03050c', color: '#f1f5f9' }}
     >
 
-      {/* Background grids and glowing orbits */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(75,107,245,0.18),rgba(0,0,0,0))] pointer-events-none z-0"></div>
-      <div className="absolute top-[20%] left-[-10%] w-[400px] h-[400px] bg-sky-500/5 rounded-full blur-[120px] pointer-events-none z-0"></div>
-      <div className="absolute bottom-[10%] right-[-10%] w-[500px] h-[500px] bg-purple-500/5 rounded-full blur-[140px] pointer-events-none z-0"></div>
+      {/* Background Atmospheric Grids, Aurora Streams & Glowing Orbits */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(75,107,245,0.22),rgba(0,0,0,0))] pointer-events-none z-0"></div>
+      
+      {/* Stratospheric Aurora Wave Stream (Top-Left to Center) */}
+      <div className="absolute top-[-5%] left-[5%] w-[800px] h-[350px] bg-gradient-to-r from-sky-500/10 via-emerald-500/10 to-indigo-500/10 rounded-full blur-[100px] pointer-events-none transform -rotate-12 animate-pulse z-0"></div>
+      
+      {/* Tropospheric Ozone Glow (Bottom Right) */}
+      <div className="absolute bottom-[5%] right-[-5%] w-[700px] h-[450px] bg-gradient-to-l from-indigo-500/12 via-sky-500/10 to-transparent rounded-full blur-[130px] pointer-events-none z-0"></div>
+      
+      {/* Subtle Atmospheric Isobar Pressure Contours in Background */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b08_1px,transparent_1px),linear-gradient(to_bottom,#1e293b08_1px,transparent_1px)] bg-[size:48px_48px] pointer-events-none z-0"></div>
 
       {/* 1. HEADER ROW */}
       <header className="max-w-7xl mx-auto w-full px-6 py-6 flex justify-between items-center z-10 relative">
@@ -286,69 +293,115 @@ export default function LandingPage({ onEnterDashboard }) {
           {/* Central Satellite Scanned Earth Sphere with 3D Parallax Tilt & Fiery Hotspot Corona */}
           <div 
             ref={earthRef}
-            className={`absolute w-[200px] h-[200px] sm:w-[260px] sm:h-[260px] rounded-full flex items-center justify-center z-10 transition-all duration-500 ease-out group cursor-grab active:cursor-grabbing ${
+            className={`absolute w-[210px] h-[210px] sm:w-[270px] sm:h-[270px] rounded-full flex items-center justify-center z-10 transition-all duration-500 ease-out group cursor-grab active:cursor-grabbing ${
               fireActive 
-                ? 'shadow-[0_0_90px_rgba(249,115,22,0.7),0_0_140px_rgba(220,38,38,0.5)]' 
-                : 'shadow-[0_0_90px_rgba(56,189,248,0.35),0_0_130px_rgba(75,107,245,0.25)]'
+                ? 'shadow-[0_0_90px_rgba(249,115,22,0.7),0_0_150px_rgba(220,38,38,0.5)]' 
+                : 'shadow-[0_0_90px_rgba(56,189,248,0.4),0_0_140px_rgba(75,107,245,0.3)]'
             }`}
           >
             {/* The 3D Earth Globe Body */}
-            <div className="w-full h-full rounded-full relative overflow-hidden bg-[#08152e] border-2 border-sky-400/40 shadow-inner">
+            <div className="w-full h-full rounded-full relative overflow-hidden bg-[#060e20] border-2 border-sky-400/50 shadow-inner">
               {/* Deep Ocean Gradient Base */}
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,#1e3a8a_0%,#0f172a_70%,#020617_100%)]"></div>
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,#1e40af_0%,#0f172a_65%,#020617_100%)]"></div>
 
-              {/* Realistic Continents & Landmass Vector Layer with India centered & glowing */}
+              {/* Atmospheric Glow Aura inside Globe */}
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(56,189,248,0.15),transparent_70%)] pointer-events-none"></div>
+
+              {/* Realistic India Centered Vector Map */}
               <div className="absolute inset-0 flex items-center justify-center">
                 <svg viewBox="0 0 200 200" className="w-full h-full">
                   <defs>
                     <radialGradient id="earthGlow" cx="30%" cy="30%" r="70%">
-                      <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.4" />
-                      <stop offset="60%" stopColor="#1d4ed8" stopOpacity="0.1" />
-                      <stop offset="100%" stopColor="#000000" stopOpacity="0.8" />
+                      <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.45" />
+                      <stop offset="60%" stopColor="#1d4ed8" stopOpacity="0.15" />
+                      <stop offset="100%" stopColor="#000000" stopOpacity="0.85" />
                     </radialGradient>
-                    <linearGradient id="indiaGlow" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#10b981" />
+
+                    <linearGradient id="indiaFill" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#065f46" />
+                      <stop offset="40%" stopColor="#0f766e" />
+                      <stop offset="80%" stopColor="#1e3a8a" />
+                    </linearGradient>
+
+                    <linearGradient id="indiaStroke" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#34d399" />
                       <stop offset="50%" stopColor="#38bdf8" />
-                      <stop offset="100%" stopColor="#4b6bf5" />
+                      <stop offset="100%" stopColor="#818cf8" />
                     </linearGradient>
                   </defs>
 
-                  {/* Global Continental Outlines */}
+                  {/* Neighboring Eurasia Background Landmass */}
                   <path 
-                    d="M 60,75 Q 80,60 110,65 Q 140,55 160,70 Q 175,90 155,115 Q 135,130 115,145 Q 105,150 95,135 Q 90,115 80,105 Z" 
-                    fill="#1e293b" 
-                    stroke="#334155" 
-                    strokeWidth="1"
-                    opacity="0.85"
+                    d="M 30,50 Q 60,35 100,30 Q 150,25 180,45 Q 190,70 170,95 Q 160,85 140,85 Q 130,70 100,65 Q 60,70 40,80 Z" 
+                    fill="#111c33" 
+                    stroke="#1e293b" 
+                    strokeWidth="0.8"
+                    opacity="0.7"
                   />
-                  {/* Indian Subcontinent (Prominent & Glowing) */}
+                  {/* Arabian Peninsula & Middle East */}
                   <path 
-                    d="M 98,90 Q 112,92 120,102 Q 116,118 108,135 Q 102,124 96,110 Q 94,98 98,90 Z" 
-                    fill="url(#indiaGlow)" 
-                    stroke="#60a5fa" 
-                    strokeWidth="1.5"
-                    className="filter drop-shadow-[0_0_8px_rgba(56,189,248,0.6)]"
-                  />
-                  {/* Africa & Surrounding Outlines */}
-                  <path 
-                    d="M 45,95 Q 60,90 70,105 Q 65,130 50,145 Q 40,135 38,115 Z" 
-                    fill="#1e293b" 
-                    stroke="#334155" 
-                    strokeWidth="1"
-                    opacity="0.75"
+                    d="M 25,90 Q 45,85 55,95 Q 50,115 35,120 Q 20,110 25,90 Z" 
+                    fill="#111c33" 
+                    stroke="#1e293b" 
+                    strokeWidth="0.8"
+                    opacity="0.6"
                   />
 
-                  {/* Longitude & Latitude Curved Grid Overlay */}
+                  {/* DETAILED ACCURATE INDIA OUTLINE MAP */}
+                  {/* Kashmir -> Punjab/Rajasthan -> Gujarat (Kutch/Kathiawar) -> South (Kanyakumari) -> East Coast -> Northeast (Assam/Arunachal) -> Himalayas */}
+                  <path 
+                    d="
+                      M 100,42 
+                      C 103,34 107,34 110,38 
+                      C 114,44 110,50 114,56 
+                      C 118,62 116,66 112,70 
+                      C 106,70 100,68 96,72 
+                      C 90,76 86,82 80,90 
+                      C 74,96 72,104 80,108 
+                      C 76,114 84,116 86,112 
+                      C 88,122 92,136 96,150 
+                      C 100,162 104,170 106,170 
+                      C 108,170 112,160 116,148 
+                      C 122,134 128,120 134,112 
+                      C 138,106 142,102 144,96 
+                      C 148,94 154,88 160,86 
+                      C 166,86 170,92 166,98 
+                      C 158,102 150,102 144,98 
+                      C 138,94 134,88 126,82 
+                      C 120,76 114,64 108,58 
+                      Z
+                    " 
+                    fill="url(#indiaFill)" 
+                    stroke="url(#indiaStroke)" 
+                    strokeWidth="1.8"
+                    className="filter drop-shadow-[0_0_10px_rgba(56,189,248,0.7)]"
+                  />
+
+                  {/* State Grid Accents (Northern Grid, Central Corridor, Coastal Arcs) */}
+                  <path d="M 96,72 Q 106,74 114,70" stroke="#38bdf8" strokeWidth="0.8" strokeDasharray="1.5 1.5" opacity="0.6" />
+                  <path d="M 80,108 Q 106,110 134,112" stroke="#38bdf8" strokeWidth="0.8" strokeDasharray="1.5 1.5" opacity="0.4" />
+                  <path d="M 88,130 Q 106,136 122,134" stroke="#38bdf8" strokeWidth="0.8" strokeDasharray="1.5 1.5" opacity="0.4" />
+
+                  {/* Sri Lanka */}
+                  <ellipse cx="114" cy="176" rx="3.5" ry="5.5" fill="#0f766e" stroke="#38bdf8" strokeWidth="0.8" opacity="0.85" />
+
+                  {/* Delhi-NCR Air Monitoring Pulsing Beacon */}
+                  <g className="cursor-pointer">
+                    <circle cx="102" cy="74" r="5" fill="none" stroke="#10b981" strokeWidth="1" className="animate-ping" />
+                    <circle cx="102" cy="74" r="2.5" fill="#34d399" className="shadow-[0_0_8px_#10b981]" />
+                  </g>
+
+                  {/* Atmospheric Longitude & Latitude Curved Grid Overlay */}
                   <ellipse cx="100" cy="100" rx="98" ry="98" fill="url(#earthGlow)" stroke="#38bdf8" strokeWidth="1" opacity="0.6" />
-                  <ellipse cx="100" cy="100" rx="65" ry="98" fill="none" stroke="#38bdf8" strokeWidth="0.8" strokeDasharray="3 3" opacity="0.35" />
-                  <ellipse cx="100" cy="100" rx="30" ry="98" fill="none" stroke="#38bdf8" strokeWidth="0.8" strokeDasharray="3 3" opacity="0.35" />
-                  <line x1="2" y1="100" x2="198" y2="100" stroke="#38bdf8" strokeWidth="0.8" strokeDasharray="3 3" opacity="0.35" />
+                  <ellipse cx="100" cy="100" rx="65" ry="98" fill="none" stroke="#38bdf8" strokeWidth="0.7" strokeDasharray="3 3" opacity="0.3" />
+                  <ellipse cx="100" cy="100" rx="30" ry="98" fill="none" stroke="#38bdf8" strokeWidth="0.7" strokeDasharray="3 3" opacity="0.3" />
+                  <line x1="2" y1="100" x2="198" y2="100" stroke="#38bdf8" strokeWidth="0.7" strokeDasharray="3 3" opacity="0.3" />
                   <line x1="14" y1="65" x2="186" y2="65" stroke="#38bdf8" strokeWidth="0.6" strokeDasharray="2 2" opacity="0.25" />
                   <line x1="14" y1="135" x2="186" y2="135" stroke="#38bdf8" strokeWidth="0.6" strokeDasharray="2 2" opacity="0.25" />
 
                   {/* Atmospheric Cloud Swirls */}
                   <path 
-                    d="M 30,55 Q 70,45 120,60 T 170,75" 
+                    d="M 25,60 Q 65,45 115,58 T 175,70" 
                     fill="none" 
                     stroke="#ffffff" 
                     strokeWidth="2.5" 
@@ -356,7 +409,7 @@ export default function LandingPage({ onEnterDashboard }) {
                     strokeLinecap="round"
                   />
                   <path 
-                    d="M 60,125 Q 100,110 140,130" 
+                    d="M 55,140 Q 95,120 145,135" 
                     fill="none" 
                     stroke="#ffffff" 
                     strokeWidth="2" 
@@ -370,7 +423,7 @@ export default function LandingPage({ onEnterDashboard }) {
               <div className={`absolute inset-0 rounded-full pointer-events-none transition-all duration-500 ${
                 fireActive 
                   ? 'bg-[radial-gradient(circle_at_30%_30%,rgba(254,240,138,0.3),rgba(249,115,22,0.45)_50%,rgba(220,38,38,0.35)_80%)]' 
-                  : 'bg-[radial-gradient(circle_at_25%_25%,rgba(255,255,255,0.3),rgba(56,189,248,0.25)_40%,transparent_75%)]'
+                  : 'bg-[radial-gradient(circle_at_25%_25%,rgba(255,255,255,0.35),rgba(56,189,248,0.25)_40%,transparent_75%)]'
               }`}></div>
 
               {/* Horizontal Satellite Radar Scan Line */}
@@ -378,24 +431,24 @@ export default function LandingPage({ onEnterDashboard }) {
                 fireActive ? 'bg-orange-400 shadow-[0_0_12px_#f97316]' : 'bg-sky-400 shadow-[0_0_10px_#38bdf8]'
               }`}></div>
 
-              {/* Active Satellite-Detected Thermal Hotspots on the Indian Continent */}
+              {/* Active Satellite-Detected Thermal Hotspots on Northern India */}
               {fireActive && (
                 <div className="absolute inset-0 pointer-events-none z-20">
-                  {/* Hotspot 1: NW Punjab/Haryana Stubble Core */}
-                  <div className="absolute top-[48%] left-[51%] -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
-                    <span className="w-7 h-7 rounded-full bg-red-500/50 animate-ping absolute"></span>
+                  {/* Hotspot 1: Punjab / Stubble Core */}
+                  <div className="absolute top-[36%] left-[49%] -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
+                    <span className="w-8 h-8 rounded-full bg-red-500/50 animate-ping absolute"></span>
                     <span className="w-4 h-4 rounded-full bg-orange-500/80 animate-pulse absolute"></span>
                     <span className="w-2.5 h-2.5 rounded-full bg-amber-200 shadow-[0_0_12px_#ffedd5] relative z-10"></span>
                   </div>
 
                   {/* Hotspot 2: Delhi-NCR Basin Receptor */}
-                  <div className="absolute top-[54%] left-[55%] -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
+                  <div className="absolute top-[40%] left-[53%] -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
                     <span className="w-5 h-5 rounded-full bg-orange-500/50 animate-ping absolute" style={{ animationDelay: '0.4s' }}></span>
                     <span className="w-2 h-2 rounded-full bg-yellow-300 shadow-[0_0_8px_#f97316] relative z-10 animate-bounce"></span>
                   </div>
 
                   {/* Hotspot 3: Upwind Farm Fire Cluster */}
-                  <div className="absolute top-[44%] left-[47%] -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
+                  <div className="absolute top-[32%] left-[45%] -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
                     <span className="w-6 h-6 rounded-full bg-amber-500/40 animate-ping absolute" style={{ animationDelay: '0.8s' }}></span>
                     <span className="w-2.5 h-2.5 rounded-full bg-orange-400 shadow-[0_0_10px_#ea580c] relative z-10"></span>
                   </div>
