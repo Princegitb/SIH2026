@@ -1,5 +1,6 @@
 import os
 import sys
+import asyncio
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
@@ -463,14 +464,16 @@ def parse_confidence(val):
         if val_str == 'h':
             return 90
         elif val_str == 'l':
-            return 40
         else:
             return 80
 
 @app.get("/api/map-data")
-def get_map_data(date: str = "2025-11-05", state: str = "All"):
+def get_map_data(date: str = None, state: str = "All"):
     if grid_df is None:
         raise HTTPException(status_code=503, detail="Service loading data.")
+        
+    if not date or date not in grid_df["date"].values:
+        date = str(grid_df["date"].max())
         
     day_grid = grid_df[grid_df["date"] == date]
     if state != "All":
@@ -506,14 +509,15 @@ def get_map_data(date: str = "2025-11-05", state: str = "All"):
             
     day_hotspots = hotspot_detector.detect_hotspots(day_grid, fires_df)
     hotspots = []
-    for idx, h in day_hotspots[day_hotspots["is_hotspot"]].iterrows():
-        hotspots.append({
-            "latitude": float(h["latitude"]),
-            "longitude": float(h["longitude"]),
-            "hcho": float(h["hcho_column"]),
-            "is_biomass": bool(h.get("is_biomass_driven", False)),
-            "cluster_id": int(h["cluster_id"])
-        })
+    if not day_hotspots.empty and "is_hotspot" in day_hotspots.columns:
+        for idx, h in day_hotspots[day_hotspots["is_hotspot"]].iterrows():
+            hotspots.append({
+                "latitude": float(h["latitude"]),
+                "longitude": float(h["longitude"]),
+                "hcho": float(h["hcho_column"]),
+                "is_biomass": bool(h.get("is_biomass_driven", False)),
+                "cluster_id": int(h["cluster_id"])
+            })
         
     ref_wind = day_grid.iloc[0] if not day_grid.empty else None
     plumes = []
@@ -548,28 +552,38 @@ def get_map_data(date: str = "2025-11-05", state: str = "All"):
     }
 
 @app.get("/api/hotspots")
-def get_hotspots(date: str = "2025-11-05"):
+def get_hotspots(date: str = None):
     if grid_df is None:
         raise HTTPException(status_code=503, detail="Service loading data.")
+        
+    if not date or date not in grid_df["date"].values:
+        date = str(grid_df["date"].max())
+        
     day_grid = grid_df[grid_df["date"] == date]
     day_hotspots = hotspot_detector.detect_hotspots(day_grid, fires_df)
     
     records = []
-    active_hotspots = day_hotspots[day_hotspots["is_hotspot"]]
-    for idx, r in active_hotspots.iterrows():
-        records.append({
-            "district": r["district"],
-            "state": r["state"],
-            "latitude": float(r["latitude"]),
-            "longitude": float(r["longitude"]),
-            "hcho_column": float(r["hcho_column"]),
-            "cluster_id": int(r["cluster_id"]),
-            "is_biomass_driven": bool(r.get("is_biomass_driven", False))
-        })
+    if not day_hotspots.empty and "is_hotspot" in day_hotspots.columns:
+        active_hotspots = day_hotspots[day_hotspots["is_hotspot"]]
+        for idx, r in active_hotspots.iterrows():
+            records.append({
+                "district": r["district"],
+                "state": r["state"],
+                "latitude": float(r["latitude"]),
+                "longitude": float(r["longitude"]),
+                "hcho_column": float(r["hcho_column"]),
+                "cluster_id": int(r["cluster_id"]),
+                "is_biomass_driven": bool(r.get("is_biomass_driven", False))
+            })
     return {"hotspots": records, "count": len(records)}
 
 @app.get("/api/fires")
-def get_fires(date: str = "2025-11-05"):
+def get_fires(date: str = None):
+    if grid_df is None:
+        raise HTTPException(status_code=503, detail="Service loading data.")
+    if not date or date not in grid_df["date"].values:
+        date = str(grid_df["date"].max())
+        
     day_fires = fires_df[fires_df["date"] == date] if fires_df is not None and not fires_df.empty else pd.DataFrame()
     records = []
     for idx, f in day_fires.iterrows():
@@ -583,9 +597,11 @@ def get_fires(date: str = "2025-11-05"):
     return {"fires": records, "count": len(records)}
 
 @app.get("/api/wind")
-def get_wind(date: str = "2025-11-05"):
+def get_wind(date: str = None):
     if grid_df is None:
         raise HTTPException(status_code=503, detail="Service loading data.")
+    if not date or date not in grid_df["date"].values:
+        date = str(grid_df["date"].max())
     
     day_grid = grid_df[grid_df["date"] == date]
     ref_wind = day_grid.iloc[0] if not day_grid.empty else None
@@ -637,9 +653,12 @@ def get_wind(date: str = "2025-11-05"):
     }
 
 @app.get("/api/attribution")
-def get_attribution(date: str = "2025-11-05", state: str = "All"):
+def get_attribution(date: str = None, state: str = "All"):
     if grid_df is None:
         raise HTTPException(status_code=503, detail="Service loading data.")
+    if not date or date not in grid_df["date"].values:
+        date = str(grid_df["date"].max())
+        
     day_grid = grid_df[grid_df["date"] == date]
     if state != "All":
         day_grid = day_grid[day_grid["state"] == state]
@@ -658,7 +677,7 @@ def get_attribution(date: str = "2025-11-05", state: str = "All"):
             "vehicular": float(np.round(r["source_vehicular_pct"], 1)),
             "industrial": float(np.round(r["source_industrial_pct"], 1))
         })
-    return {"attribution": records}
+    return {"attributions": records, "date": date}
 
 @app.get("/api/compliance")
 def get_compliance(date: str = "2025-11-05", district: str = "Ambala"):
