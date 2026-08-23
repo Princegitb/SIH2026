@@ -707,21 +707,22 @@ export default function DashboardView() {
           </div>
         )}
 
-        {/* Card 5: AQI Forecast Projection */}
-        <div className="bottom-card group cursor-pointer" onClick={() => setActiveTab('AQI Forecast')}>
+        {/* Card 5: GRAP Air Compliance Protocol */}
+        <div className="bottom-card group cursor-pointer" onClick={() => setActiveTab('Alerts')}>
           <div>
-            <div className="kpi-title text-emerald-400 group-hover:text-emerald-300">48-Hour Forecast</div>
-            <div className="kpi-value text-emerald-400 text-lg mt-1 flex items-baseline">
-              <span>{focus?.forecast?.day1?.aqi || 92}</span>
-              <span className="text-xs font-normal text-emerald-500 ml-1.5 font-sans">Day+1 AQI</span>
+            <div className="kpi-title text-emerald-400 group-hover:text-emerald-300 flex items-center justify-between">
+              <span>GRAP Compliance</span>
+              <ShieldAlert size={12} className={focus?.aqi > 200 ? "text-orange-400" : "text-emerald-400"} />
             </div>
-            <div className="text-[9px] text-emerald-400/80 font-semibold uppercase mt-0.5 tracking-wider">
-              {focus?.forecast?.day1?.inversion_risk || 'Multi-Step AI Projection'}
+            <div className="kpi-value text-emerald-400 text-lg mt-1">
+              {focus?.aqi <= 100 ? "Stage 0 (Normal)" : focus?.aqi <= 200 ? "Stage I (Moderate)" : focus?.aqi <= 300 ? "Stage II (Poor)" : "Stage III (Severe)"}
+            </div>
+            <div className="text-[9px] text-slate-400 font-semibold mt-1 tracking-tight truncate">
+              {focus?.aqi <= 100 ? "Clean Air Protocol • Routine Sweeping" : focus?.aqi <= 200 ? "Maintain Mechanical Sweeping" : "Enforce Dust & Emission Curbs"}
             </div>
           </div>
-          <Sparkline values={[focus?.aqi || 91, focus?.forecast?.day1?.aqi || 92, focus?.forecast?.day2?.aqi || 96, (focus?.forecast?.day2?.aqi || 96) - 3, (focus?.forecast?.day2?.aqi || 96) + 2]} color="#10b981" />
-          <div className="text-[10px] text-slate-500 flex items-center group-hover:text-slate-355">
-            View Forecast <ArrowUpRight size={10} className="ml-1" />
+          <div className="text-[10px] text-slate-500 flex items-center group-hover:text-slate-355 pt-2 border-t border-slate-800/40">
+            View Action Alerts <ArrowUpRight size={10} className="ml-1" />
           </div>
         </div>
 
