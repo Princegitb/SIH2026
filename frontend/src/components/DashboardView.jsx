@@ -673,27 +673,28 @@ export default function DashboardView() {
 
         {/* Card 4: Source Attribution */}
         {focus && (
-          <div className="bottom-card flex flex-row items-center justify-between p-4 cursor-pointer group" onClick={() => setActiveTab('Source Attribution')}>
-            <div className="flex flex-col justify-between h-full">
-              <div>
-                <div className="kpi-title text-coral-500" style={{ color: '#ff7043' }}>Source Attribution</div>
-                <div className="text-xs font-bold text-slate-200 mt-1">Biomass Burning</div>
-                <div className="text-2xl font-bold" style={{ color: '#ff7043' }}>{intVal(focus.source_attribution.biomass)}%</div>
+          <div className="bottom-card group cursor-pointer relative" onClick={() => setActiveTab('Source Attribution')}>
+            <div>
+              <div className="kpi-title text-[#ff7043] group-hover:text-orange-300">Source Attribution</div>
+              <div className="kpi-value text-[#ff7043] text-lg mt-1 flex items-baseline">
+                <span>{intVal(focus.source_attribution.biomass)}%</span>
+                <span className="text-xs font-normal text-slate-400 ml-1.5 font-sans">Biomass</span>
               </div>
-              <div className="text-[10px] text-slate-500 flex items-center group-hover:text-slate-355">
-                View Details <ArrowUpRight size={10} className="ml-1" />
+              <div className="text-[9px] text-slate-400 font-semibold mt-1 tracking-tight truncate">
+                Vehicular: {intVal(focus.source_attribution.vehicular)}% • Industrial: {intVal(focus.source_attribution.industrial)}%
               </div>
             </div>
-            {/* Recharts Pie Donut */}
-            <div className="w-[70px] h-[70px]">
+
+            {/* Recharts Pie Donut absolute on bottom right like other cards */}
+            <div className="absolute right-3 bottom-3 w-[52px] h-[52px] pointer-events-none opacity-85 group-hover:opacity-100 transition-opacity">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
                     data={donutData}
                     cx="50%"
                     cy="50%"
-                    innerRadius={18}
-                    outerRadius={28}
+                    innerRadius={14}
+                    outerRadius={22}
                     paddingAngle={2}
                     dataKey="value"
                   >
@@ -703,6 +704,10 @@ export default function DashboardView() {
                   </Pie>
                 </PieChart>
               </ResponsiveContainer>
+            </div>
+
+            <div className="text-[10px] text-slate-500 flex items-center group-hover:text-slate-355 pt-2 border-t border-slate-800/40">
+              View Details <ArrowUpRight size={10} className="ml-1" />
             </div>
           </div>
         )}
