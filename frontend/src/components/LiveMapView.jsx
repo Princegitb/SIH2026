@@ -312,26 +312,39 @@ export default function LiveMapView() {
             
             {/* Hyperlocal Pin Drop Marker */}
             {hyperlocalPoint && (
-              <CircleMarker
-                center={[hyperlocalPoint.lat, hyperlocalPoint.lng]}
-                radius={12}
-                pathOptions={{
-                  fillColor: hpColorInfo ? hpColorInfo.color : '#3b82f6',
-                  fillOpacity: 0.9,
-                  color: '#ffffff',
-                  weight: 2,
-                  className: "animate-ping"
-                }}
-              >
-                <Popup>
-                  <div className="text-xs">
-                    <span className="font-bold text-white">Hyperlocal GPS Target Pin</span>
-                    <div className="text-[10px] text-slate-400 mt-0.5">
-                      Lat: {hyperlocalPoint.lat.toFixed(4)} | Lon: {hyperlocalPoint.lng.toFixed(4)}
+              <React.Fragment key={`hyperlocal-${hyperlocalPoint.lat}-${hyperlocalPoint.lng}`}>
+                {/* Static outer glow ring */}
+                <Circle
+                  center={[hyperlocalPoint.lat, hyperlocalPoint.lng]}
+                  radius={5000}
+                  pathOptions={{
+                    color: hpColorInfo ? hpColorInfo.color : '#3b82f6',
+                    weight: 1.5,
+                    fillColor: hpColorInfo ? hpColorInfo.color : '#3b82f6',
+                    fillOpacity: 0.18
+                  }}
+                />
+                {/* Crisp target core pinpoint */}
+                <CircleMarker
+                  center={[hyperlocalPoint.lat, hyperlocalPoint.lng]}
+                  radius={9}
+                  pathOptions={{
+                    fillColor: hpColorInfo ? hpColorInfo.color : '#3b82f6',
+                    fillOpacity: 0.95,
+                    color: '#ffffff',
+                    weight: 2
+                  }}
+                >
+                  <Popup>
+                    <div className="text-xs">
+                      <span className="font-bold text-white">Hyperlocal GPS Target Pin</span>
+                      <div className="text-[10px] text-slate-400 mt-0.5">
+                        Lat: {hyperlocalPoint.lat.toFixed(4)} | Lon: {hyperlocalPoint.lng.toFixed(4)}
+                      </div>
                     </div>
-                  </div>
-                </Popup>
-              </CircleMarker>
+                  </Popup>
+                </CircleMarker>
+              </React.Fragment>
             )}
 
             {/* Clean, understandable, and consistent District markers */}
