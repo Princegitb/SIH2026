@@ -70,32 +70,31 @@ def simulate_data():
     logger.info("Initializing grid and date parameters...")
     grid_df = generate_spatial_grid()
     
-    start_date = datetime(2025, 11, 1)
-    end_date = datetime(2025, 11, 30)
-    days = (end_date - start_date).days + 1
+    # Multi-seasonal simulation (August Monsoon Clean Baseline + November Winter Stubble Peak)
+    aug_dates = [datetime(2025, 8, d) for d in range(15, 32)]
+    nov_dates = [datetime(2025, 11, d) for d in range(1, 31)]
+    date_list = aug_dates + nov_dates
     
-    date_list = [start_date + timedelta(days=x) for x in range(days)]
-    
-    logger.info(f"Generated {len(grid_df)} grid cells. Simulating {days} days from Nov 1 to Nov 30...")
+    logger.info(f"Generated {len(grid_df)} grid cells. Simulating multi-seasonal atmospheric dataset ({len(date_list)} days)...")
     
     # 1. Simulate Fire Events for the period
     np.random.seed(42)
     fire_records = []
     
     for date in date_list:
-        day_of_season = (date - start_date).days
-        
-        # Stubble burning timeline: peaks late Oct to mid Nov
-        if day_of_season < 15: # Early Oct: very few fires
-            num_fires = np.random.randint(1, 10)
-        elif day_of_season < 20: # Mid Oct: rising fires
-            num_fires = np.random.randint(10, 40)
-        elif day_of_season < 45: # Late Oct to mid Nov: Peak stubble burning
-            num_fires = np.random.randint(100, 300)
-        elif day_of_season < 55: # Late Nov: declining
-            num_fires = np.random.randint(20, 80)
-        else: # End of Nov: very low
-            num_fires = np.random.randint(2, 15)
+        is_monsoon = date.month in [6, 7, 8, 9]
+        if is_monsoon:
+            # Summer/Monsoon: Virtually zero stubble fires (0 to 3 localized fires)
+            num_fires = np.random.choice([0, 1, 2, 0, 3, 1])
+        else:
+            # Stubble burning timeline: peaks early to mid Nov
+            day_of_nov = date.day
+            if day_of_nov < 5:
+                num_fires = np.random.randint(15, 50)
+            elif day_of_nov < 20:
+                num_fires = np.random.randint(120, 280)
+            else:
+                num_fires = np.random.randint(30, 90)
             
         for _ in range(num_fires):
             # Fires occur mostly in agricultural areas of Punjab (70%) and Haryana (30%)
@@ -127,66 +126,53 @@ def simulate_data():
     fires_df.to_csv("data/fire_events.csv", index=False)
     logger.info(f"Simulated {len(fires_df)} fire events and saved to data/fire_events.csv")
     
-    # 2. Simulate Grid Dataset
-    grid_records = []
-    
-    # Generate daily base weather parameters
-    # Predominant wind is north-westerly in this season
+    # 2. Weather Generation per Date
     weather_by_date = {}
     for date in date_list:
-        day_of_season = (date - start_date).days
-        
-        # Temperature decreases as winter approaches
-        base_temp = 32.0 - (day_of_season * 0.22) + np.random.normal(0, 1.0)
-        # Humidity increases
-        base_humidity = 40.0 + (day_of_season * 0.45) + np.random.normal(0, 4.0)
-        # Boundary Layer Height decreases as atmosphere cools and locks in (inversion)
-        base_blh = 1300.0 - (day_of_season * 18.0) + np.random.normal(0, 50.0)
-        base_blh = max(180.0, base_blh) # cap at minimum 180 meters
-        
-        # Wind: predominant north-westerly (wind vector angle ~315 degrees, blowing towards SE)
-        # We vary the angle slightly dynamically
-        wind_angle = 315.0 + np.sin(day_of_season / 5.0) * 20.0 + np.random.normal(0, 10.0)
-        wind_speed = 2.0 + np.cos(day_of_season / 7.0) * 0.8 + np.random.normal(0, 0.4)
-        wind_speed = max(0.5, wind_speed)
-        
-        # Convert to u and v wind components
-        # North-westerly wind blows from NW to SE, so u > 0, v < 0
+        is_monsoon = date.month in [6, 7, 8, 9]
+        if is_monsoon:
+            base_temp = 31.0 + np.random.normal(0, 1.2)
+            base_humidity = 72.0 + np.random.normal(0, 4.0)
+            base_blh = 950.0 + np.random.normal(0, 60.0) # High convective boundary layer (900-1100m)
+            wind_angle = 120.0 + np.random.normal(0, 25.0) # Monsoon easterly/south-easterly
+            wind_speed = 3.5 + np.random.normal(0, 0.6)
+            rain = float(np.random.choice([0.0, 0.0, 4.5, 12.0, 0.0]))
+        else:
+            day_of_nov = date.day
+            base_temp = 24.0 - (day_of_nov * 0.25) + np.random.normal(0, 1.0)
+            base_humidity = 45.0 + (day_of_nov * 0.4) + np.random.normal(0, 3.0)
+            base_blh = max(200.0, 650.0 - (day_of_nov * 14.0) + np.random.normal(0, 40.0)) # Winter thermal inversion
+            wind_angle = 315.0 + np.random.normal(0, 15.0) # North-westerly stubble corridor
+            wind_speed = max(0.8, 2.2 + np.random.normal(0, 0.4))
+            rain = 0.0
+            
         wind_u = wind_speed * np.cos(np.radians(360 - wind_angle + 90))
         wind_v = wind_speed * np.sin(np.radians(360 - wind_angle + 90))
         
-        # Rain: dry season, but simulate a couple of rain events (e.g. Day 18 and Day 40)
-        rain = 0.0
-        if day_of_season in [18, 41]:
-            rain = np.random.uniform(5.0, 20.0)
-            
         weather_by_date[date.strftime("%Y-%m-%d")] = {
-            "temperature": base_temp,
-            "humidity": base_humidity,
-            "blh": base_blh,
-            "wind_u": wind_u,
-            "wind_v": wind_v,
-            "precipitation": rain,
+            "temperature": round(base_temp, 1),
+            "humidity": round(base_humidity, 1),
+            "blh": round(base_blh, 1),
+            "wind_u": round(wind_u, 2),
+            "wind_v": round(wind_v, 2),
+            "precipitation": round(rain, 1),
             "wind_angle": wind_angle,
-            "wind_speed": wind_speed
+            "wind_speed": round(wind_speed, 1)
         }
         
     # Process grid cell values day by day
+    grid_records = []
     for date in date_list:
         date_str = date.strftime("%Y-%m-%d")
         w = weather_by_date[date_str]
+        is_monsoon = date.month in [6, 7, 8, 9]
         
-        # Get active fires for this day
         day_fires = fires_df[fires_df["date"] == date_str]
-        
         if not day_fires.empty:
             fire_lats = day_fires["latitude"].values
             fire_lons = day_fires["longitude"].values
             fire_frps = day_fires["frp"].values
-            
-            # Precompute wind variables
             travel_angle = np.radians(w["wind_angle"] - 180.0)
-            # Wind unit vector pointing downwind
             wind_dir_vector = np.array([np.cos(travel_angle), np.sin(travel_angle)])
         else:
             fire_lats = np.array([])
@@ -197,67 +183,78 @@ def simulate_data():
         for idx, row in grid_df.iterrows():
             lat_c, lon_c = row["latitude"], row["longitude"]
             
-            # A. Calculate Biomass Smoke Impact (Optimized Vectorized Plume Model)
+            # A. Biomass Plume Dispersion
             smoke_impact = 0.0
             if len(fire_lats) > 0:
                 d_lats = lat_c - fire_lats
                 d_lons = lon_c - fire_lons
                 dists_deg = np.sqrt(d_lats**2 + d_lons**2)
-                dists_km = dists_deg * 111.0
-                dists_km = np.clip(dists_km, 1.0, None)
+                dists_km = np.clip(dists_deg * 111.0, 1.0, None)
                 
-                # Projection of distance vector onto downwind direction vector
                 proj_dists = (d_lons * wind_dir_vector[0] + d_lats * wind_dir_vector[1]) * 111.0
-                
-                # Perpendicular distance to plume centerline
-                # Cross product in 2D gives |d_vector x wind_vector| which is perpendicular distance
                 perp_dists = np.abs(d_lons * wind_dir_vector[1] - d_lats * wind_dir_vector[0]) * 111.0
-                
-                # Plume model: dispersion width increases with downwind distance
                 sigma_ys = 1.5 + 0.1 * np.clip(proj_dists, 0.0, None)
-                
-                # Plume Gaussian factor
                 plume_factors = np.exp(-0.5 * (perp_dists / sigma_ys)**2)
-                
-                # Decay along downwind distance
                 decay_factors = 1.0 / (1.0 + 0.005 * np.clip(proj_dists, 0.0, None)**1.5)
-                
-                # Filter out upwind cells (proj_dists <= -5.0)
                 mask = proj_dists > -5.0
-                
                 contributions = (fire_frps * plume_factors * decay_factors) / np.sqrt(dists_km)
-                smoke_impact = np.sum(contributions[mask])
-            
-            smoke_impact = min(800.0, smoke_impact)
-            
-            # B. Base Concentrations based on Cell Type (urban, industrial, agricultural, rural)
-            # November in North India (Delhi-NCR, Punjab, Haryana) is peak stubble burning winter haze season
-            winter_haze_factor = (date - start_date).days * 4.5
-            
-            if row["type"] == "urban":
-                base_pm25 = 240.0 + winter_haze_factor + np.random.normal(0, 15.0)
-                base_no2 = 75.0 + np.random.normal(0, 5.0)
-                base_so2 = 22.0 + np.random.normal(0, 2.0)
-                base_co = 2.8 + np.random.normal(0, 0.2)
-                base_o3 = 45.0 + np.random.normal(0, 4.0)
-            elif row["type"] == "industrial":
-                base_pm25 = 280.0 + winter_haze_factor + np.random.normal(0, 20.0)
-                base_no2 = 65.0 + np.random.normal(0, 5.0)
-                base_so2 = 45.0 + np.random.normal(0, 6.0)
-                base_co = 3.5 + np.random.normal(0, 0.3)
-                base_o3 = 35.0 + np.random.normal(0, 3.0)
-            elif row["type"] == "agricultural":
-                base_pm25 = 210.0 + winter_haze_factor + np.random.normal(0, 15.0)
-                base_no2 = 35.0 + np.random.normal(0, 3.0)
-                base_so2 = 18.0 + np.random.normal(0, 2.0)
-                base_co = 1.8 + np.random.normal(0, 0.15)
-                base_o3 = 50.0 + np.random.normal(0, 4.0)
-            else: # rural
-                base_pm25 = 180.0 + winter_haze_factor + np.random.normal(0, 12.0)
-                base_no2 = 28.0 + np.random.normal(0, 2.5)
-                base_so2 = 14.0 + np.random.normal(0, 1.5)
-                base_co = 1.2 + np.random.normal(0, 0.1)
-                base_o3 = 42.0 + np.random.normal(0, 3.0)
+                smoke_impact = min(800.0, np.sum(contributions[mask]))
+                
+            # B. Base Concentrations based on Seasonal Regime
+            if is_monsoon:
+                # Clean monsoon / summer atmosphere
+                if row["type"] == "urban":
+                    base_pm25 = 28.0 + np.random.normal(0, 3.0)
+                    base_no2 = 22.0 + np.random.normal(0, 2.0)
+                    base_so2 = 8.0 + np.random.normal(0, 1.0)
+                    base_co = 0.6 + np.random.normal(0, 0.04)
+                    base_o3 = 24.0 + np.random.normal(0, 2.0)
+                elif row["type"] == "industrial":
+                    base_pm25 = 44.0 + np.random.normal(0, 4.0)
+                    base_no2 = 32.0 + np.random.normal(0, 3.0)
+                    base_so2 = 18.0 + np.random.normal(0, 2.0)
+                    base_co = 0.9 + np.random.normal(0, 0.06)
+                    base_o3 = 20.0 + np.random.normal(0, 2.0)
+                elif row["type"] == "agricultural":
+                    base_pm25 = 20.0 + np.random.normal(0, 2.5)
+                    base_no2 = 12.0 + np.random.normal(0, 1.5)
+                    base_so2 = 6.0 + np.random.normal(0, 0.8)
+                    base_co = 0.4 + np.random.normal(0, 0.03)
+                    base_o3 = 26.0 + np.random.normal(0, 2.0)
+                else: # rural
+                    base_pm25 = 16.0 + np.random.normal(0, 2.0)
+                    base_no2 = 9.0 + np.random.normal(0, 1.0)
+                    base_so2 = 5.0 + np.random.normal(0, 0.6)
+                    base_co = 0.3 + np.random.normal(0, 0.02)
+                    base_o3 = 28.0 + np.random.normal(0, 2.0)
+            else:
+                # Winter stubble haze regime
+                day_of_nov = date.day
+                winter_haze_factor = day_of_nov * 4.0
+                if row["type"] == "urban":
+                    base_pm25 = 190.0 + winter_haze_factor + np.random.normal(0, 12.0)
+                    base_no2 = 68.0 + np.random.normal(0, 4.0)
+                    base_so2 = 22.0 + np.random.normal(0, 2.0)
+                    base_co = 2.4 + np.random.normal(0, 0.15)
+                    base_o3 = 42.0 + np.random.normal(0, 3.0)
+                elif row["type"] == "industrial":
+                    base_pm25 = 230.0 + winter_haze_factor + np.random.normal(0, 15.0)
+                    base_no2 = 62.0 + np.random.normal(0, 4.0)
+                    base_so2 = 42.0 + np.random.normal(0, 4.0)
+                    base_co = 3.0 + np.random.normal(0, 0.2)
+                    base_o3 = 34.0 + np.random.normal(0, 3.0)
+                elif row["type"] == "agricultural":
+                    base_pm25 = 160.0 + winter_haze_factor + np.random.normal(0, 12.0)
+                    base_no2 = 30.0 + np.random.normal(0, 2.5)
+                    base_so2 = 16.0 + np.random.normal(0, 1.5)
+                    base_co = 1.5 + np.random.normal(0, 0.1)
+                    base_o3 = 48.0 + np.random.normal(0, 3.0)
+                else: # rural
+                    base_pm25 = 140.0 + winter_haze_factor + np.random.normal(0, 10.0)
+                    base_no2 = 24.0 + np.random.normal(0, 2.0)
+                    base_so2 = 12.0 + np.random.normal(0, 1.2)
+                    base_co = 1.1 + np.random.normal(0, 0.08)
+                    base_o3 = 40.0 + np.random.normal(0, 2.5)
                 
             # C. Boundary Layer Height Compression Effect
             blh_compression = 1000.0 / w["blh"]
