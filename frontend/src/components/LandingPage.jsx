@@ -504,7 +504,7 @@ export default function LandingPage({ onEnterDashboard }) {
             </div>
           </div>
 
-          {/* Floating Widget Card 3: Active Fires — "Fire Awakens" (Middle Right) */}
+          {/* Floating Widget Card 3: Active Fires — "Fire Awakens" (Shifted to Upper-Right Orbital Ring) */}
           <div
             ref={fireCardRef}
             onMouseEnter={() => {
@@ -515,7 +515,7 @@ export default function LandingPage({ onEnterDashboard }) {
               setActiveCard(null)
               setFireActive(false)
             }}
-            className={`absolute top-[48%] right-[2%] glass-panel rounded-2xl p-4 w-[160px] text-left transition-all duration-300 z-30 cursor-pointer relative overflow-hidden ${
+            className={`absolute top-[12%] right-[2%] glass-panel rounded-2xl p-4 w-[160px] text-left transition-all duration-300 z-30 cursor-pointer relative overflow-hidden ${
               fireActive 
                 ? 'scale-105 border-orange-500 shadow-[0_0_40px_rgba(249,115,22,0.55),inset_0_0_25px_rgba(239,68,68,0.3)] bg-gradient-to-br from-orange-950/40 via-slate-900/90 to-red-950/30' 
                 : 'hover:translate-y-[-2px] border-slate-800'
