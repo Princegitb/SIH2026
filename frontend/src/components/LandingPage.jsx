@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { ArrowRight, Satellite, Shield, Cpu, Database, Bell, BarChart3, Wind, Flame, Compass } from 'lucide-react'
 
 // Simple SVG mini sparkline generator for floating widgets
@@ -25,6 +25,24 @@ export default function LandingPage({ onEnterDashboard }) {
   const [activeCard, setActiveCard] = useState(null)
   const [pulseCount, setPulseCount] = useState(0)
 
+  // Refs for interactive components
+  const heroRef = useRef(null)
+  const windCardRef = useRef(null)
+  const fireCardRef = useRef(null)
+  const earthRef = useRef(null)
+  const ringsRef = useRef(null)
+
+  // Wind evasion physics state
+  const windPos = useRef({ x: 0, y: 0, targetX: 0, targetY: 0, speed: 0 })
+  const [windTrails, setWindTrails] = useState(false)
+
+  // Fire awakening state & rising embers
+  const [fireActive, setFireActive] = useState(false)
+  const [embers, setEmbers] = useState([])
+
+  // Mouse coords inside hero container
+  const mouseCoords = useRef({ x: -9999, y: -9999, isInside: false, nx: 0, ny: 0 })
+
   // Subtle dynamic updates on floating widgets for interactivity
   useEffect(() => {
     const interval = setInterval(() => {
@@ -32,6 +50,148 @@ export default function LandingPage({ onEnterDashboard }) {
     }, 3000)
     return () => clearInterval(interval)
   }, [])
+
+  // Ember generation when fire is active
+  useEffect(() => {
+    if (!fireActive) {
+      setEmbers([])
+      return
+    }
+
+    const emberInterval = setInterval(() => {
+      const id = Date.now() + Math.random()
+      const newEmber = {
+        id,
+        left: Math.random() * 80 + 10,
+        size: Math.random() * 3 + 2,
+        duration: Math.random() * 1.2 + 0.8,
+        drift: (Math.random() - 0.5) * 30
+      }
+      setEmbers(prev => [...prev.slice(-12), newEmber])
+    }, 120)
+
+    return () => clearInterval(emberInterval)
+  }, [fireActive])
+
+  // Continuous 60fps RAF loop for Wind physics & Earth 3D Parallax
+  useEffect(() => {
+    // Check for reduced motion and fine pointer (desktop cursor)
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const isFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches
+
+    if (prefersReducedMotion || !isFinePointer) return
+
+    let animationFrameId
+    let time = 0
+
+    const updatePhysics = () => {
+      time += 0.03
+
+      // 1. EARTH & RINGS 3D PARALLAX
+      if (earthRef.current && mouseCoords.current.isInside) {
+        const tiltX = -mouseCoords.current.ny * 10
+        const tiltY = mouseCoords.current.nx * 12
+        earthRef.current.style.transform = `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translateZ(12px)`
+      } else if (earthRef.current) {
+        earthRef.current.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0px)`
+      }
+
+      if (ringsRef.current && mouseCoords.current.isInside) {
+        const ringX = -mouseCoords.current.nx * 7
+        const ringY = -mouseCoords.current.ny * 7
+        ringsRef.current.style.transform = `translate(${ringX}px, ${ringY}px)`
+      } else if (ringsRef.current) {
+        ringsRef.current.style.transform = `translate(0px, 0px)`
+      }
+
+      // 2. WIND VELOCITY CARD — "THE WIND ESCAPES"
+      if (windCardRef.current && heroRef.current) {
+        const heroRect = heroRef.current.getBoundingClientRect()
+        const windRect = windCardRef.current.getBoundingClientRect()
+
+        const windCenterX = windRect.left + windRect.width / 2 - heroRect.left
+        const windCenterY = windRect.top + windRect.height / 2 - heroRect.top
+
+        const mouseX = mouseCoords.current.x
+        const mouseY = mouseCoords.current.y
+
+        const dx = windCenterX - mouseX
+        const dy = windCenterY - mouseY
+        const dist = Math.sqrt(dx * dx + dy * dy)
+
+        const evasionRadius = 140
+
+        if (mouseCoords.current.isInside && dist < evasionRadius && dist > 0) {
+          // Stronger repulsion the closer cursor gets
+          const intensity = Math.pow((evasionRadius - dist) / evasionRadius, 1.2) * 55
+          const angle = Math.atan2(dy, dx)
+          
+          // Evasion vector with subtle tangential breeze curl
+          const curl = Math.sin(time * 3) * 8
+          windPos.current.targetX = Math.max(-45, Math.min(45, Math.cos(angle) * intensity + curl))
+          windPos.current.targetY = Math.max(-35, Math.min(35, Math.sin(angle) * intensity - 5))
+          setWindTrails(true)
+        } else {
+          // Resting floating breath motion when cursor is far
+          windPos.current.targetX = Math.sin(time * 1.5) * 3
+          windPos.current.targetY = Math.cos(time * 2) * 4
+          if (windPos.current.speed < 0.2) {
+            setWindTrails(false)
+          }
+        }
+
+        // Spring-like interpolation (lerp with damping)
+        const prevX = windPos.current.x
+        const prevY = windPos.current.y
+        windPos.current.x += (windPos.current.targetX - windPos.current.x) * 0.12
+        windPos.current.y += (windPos.current.targetY - windPos.current.y) * 0.12
+
+        const stepSpeed = Math.sqrt(
+          Math.pow(windPos.current.x - prevX, 2) + Math.pow(windPos.current.y - prevY, 2)
+        )
+        windPos.current.speed = stepSpeed
+
+        const tiltDeg = (windPos.current.x * 0.25).toFixed(2)
+        windCardRef.current.style.transform = `translate3d(${windPos.current.x.toFixed(2)}px, ${windPos.current.y.toFixed(2)}px, 20px) rotate(${tiltDeg}deg)`
+      }
+
+      animationFrameId = requestAnimationFrame(updatePhysics)
+    }
+
+    animationFrameId = requestAnimationFrame(updatePhysics)
+    return () => cancelAnimationFrame(animationFrameId)
+  }, [])
+
+  const handleHeroMouseMove = (e) => {
+    if (!heroRef.current) return
+    const rect = heroRef.current.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+    const nx = (x / rect.width) * 2 - 1
+    const ny = (y / rect.height) * 2 - 1
+
+    mouseCoords.current = { x, y, isInside: true, nx, ny }
+
+    // Proximity check for Fire Card Awakening
+    if (fireCardRef.current) {
+      const fireRect = fireCardRef.current.getBoundingClientRect()
+      const fireCenterX = fireRect.left + fireRect.width / 2 - rect.left
+      const fireCenterY = fireRect.top + fireRect.height / 2 - rect.top
+      const fdx = x - fireCenterX
+      const fdy = y - fireCenterY
+      const fdist = Math.sqrt(fdx * fdx + fdy * fdy)
+      if (fdist < 110) {
+        setFireActive(true)
+      } else if (activeCard !== 3) {
+        setFireActive(false)
+      }
+    }
+  }
+
+  const handleHeroMouseLeave = () => {
+    mouseCoords.current = { x: -9999, y: -9999, isInside: false, nx: 0, ny: 0 }
+    if (activeCard !== 3) setFireActive(false)
+  }
 
   return (
     <div
@@ -100,26 +260,43 @@ export default function LandingPage({ onEnterDashboard }) {
         </div>
 
         {/* Right Side: Futuristic Animated Space Orbit Scan Visual (Span 6) */}
-        <div className="lg:col-span-6 relative flex items-center justify-center min-h-[440px] lg:min-h-[500px]">
+        <div 
+          ref={heroRef}
+          onMouseMove={handleHeroMouseMove}
+          onMouseLeave={handleHeroMouseLeave}
+          className="lg:col-span-6 relative flex items-center justify-center min-h-[440px] lg:min-h-[500px] select-none perspective-[1000px]"
+        >
 
-          {/* The Orbiting/Radar Background Ring */}
-          <div className="absolute w-[360px] h-[360px] sm:w-[440px] sm:h-[440px] border border-slate-800/40 rounded-full flex items-center justify-center z-0">
-            <div className="w-[280px] h-[280px] sm:w-[340px] sm:h-[340px] border border-slate-800/20 rounded-full flex items-center justify-center">
-              <div className="w-[180px] h-[180px] sm:w-[220px] sm:h-[220px] border border-sky-500/5 rounded-full"></div>
+          {/* Concentric Background Rings with Parallax Container */}
+          <div 
+            ref={ringsRef}
+            className="absolute inset-0 flex items-center justify-center transition-transform duration-300 ease-out pointer-events-none z-0"
+          >
+            <div className="w-[360px] h-[360px] sm:w-[440px] sm:h-[440px] border border-slate-800/40 rounded-full flex items-center justify-center">
+              <div className="w-[280px] h-[280px] sm:w-[340px] sm:h-[340px] border border-slate-800/20 rounded-full flex items-center justify-center">
+                <div className="w-[180px] h-[180px] sm:w-[220px] sm:h-[220px] border border-sky-500/5 rounded-full"></div>
+              </div>
             </div>
           </div>
 
-          {/* Glowing Green Scanning Arc Orbit path */}
+          {/* Glowing Green & Blue Scanning Arc Orbit paths */}
           <div className="absolute w-[380px] h-[380px] sm:w-[460px] sm:h-[460px] rounded-full border border-transparent border-t-emerald-500/20 border-r-emerald-500/25 animate-spin duration-[20s] ease-linear pointer-events-none z-0"></div>
           <div className="absolute w-[380px] h-[380px] sm:w-[460px] sm:h-[460px] rounded-full border border-transparent border-b-sky-500/20 border-l-sky-500/25 animate-spin duration-[12s] ease-linear pointer-events-none z-0"></div>
 
-          {/* Central Satellite Scanned Earth Sphere */}
-          <div className="absolute w-[180px] h-[180px] sm:w-[240px] sm:h-[240px] bg-slate-900 border border-slate-850 rounded-full overflow-hidden shadow-[0_0_80px_rgba(75,107,245,0.15)] flex items-center justify-center z-10 transition-transform duration-500 hover:scale-105 group">
+          {/* Central Satellite Scanned Earth Sphere with 3D Parallax Tilt */}
+          <div 
+            ref={earthRef}
+            className="absolute w-[180px] h-[180px] sm:w-[240px] sm:h-[240px] bg-slate-900 border border-slate-800 rounded-full overflow-hidden shadow-[0_0_80px_rgba(75,107,245,0.22)] flex items-center justify-center z-10 transition-transform duration-200 ease-out group cursor-grab active:cursor-grabbing"
+          >
+            {/* Atmospheric Rim Glow */}
+            <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(75,107,245,0.35),rgba(56,189,248,0.15),transparent_70%)] pointer-events-none"></div>
+            
             {/* Holographic Earth mesh overlay */}
             <div className="absolute inset-0 bg-gradient-to-tr from-slate-950 via-slate-900/90 to-[#4b6bf5]/25 mix-blend-screen pointer-events-none"></div>
+            
             {/* Grid Line Scans */}
             <div className="absolute w-full h-[2px] bg-sky-500/35 top-0 animate-[scan_3s_infinite_linear]"></div>
-            <span className="text-7xl select-none filter drop-shadow-[0_0_20px_rgba(75,107,245,0.4)] opacity-85">🌏</span>
+            <span className="text-7xl select-none filter drop-shadow-[0_0_22px_rgba(75,107,245,0.45)] opacity-90 transition-transform duration-500 group-hover:scale-110">🌏</span>
           </div>
 
           {/* Orbiting Scanning Satellite Model */}
@@ -136,8 +313,9 @@ export default function LandingPage({ onEnterDashboard }) {
           <div
             onMouseEnter={() => setActiveCard(1)}
             onMouseLeave={() => setActiveCard(null)}
-            className={`absolute top-[8%] left-[2%] glass-panel rounded-2xl p-4 w-[160px] text-left transition-all duration-300 z-30 cursor-pointer ${activeCard === 1 ? 'scale-105 border-[#4b6bf5]/50 shadow-[0_0_20px_rgba(75,107,245,0.2)]' : 'hover:translate-y-[-2px]'
-              }`}
+            className={`absolute top-[8%] left-[2%] glass-panel rounded-2xl p-4 w-[160px] text-left transition-all duration-300 z-30 cursor-pointer ${
+              activeCard === 1 ? 'scale-105 border-[#4b6bf5]/50 shadow-[0_0_20px_rgba(75,107,245,0.2)]' : 'hover:translate-y-[-2px]'
+            }`}
           >
             <div className="text-[8px] font-bold text-slate-500 uppercase tracking-wider">AQI (Delhi NCR)</div>
             <div className="flex items-baseline space-x-1.5 mt-1">
@@ -150,38 +328,126 @@ export default function LandingPage({ onEnterDashboard }) {
             </div>
           </div>
 
-          {/* Floating Widget Card 2: Wind Speed (Bottom Center) */}
+          {/* Floating Widget Card 2: Wind Velocity — "The Wind Escapes" (Bottom Center) */}
           <div
+            ref={windCardRef}
             onMouseEnter={() => setActiveCard(2)}
             onMouseLeave={() => setActiveCard(null)}
-            className={`absolute bottom-[10%] left-[25%] -translate-x-1/2 glass-panel rounded-2xl p-3.5 w-[140px] text-left transition-all duration-300 z-30 cursor-pointer ${activeCard === 2 ? 'scale-105 border-sky-500/50 shadow-[0_0_20px_rgba(56,189,248,0.2)]' : 'hover:translate-y-[-2px]'
-              }`}
+            className={`absolute bottom-[10%] left-[25%] -translate-x-1/2 glass-panel rounded-2xl p-3.5 w-[140px] text-left z-30 cursor-pointer will-change-transform ${
+              activeCard === 2 
+                ? 'border-sky-400/60 shadow-[0_0_25px_rgba(56,189,248,0.3)]' 
+                : 'border-slate-800/80 shadow-lg'
+            }`}
+            style={{ transition: 'box-shadow 0.3s ease, border-color 0.3s ease' }}
           >
-            <div className="text-[8px] font-bold text-slate-500 uppercase tracking-wider flex items-center">
-              <Wind size={10} className="mr-1 text-sky-400" /> Wind Velocity
+            {/* Animated Air Streams / Wind Trails flowing behind the escaping card */}
+            {windTrails && (
+              <div className="absolute -top-3 -left-5 -right-5 pointer-events-none opacity-60">
+                <svg viewBox="0 0 160 30" className="w-full h-7 overflow-visible">
+                  <path 
+                    d="M 5,12 Q 35,4 70,14 T 145,8" 
+                    fill="none" 
+                    stroke="rgba(56,189,248,0.5)" 
+                    strokeWidth="1.5" 
+                    strokeDasharray="12 6"
+                    className="animate-[windStream_1.2s_linear_infinite]"
+                  />
+                  <path 
+                    d="M 15,22 Q 45,16 90,24 T 155,18" 
+                    fill="none" 
+                    stroke="rgba(147,197,253,0.4)" 
+                    strokeWidth="1" 
+                    strokeDasharray="8 4"
+                    className="animate-[windStream_0.9s_linear_infinite]"
+                  />
+                </svg>
+              </div>
+            )}
+
+            <div className="text-[8px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+              <span className="flex items-center">
+                <Wind size={11} className={`mr-1 text-sky-400 ${windTrails ? 'animate-pulse' : ''}`} /> Wind Velocity
+              </span>
+              {windTrails && (
+                <span className="text-[7px] text-sky-400 font-mono font-bold animate-pulse">GUST</span>
+              )}
             </div>
-            <div className="text-xl font-extrabold text-white mt-1">
-              9 <span className="text-[10px] font-normal text-slate-400">km/h</span>
+            <div className="text-xl font-extrabold text-white mt-1 flex items-baseline">
+              <span>9</span> 
+              <span className="text-[10px] font-normal text-slate-400 ml-1">km/h</span>
             </div>
-            <div className="text-[8px] text-[#10b981] font-bold mt-1 uppercase">Moderate Vector</div>
+            <div className="text-[8px] text-[#10b981] font-bold mt-1 uppercase flex items-center justify-between">
+              <span>Moderate Vector</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-ping"></span>
+            </div>
           </div>
 
-          {/* Floating Widget Card 3: Active Fires (Middle Right) */}
+          {/* Floating Widget Card 3: Active Fires — "Fire Awakens" (Middle Right) */}
           <div
-            onMouseEnter={() => setActiveCard(3)}
-            onMouseLeave={() => setActiveCard(null)}
-            className={`absolute top-[48%] right-[2%] glass-panel rounded-2xl p-4 w-[160px] text-left transition-all duration-300 z-30 cursor-pointer ${activeCard === 3 ? 'scale-105 border-orange-500/50 shadow-[0_0_20px_rgba(249,115,22,0.2)]' : 'hover:translate-y-[-2px]'
-              }`}
+            ref={fireCardRef}
+            onMouseEnter={() => {
+              setActiveCard(3)
+              setFireActive(true)
+            }}
+            onMouseLeave={() => {
+              setActiveCard(null)
+              setFireActive(false)
+            }}
+            className={`absolute top-[48%] right-[2%] glass-panel rounded-2xl p-4 w-[160px] text-left transition-all duration-300 z-30 cursor-pointer relative overflow-hidden ${
+              fireActive 
+                ? 'scale-105 border-orange-500 shadow-[0_0_35px_rgba(249,115,22,0.4),inset_0_0_20px_rgba(239,68,68,0.2)]' 
+                : 'hover:translate-y-[-2px] border-slate-800'
+            }`}
           >
-            <div className="text-[8px] font-bold text-slate-500 uppercase tracking-wider flex items-center">
-              <Flame size={10} className="mr-1 text-orange-500" /> Active Fires
+            {/* Ambient Fire Aura Glow in background */}
+            {fireActive && (
+              <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-gradient-to-t from-orange-500/30 via-red-500/20 to-transparent rounded-full blur-xl pointer-events-none animate-pulse"></div>
+            )}
+
+            {/* Rising Animated Ember Sparks Particle Layer */}
+            {fireActive && embers.map(ember => (
+              <div
+                key={ember.id}
+                className="absolute rounded-full pointer-events-none animate-[emberRise_1.2s_ease-out_forwards]"
+                style={{
+                  left: `${ember.left}%`,
+                  bottom: '10px',
+                  width: `${ember.size}px`,
+                  height: `${ember.size}px`,
+                  backgroundColor: Math.random() > 0.4 ? '#f97316' : '#facc15',
+                  boxShadow: '0 0 6px #ea580c',
+                  '--ember-drift': `${ember.drift}px`,
+                  animationDuration: `${ember.duration}s`
+                }}
+              />
+            ))}
+
+            <div className="text-[8px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between relative z-10">
+              <span className="flex items-center">
+                <Flame 
+                  size={12} 
+                  className={`mr-1 transition-all duration-300 ${
+                    fireActive ? 'text-orange-400 scale-125 drop-shadow-[0_0_8px_#f97316] animate-bounce' : 'text-orange-500'
+                  }`} 
+                /> 
+                Active Fires
+              </span>
+              {fireActive && (
+                <span className="text-[7px] bg-orange-500/20 text-orange-400 border border-orange-500/40 px-1 rounded font-bold uppercase animate-pulse">
+                  IGNITED
+                </span>
+              )}
             </div>
-            <div className="flex items-baseline space-x-1.5 mt-1">
-              <span className="text-2xl font-extrabold text-orange-500">3</span>
+
+            <div className="flex items-baseline space-x-1.5 mt-1 relative z-10">
+              <span className={`text-2xl font-extrabold transition-colors duration-300 ${fireActive ? 'text-orange-400 drop-shadow-[0_0_10px_rgba(249,115,22,0.6)]' : 'text-orange-500'}`}>
+                3
+              </span>
               <span className="text-[8px] font-bold text-orange-400 uppercase">Detected</span>
             </div>
-            <div className="flex justify-between items-center mt-2.5 pt-1 border-t border-slate-850">
-              <span className="text-[7px] text-slate-500">Last 24 hrs</span>
+
+            <div className="flex justify-between items-center mt-2.5 pt-1 border-t border-slate-850 relative z-10">
+              <span className="text-[7px] text-slate-400">Last 24 hrs</span>
               <MiniSparkline values={[1, 3, 2, 4, 3, 3]} color="#f97316" />
             </div>
           </div>
@@ -272,7 +538,7 @@ export default function LandingPage({ onEnterDashboard }) {
         </div>
       </footer>
 
-      {/* Embedded CSS rules for orbit scanning effects */}
+      {/* Embedded CSS rules for orbit scanning, wind streams & ember particles */}
       <style>{`
         @keyframes scan {
           0% { transform: translateY(0); opacity: 0.1; }
@@ -284,7 +550,26 @@ export default function LandingPage({ onEnterDashboard }) {
           50% { opacity: 0.8; }
           100% { opacity: 0.2; }
         }
+        @keyframes windStream {
+          0% { stroke-dashoffset: 36; opacity: 0.2; }
+          50% { opacity: 0.9; }
+          100% { stroke-dashoffset: 0; opacity: 0.1; }
+        }
+        @keyframes emberRise {
+          0% {
+            transform: translate(0, 0) scale(1);
+            opacity: 1;
+          }
+          50% {
+            opacity: 0.8;
+          }
+          100% {
+            transform: translate(var(--ember-drift, 10px), -60px) scale(0.3);
+            opacity: 0;
+          }
+        }
       `}</style>
     </div>
   )
 }
+
