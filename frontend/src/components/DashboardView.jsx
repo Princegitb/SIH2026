@@ -220,96 +220,82 @@ export default function DashboardView() {
       {/* 1. KPIs Row */}
       <div className="grid grid-cols-12 gap-4">
         
-        {/* KPI 1: Estimated AQI (Span 4) */}
-        <div className="col-span-4 glass-panel rounded-2xl p-5 flex flex-col justify-between h-[160px]">
+        {/* KPI 1: Regional AQI */}
+        <div className="col-span-4 glass-panel rounded-2xl p-5 flex flex-col justify-between h-[155px]">
           <div className="flex justify-between items-start">
             <div>
-              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Estimated AQI</div>
-              <div className="text-[10px] text-slate-500 font-semibold mt-0.5">Delhi NCR Basin</div>
-              <div className="text-4xl font-extrabold mt-1 theme-adapt-text tracking-tight">{kpis.aqi}</div>
-              <span className={`inline-block text-[9px] font-bold px-2 py-0.5 rounded-full mt-2 ${aqiDetails.badge}`}>
+              <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Regional AQI</div>
+              <div className="text-4xl font-extrabold mt-2 theme-adapt-text tracking-tight">{kpis.aqi}</div>
+              <span className={`inline-block text-[10px] font-bold px-2.5 py-0.5 rounded-full mt-2.5 ${aqiDetails.badge}`}>
                 {aqiDetails.label.toUpperCase()}
               </span>
             </div>
             <div className="flex flex-col items-end text-right">
-              <div className={`text-[10px] font-bold flex items-center space-x-0.5 ${kpis.aqi_trend_pct <= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                {kpis.aqi_trend_pct <= 0 ? <TrendingDown size={12} /> : <TrendingUp size={12} />}
+              <div className={`text-[11px] font-bold flex items-center space-x-0.5 ${kpis.aqi_trend_pct <= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                {kpis.aqi_trend_pct <= 0 ? <TrendingDown size={13} /> : <TrendingUp size={13} />}
                 <span>{Math.abs(kpis.aqi_trend_pct || 0).toFixed(1)}%</span>
               </div>
-              <span className="text-[8px] text-slate-500 mt-0.5 font-medium">vs yesterday</span>
-              <div className="mt-4">
+              <span className="text-[9px] text-slate-500 mt-0.5 font-medium">vs yesterday</span>
+              <div className="mt-3">
                 <Sparkline values={kpis.sparklines.aqi} color={aqiDetails.color} />
               </div>
             </div>
           </div>
-          <div className="text-[8px] text-slate-500 font-medium flex items-center space-x-1 mt-1">
-            <Clock size={10} />
-            <span>{kpis.last_synced_at ? `Synced: ${kpis.last_synced_at}` : 'Telemetry Synced Live'}</span>
-          </div>
         </div>
 
-        {/* KPI 2: Pollutants Overview (Span 3) */}
-        <div className="col-span-3 glass-panel rounded-2xl p-5 flex flex-col justify-between h-[160px]">
+        {/* KPI 2: Particulate Matter */}
+        <div className="col-span-3 glass-panel rounded-2xl p-5 flex flex-col justify-between h-[155px]">
           <div>
-            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Particulate Matter</div>
-            <div className="text-[10px] text-slate-500 font-semibold mt-0.5">Focus District Averages</div>
-            
-            <div className="grid grid-cols-2 gap-2 mt-2">
-              <div>
-                <div className="text-[10px] font-medium text-slate-400">PM2.5</div>
-                <div className="text-2xl font-extrabold text-yellow-400 tracking-tight">{focus ? focus.pm25.toFixed(0) : "77"}</div>
-                <div className="text-[8px] text-slate-500 mt-0.5">µg/m³</div>
+            <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Particulate Matter</div>
+            <div className="grid grid-cols-2 gap-3 mt-3">
+              <div className="bg-slate-900/40 border border-slate-800/60 rounded-xl p-2.5">
+                <div className="text-[10px] font-semibold text-slate-400">PM2.5</div>
+                <div className="text-2xl font-extrabold text-yellow-400 tracking-tight mt-0.5">{focus ? focus.pm25.toFixed(0) : "46"}</div>
+                <div className="text-[9px] text-slate-500 font-medium">µg/m³</div>
               </div>
-              <div>
-                <div className="text-[10px] font-medium text-slate-400">PM10</div>
-                <div className="text-2xl font-extrabold text-orange-400 tracking-tight">{focus ? focus.pm10.toFixed(0) : "143"}</div>
-                <div className="text-[8px] text-slate-500 mt-0.5">µg/m³</div>
+              <div className="bg-slate-900/40 border border-slate-800/60 rounded-xl p-2.5">
+                <div className="text-[10px] font-semibold text-slate-400">PM10</div>
+                <div className="text-2xl font-extrabold text-orange-400 tracking-tight mt-0.5">{focus ? focus.pm10.toFixed(0) : "74"}</div>
+                <div className="text-[9px] text-slate-500 font-medium">µg/m³</div>
               </div>
             </div>
           </div>
-          <div className="flex justify-between items-center text-[8px] text-slate-500 font-medium border-t border-slate-800/40 pt-1.5 mt-1">
-            <span>CPCB Guideline Limits</span>
-            <span className="font-bold text-slate-400">60 / 100</span>
-          </div>
         </div>
 
-        {/* KPI 3: HCHO Hotspots (Span 2) */}
-        <div className="col-span-2 glass-panel rounded-2xl p-5 flex flex-col justify-between h-[160px]">
+        {/* KPI 3: Satellite Hotspots */}
+        <div className="col-span-2 glass-panel rounded-2xl p-5 flex flex-col justify-between h-[155px]">
           <div className="flex justify-between items-start">
             <div>
-              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">HCHO Hotspots</div>
-              <div className="text-[10px] text-slate-500 font-semibold mt-0.5">DBSCAN Clusters</div>
-              <div className="text-3xl font-extrabold mt-1.5 text-purple-400 tracking-tight">{kpis.hcho}</div>
+              <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Satellite Hotspots</div>
+              <div className="text-3xl font-extrabold mt-2 text-purple-400 tracking-tight">{kpis.hcho}</div>
             </div>
-            <div className="w-2 h-2 rounded-full bg-purple-400 shadow-[0_0_8px_rgba(168,85,247,0.7)] animate-pulse"></div>
+            <div className="w-2.5 h-2.5 rounded-full bg-purple-400 shadow-[0_0_8px_rgba(168,85,247,0.7)] animate-pulse"></div>
           </div>
           <div className="mt-1">
             <Sparkline values={kpis.sparklines.hcho} color="#a855f7" />
           </div>
-          <div className="text-[8px] text-purple-400/90 font-bold uppercase tracking-wider">
-            {kpis.hcho > 0 ? 'Elevated Activity' : 'Atmosphere Baseline'}
+          <div className="text-[9px] text-purple-400/90 font-bold uppercase tracking-wider">
+            {kpis.hcho > 0 ? 'Active Detected' : 'Normal Baseline'}
           </div>
         </div>
 
-        {/* KPI 4: Active Fires (Span 3) */}
-        <div className="col-span-3 glass-panel rounded-2xl p-5 flex flex-col justify-between h-[160px]">
+        {/* KPI 4: Active Thermal Fires */}
+        <div className="col-span-3 glass-panel rounded-2xl p-5 flex flex-col justify-between h-[155px]">
           <div className="flex justify-between items-start">
             <div>
-              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Active Fires</div>
-              <div className="text-[10px] text-slate-500 font-semibold mt-0.5">MODIS/VIIRS Satellite</div>
-              <div className="text-3xl font-extrabold mt-1.5 text-orange-500 tracking-tight">{kpis.fires}</div>
+              <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Active Fires</div>
+              <div className="text-3xl font-extrabold mt-2 text-orange-500 tracking-tight">{kpis.fires}</div>
             </div>
-            <div className={`text-[9px] font-bold flex items-center space-x-0.5 ${kpis.fire_trend_pct >= 0 ? 'text-orange-400' : 'text-emerald-400'}`}>
-              {kpis.fire_trend_pct >= 0 ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
+            <div className={`text-[10px] font-bold flex items-center space-x-0.5 ${kpis.fire_trend_pct >= 0 ? 'text-orange-400' : 'text-emerald-400'}`}>
+              {kpis.fire_trend_pct >= 0 ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
               <span>{kpis.fire_trend_pct >= 0 ? `+${kpis.fire_trend_pct}%` : `${kpis.fire_trend_pct}%`}</span>
             </div>
           </div>
           <div className="mt-1">
             <Sparkline values={kpis.sparklines.fires} color="#f97316" />
           </div>
-          <div className="text-[8px] text-slate-500 font-medium flex justify-between">
-            <span>Sensor confidence rate</span>
-            <span className="font-bold text-orange-400">{kpis.sensor_confidence || 88}% avg</span>
+          <div className="text-[9px] text-slate-500 font-medium">
+            Thermal anomaly detections
           </div>
         </div>
 
@@ -359,8 +345,7 @@ export default function DashboardView() {
         <div className="col-span-7 glass-panel rounded-2xl p-5 flex flex-col h-[570px] relative">
           <div className="flex justify-between items-center mb-3">
             <div>
-              <div className="text-sm font-extrabold text-slate-200 tracking-tight">Geospatial GIS Atmospheric Overview</div>
-              <div className="text-[10px] text-slate-500 font-semibold mt-0.5">District centers AQI, HCHO, and PM overlay</div>
+              <div className="text-sm font-extrabold text-slate-200 tracking-tight">Geospatial Atmospheric Grid</div>
             </div>
             {/* Toggles */}
             <div className="flex bg-slate-900/50 border border-slate-800/80 rounded-lg p-0.5 text-xs text-slate-400">

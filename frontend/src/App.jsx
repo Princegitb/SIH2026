@@ -246,8 +246,26 @@ export default function App() {
               </div>
             </div>
             
-            <div className="flex items-center space-x-3">
-              {/* Date selection selectbox */}
+            <div className="flex items-center space-x-2.5">
+              {/* Quick Filter: Jump to Live Today */}
+              <button
+                onClick={() => {
+                  if (dates && dates.length > 0) {
+                    setSelectedDate(dates[dates.length - 1])
+                  }
+                }}
+                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+                  dates && dates.length > 0 && selectedDate === dates[dates.length - 1]
+                    ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/35 shadow-sm shadow-emerald-500/10'
+                    : 'bg-[#0d1121] text-slate-400 border-slate-800 hover:text-white hover:border-slate-700'
+                }`}
+                title="Jump to today's real-time live telemetry"
+              >
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>Live Today</span>
+              </button>
+
+              {/* Date Filter Dropdown */}
               <div className="relative flex items-center">
                 <Calendar size={13} className="absolute left-3 text-[#4b6bf5] pointer-events-none" />
                 <select
@@ -263,14 +281,16 @@ export default function App() {
                     ))
                   ) : (
                     <option value={selectedDate} className="bg-[#0d1121] text-slate-200">
-                      {selectedDate || "2025-11-30"}
+                      {selectedDate || "2026-08-23"}
                     </option>
                   )}
                 </select>
               </div>
+
+              {/* Export Report Button */}
               <button 
                 onClick={() => alert('NCAP Compliance report prepared for export!')}
-                className="bg-[#4b6bf5] hover:bg-[#3b56cf] text-white text-xs font-semibold px-4.5 py-1.5 rounded-lg transition-colors shadow-sm"
+                className="bg-[#4b6bf5] hover:bg-[#3b56cf] text-white text-xs font-semibold px-4 py-1.5 rounded-lg transition-colors shadow-sm"
               >
                 Export Report 📥
               </button>
