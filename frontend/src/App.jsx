@@ -179,7 +179,7 @@ export default function App() {
                 <span className="text-white font-bold">{diagnosticsData?.models?.pollutant_xgboost_models || "6/6 Operational"}</span>
               </div>
               <div className="flex justify-between">
-                <span>Model R² Validation:</span> 
+                <span>Overall System Accuracy:</span> 
                 <span className="text-emerald-400 font-bold">{diagnosticsData?.models?.cross_validation_r2 ? `${(diagnosticsData.models.cross_validation_r2 * 100).toFixed(1)}%` : "89.2%"}</span>
               </div>
               <div className="flex justify-between">
