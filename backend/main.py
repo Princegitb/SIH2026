@@ -464,6 +464,7 @@ def parse_confidence(val):
         if val_str == 'h':
             return 90
         elif val_str == 'l':
+            return 40
         else:
             return 80
 
