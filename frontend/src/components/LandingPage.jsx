@@ -286,56 +286,122 @@ export default function LandingPage({ onEnterDashboard }) {
           {/* Central Satellite Scanned Earth Sphere with 3D Parallax Tilt & Fiery Hotspot Corona */}
           <div 
             ref={earthRef}
-            className={`absolute w-[180px] h-[180px] sm:w-[240px] sm:h-[240px] bg-slate-900 border rounded-full overflow-hidden flex items-center justify-center z-10 transition-all duration-500 ease-out group cursor-grab active:cursor-grabbing ${
+            className={`absolute w-[200px] h-[200px] sm:w-[260px] sm:h-[260px] rounded-full flex items-center justify-center z-10 transition-all duration-500 ease-out group cursor-grab active:cursor-grabbing ${
               fireActive 
-                ? 'border-orange-500/80 shadow-[0_0_90px_rgba(249,115,22,0.65),0_0_140px_rgba(220,38,38,0.45),inset_0_0_45px_rgba(249,115,22,0.4)]' 
-                : 'border-slate-800 shadow-[0_0_80px_rgba(75,107,245,0.22)]'
+                ? 'shadow-[0_0_90px_rgba(249,115,22,0.7),0_0_140px_rgba(220,38,38,0.5)]' 
+                : 'shadow-[0_0_90px_rgba(56,189,248,0.35),0_0_130px_rgba(75,107,245,0.25)]'
             }`}
           >
-            {/* Blazing Flame Corona Around the Earth when Fire Awakens */}
-            {fireActive && (
-              <div className="absolute -inset-4 rounded-full bg-[radial-gradient(circle_at_50%_50%,rgba(254,240,138,0.3)_0%,rgba(249,115,22,0.45)_40%,rgba(220,38,38,0.3)_70%,transparent_100%)] pointer-events-none animate-pulse z-0"></div>
-            )}
+            {/* The 3D Earth Globe Body */}
+            <div className="w-full h-full rounded-full relative overflow-hidden bg-[#08152e] border-2 border-sky-400/40 shadow-inner">
+              {/* Deep Ocean Gradient Base */}
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,#1e3a8a_0%,#0f172a_70%,#020617_100%)]"></div>
 
-            {/* Atmospheric Rim Glow */}
-            <div className={`absolute inset-0 rounded-full transition-all duration-500 pointer-events-none ${
-              fireActive 
-                ? 'bg-[radial-gradient(circle_at_35%_35%,rgba(249,115,22,0.45),rgba(239,68,68,0.3),transparent_70%)]' 
-                : 'bg-[radial-gradient(circle_at_30%_30%,rgba(75,107,245,0.35),rgba(56,189,248,0.15),transparent_70%)]'
-            }`}></div>
-            
-            {/* Holographic Earth mesh overlay */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-slate-950 via-slate-900/90 to-[#4b6bf5]/25 mix-blend-screen pointer-events-none"></div>
-            
-            {/* Grid Line Scans */}
-            <div className={`absolute w-full h-[2px] top-0 animate-[scan_3s_infinite_linear] transition-colors duration-500 ${
-              fireActive ? 'bg-orange-400/60 shadow-[0_0_10px_#f97316]' : 'bg-sky-500/35'
-            }`}></div>
-            
-            <span className="text-7xl select-none filter drop-shadow-[0_0_22px_rgba(75,107,245,0.45)] opacity-90 transition-transform duration-500 group-hover:scale-110">🌏</span>
+              {/* Realistic Continents & Landmass Vector Layer with India centered & glowing */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <svg viewBox="0 0 200 200" className="w-full h-full">
+                  <defs>
+                    <radialGradient id="earthGlow" cx="30%" cy="30%" r="70%">
+                      <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.4" />
+                      <stop offset="60%" stopColor="#1d4ed8" stopOpacity="0.1" />
+                      <stop offset="100%" stopColor="#000000" stopOpacity="0.8" />
+                    </radialGradient>
+                    <linearGradient id="indiaGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#10b981" />
+                      <stop offset="50%" stopColor="#38bdf8" />
+                      <stop offset="100%" stopColor="#4b6bf5" />
+                    </linearGradient>
+                  </defs>
 
-            {/* Active Satellite-Detected Thermal Hotspots Around & On the Earth */}
-            {fireActive && (
-              <div className="absolute inset-0 pointer-events-none z-20">
-                {/* Hotspot 1: NW Burning Cluster */}
-                <div className="absolute top-[28%] left-[44%] -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
-                  <span className="w-4 h-4 rounded-full bg-orange-500/40 animate-ping absolute"></span>
-                  <span className="w-2.5 h-2.5 rounded-full bg-amber-300 shadow-[0_0_10px_#ea580c] relative z-10 animate-pulse"></span>
-                </div>
+                  {/* Global Continental Outlines */}
+                  <path 
+                    d="M 60,75 Q 80,60 110,65 Q 140,55 160,70 Q 175,90 155,115 Q 135,130 115,145 Q 105,150 95,135 Q 90,115 80,105 Z" 
+                    fill="#1e293b" 
+                    stroke="#334155" 
+                    strokeWidth="1"
+                    opacity="0.85"
+                  />
+                  {/* Indian Subcontinent (Prominent & Glowing) */}
+                  <path 
+                    d="M 98,90 Q 112,92 120,102 Q 116,118 108,135 Q 102,124 96,110 Q 94,98 98,90 Z" 
+                    fill="url(#indiaGlow)" 
+                    stroke="#60a5fa" 
+                    strokeWidth="1.5"
+                    className="filter drop-shadow-[0_0_8px_rgba(56,189,248,0.6)]"
+                  />
+                  {/* Africa & Surrounding Outlines */}
+                  <path 
+                    d="M 45,95 Q 60,90 70,105 Q 65,130 50,145 Q 40,135 38,115 Z" 
+                    fill="#1e293b" 
+                    stroke="#334155" 
+                    strokeWidth="1"
+                    opacity="0.75"
+                  />
 
-                {/* Hotspot 2: Punjab Core Hotspot */}
-                <div className="absolute top-[36%] left-[54%] -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
-                  <span className="w-5 h-5 rounded-full bg-red-500/50 animate-ping absolute" style={{ animationDelay: '0.3s' }}></span>
-                  <span className="w-3 h-3 rounded-full bg-orange-400 shadow-[0_0_12px_#ef4444] relative z-10 animate-bounce"></span>
-                </div>
+                  {/* Longitude & Latitude Curved Grid Overlay */}
+                  <ellipse cx="100" cy="100" rx="98" ry="98" fill="url(#earthGlow)" stroke="#38bdf8" strokeWidth="1" opacity="0.6" />
+                  <ellipse cx="100" cy="100" rx="65" ry="98" fill="none" stroke="#38bdf8" strokeWidth="0.8" strokeDasharray="3 3" opacity="0.35" />
+                  <ellipse cx="100" cy="100" rx="30" ry="98" fill="none" stroke="#38bdf8" strokeWidth="0.8" strokeDasharray="3 3" opacity="0.35" />
+                  <line x1="2" y1="100" x2="198" y2="100" stroke="#38bdf8" strokeWidth="0.8" strokeDasharray="3 3" opacity="0.35" />
+                  <line x1="14" y1="65" x2="186" y2="65" stroke="#38bdf8" strokeWidth="0.6" strokeDasharray="2 2" opacity="0.25" />
+                  <line x1="14" y1="135" x2="186" y2="135" stroke="#38bdf8" strokeWidth="0.6" strokeDasharray="2 2" opacity="0.25" />
 
-                {/* Hotspot 3: NCR Downwind Receptor */}
-                <div className="absolute top-[48%] left-[62%] -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
-                  <span className="w-3.5 h-3.5 rounded-full bg-amber-500/40 animate-ping absolute" style={{ animationDelay: '0.6s' }}></span>
-                  <span className="w-2 h-2 rounded-full bg-yellow-200 shadow-[0_0_8px_#f97316] relative z-10"></span>
-                </div>
+                  {/* Atmospheric Cloud Swirls */}
+                  <path 
+                    d="M 30,55 Q 70,45 120,60 T 170,75" 
+                    fill="none" 
+                    stroke="#ffffff" 
+                    strokeWidth="2.5" 
+                    opacity="0.3" 
+                    strokeLinecap="round"
+                  />
+                  <path 
+                    d="M 60,125 Q 100,110 140,130" 
+                    fill="none" 
+                    stroke="#ffffff" 
+                    strokeWidth="2" 
+                    opacity="0.25" 
+                    strokeLinecap="round"
+                  />
+                </svg>
               </div>
-            )}
+
+              {/* Atmospheric Rim Glow */}
+              <div className={`absolute inset-0 rounded-full pointer-events-none transition-all duration-500 ${
+                fireActive 
+                  ? 'bg-[radial-gradient(circle_at_30%_30%,rgba(254,240,138,0.3),rgba(249,115,22,0.45)_50%,rgba(220,38,38,0.35)_80%)]' 
+                  : 'bg-[radial-gradient(circle_at_25%_25%,rgba(255,255,255,0.3),rgba(56,189,248,0.25)_40%,transparent_75%)]'
+              }`}></div>
+
+              {/* Horizontal Satellite Radar Scan Line */}
+              <div className={`absolute w-full h-[2px] top-0 animate-[scan_3s_infinite_linear] transition-colors duration-500 ${
+                fireActive ? 'bg-orange-400 shadow-[0_0_12px_#f97316]' : 'bg-sky-400 shadow-[0_0_10px_#38bdf8]'
+              }`}></div>
+
+              {/* Active Satellite-Detected Thermal Hotspots on the Indian Continent */}
+              {fireActive && (
+                <div className="absolute inset-0 pointer-events-none z-20">
+                  {/* Hotspot 1: NW Punjab/Haryana Stubble Core */}
+                  <div className="absolute top-[48%] left-[51%] -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
+                    <span className="w-7 h-7 rounded-full bg-red-500/50 animate-ping absolute"></span>
+                    <span className="w-4 h-4 rounded-full bg-orange-500/80 animate-pulse absolute"></span>
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-200 shadow-[0_0_12px_#ffedd5] relative z-10"></span>
+                  </div>
+
+                  {/* Hotspot 2: Delhi-NCR Basin Receptor */}
+                  <div className="absolute top-[54%] left-[55%] -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
+                    <span className="w-5 h-5 rounded-full bg-orange-500/50 animate-ping absolute" style={{ animationDelay: '0.4s' }}></span>
+                    <span className="w-2 h-2 rounded-full bg-yellow-300 shadow-[0_0_8px_#f97316] relative z-10 animate-bounce"></span>
+                  </div>
+
+                  {/* Hotspot 3: Upwind Farm Fire Cluster */}
+                  <div className="absolute top-[44%] left-[47%] -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
+                    <span className="w-6 h-6 rounded-full bg-amber-500/40 animate-ping absolute" style={{ animationDelay: '0.8s' }}></span>
+                    <span className="w-2.5 h-2.5 rounded-full bg-orange-400 shadow-[0_0_10px_#ea580c] relative z-10"></span>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Active Fire Orbit Corona Ring encircling the Earth when Fire Awakens */}
