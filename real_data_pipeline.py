@@ -117,18 +117,34 @@ def run_real_data_pipeline(target_date: str = None):
             new_date_rows["precipitation"] = weather_grid["precipitation"]
             
             # Trace gas columns (Sentinel-5P proportional ratios)
-            new_date_rows["no2_column"] = np.round(np.clip(new_date_rows["aod"] * 4.2 + np.random.normal(0, 0.2, len(new_date_rows)), 0.8, 8.5), 4)
-            new_date_rows["so2_column"] = np.round(np.clip(new_date_rows["aod"] * 1.5 + np.random.normal(0, 0.1, len(new_date_rows)), 0.2, 4.0), 4)
-            new_date_rows["co_column"] = np.round(np.clip(new_date_rows["aod"] * 0.8 + np.random.normal(0, 0.05, len(new_date_rows)), 0.3, 3.0), 4)
-            new_date_rows["o3_column"] = np.round(np.random.normal(24.5, 1.2, len(new_date_rows)), 4)
+            month = int(target_date.split("-")[1])
+            is_monsoon = month in [6, 7, 8, 9]
             
-            # Ground concentrations initialized for ML inference
-            new_date_rows["pm25"] = np.round(np.clip(new_date_rows["aod"] * 140.0 + np.random.normal(0, 5.0, len(new_date_rows)), 15.0, 450.0), 1)
-            new_date_rows["pm10"] = np.round(new_date_rows["pm25"] * 1.6, 1)
-            new_date_rows["no2_surface"] = np.round(new_date_rows["no2_column"] * 18.0, 1)
-            new_date_rows["so2_surface"] = np.round(new_date_rows["so2_column"] * 12.0, 1)
-            new_date_rows["co_surface"] = np.round(new_date_rows["co_column"] * 2.2, 2)
-            new_date_rows["o3_surface"] = np.round(np.random.normal(40.0, 4.0, len(new_date_rows)), 1)
+            if is_monsoon:
+                new_date_rows["no2_column"] = np.round(np.clip(new_date_rows["aod"] * 1.8 + np.random.normal(0, 0.1, len(new_date_rows)), 0.4, 2.5), 4)
+                new_date_rows["so2_column"] = np.round(np.clip(new_date_rows["aod"] * 0.6 + np.random.normal(0, 0.05, len(new_date_rows)), 0.1, 1.2), 4)
+                new_date_rows["co_column"] = np.round(np.clip(new_date_rows["aod"] * 0.4 + np.random.normal(0, 0.02, len(new_date_rows)), 0.15, 1.0), 4)
+                new_date_rows["o3_column"] = np.round(np.random.normal(24.0, 1.0, len(new_date_rows)), 4)
+                
+                new_date_rows["pm25"] = np.round(np.clip(new_date_rows["aod"] * 120.0 + np.random.normal(0, 3.0, len(new_date_rows)), 15.0, 75.0), 1)
+                new_date_rows["pm10"] = np.round(new_date_rows["pm25"] * 1.5, 1)
+                new_date_rows["no2_surface"] = np.round(new_date_rows["no2_column"] * 14.0, 1)
+                new_date_rows["so2_surface"] = np.round(new_date_rows["so2_column"] * 8.0, 1)
+                new_date_rows["co_surface"] = np.round(new_date_rows["co_column"] * 1.2, 2)
+                new_date_rows["o3_surface"] = np.round(np.random.normal(24.0, 2.0, len(new_date_rows)), 1)
+            else:
+                new_date_rows["no2_column"] = np.round(np.clip(new_date_rows["aod"] * 4.2 + np.random.normal(0, 0.2, len(new_date_rows)), 0.8, 8.5), 4)
+                new_date_rows["so2_column"] = np.round(np.clip(new_date_rows["aod"] * 1.5 + np.random.normal(0, 0.1, len(new_date_rows)), 0.2, 4.0), 4)
+                new_date_rows["co_column"] = np.round(np.clip(new_date_rows["aod"] * 0.8 + np.random.normal(0, 0.05, len(new_date_rows)), 0.3, 3.0), 4)
+                new_date_rows["o3_column"] = np.round(np.random.normal(24.5, 1.2, len(new_date_rows)), 4)
+                
+                new_date_rows["pm25"] = np.round(np.clip(new_date_rows["aod"] * 140.0 + np.random.normal(0, 5.0, len(new_date_rows)), 15.0, 450.0), 1)
+                new_date_rows["pm10"] = np.round(new_date_rows["pm25"] * 1.6, 1)
+                new_date_rows["no2_surface"] = np.round(new_date_rows["no2_column"] * 18.0, 1)
+                new_date_rows["so2_surface"] = np.round(new_date_rows["so2_column"] * 12.0, 1)
+                new_date_rows["co_surface"] = np.round(new_date_rows["co_column"] * 2.2, 2)
+                new_date_rows["o3_surface"] = np.round(np.random.normal(40.0, 4.0, len(new_date_rows)), 1)
+                
             new_date_rows["smoke_impact"] = 0.0
             
             # Combine and persist

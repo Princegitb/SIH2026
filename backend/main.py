@@ -33,7 +33,8 @@ from backend.database import init_db, sync_dataframes_to_db, db_session, Sensiti
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="VayuShetra API Service", version="1.0.0")
+# VayuShetra Atmospheric Intelligence Service v1.0.1 (Multi-seasonal calibrated)
+app = FastAPI(title="VayuShetra API Service", version="1.0.1")
 
 # Enable CORS
 app.add_middleware(
