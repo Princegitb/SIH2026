@@ -39,9 +39,9 @@ export default function AttributionView() {
   // Format Recharts data (Stacked bars)
   const chartData = data.map(item => ({
     name: item.district,
-    'Biomass Burning %': item.biomass,
-    'Vehicular %': item.vehicular,
-    'Industrial Stack %': item.industrial
+    'Vehicular Exhaust': item.vehicular,
+    'Industrial Stacks': item.industrial,
+    'Biomass Burning': item.biomass
   }))
 
   // Regional overall average pie breakdown
