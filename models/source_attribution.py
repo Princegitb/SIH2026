@@ -87,15 +87,17 @@ class SourceAttributor:
         co = df["co_column"].values
 
         # Base weights vectorization
-        base_v = np.select([cell_types == "urban", cell_types == "industrial", cell_types == "agricultural"], [60.0, 25.0, 20.0], default=40.0)
-        base_i = np.select([cell_types == "urban", cell_types == "industrial", cell_types == "agricultural"], [25.0, 65.0, 15.0], default=30.0)
-        base_b = np.select([cell_types == "urban", cell_types == "industrial", cell_types == "agricultural"], [15.0, 10.0, 65.0], default=30.0)
+        base_v = np.select([cell_types == "urban", cell_types == "industrial", cell_types == "agricultural"], [55.0, 25.0, 40.0], default=40.0)
+        base_i = np.select([cell_types == "urban", cell_types == "industrial", cell_types == "agricultural"], [25.0, 65.0, 35.0], default=35.0)
+        base_b = np.select([cell_types == "urban", cell_types == "industrial", cell_types == "agricultural"], [12.0, 10.0, 20.0], default=15.0)
 
-        biomass_sig = hcho * 2.5 + (smoke * 0.08)
+        # Biomass signal rises only when HCHO exceeds atmospheric background (>2.5) or smoke is present
+        excess_hcho = np.maximum(0.0, hcho - 2.2)
+        biomass_sig = excess_hcho * 12.0 + (smoke * 0.15)
         vehicular_sig = no2 * 3.5 + co * 0.8
         industrial_sig = so2 * 6.0 + no2 * 0.5
 
-        weight_b = base_b + biomass_sig * 12.0
+        weight_b = base_b + biomass_sig * 8.0
         weight_v = base_v + vehicular_sig * 4.0
         weight_i = base_i + industrial_sig * 5.0
 
