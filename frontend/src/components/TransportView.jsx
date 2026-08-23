@@ -203,33 +203,49 @@ export default function TransportView() {
         </div>
 
         {/* Right Causal Insight Cards (Span 4) */}
-        <div className="col-span-12 lg:col-span-4 flex flex-col justify-between space-y-4">
+        <div className="col-span-12 lg:col-span-4 flex flex-col justify-between h-[440px] gap-3">
           
-          <div className="glass-panel rounded-2xl p-4 border-l-4 border-l-[#38bdf8] bg-slate-900/60 flex flex-col justify-between">
+          <div className="glass-panel rounded-xl p-3.5 border-l-4 border-l-[#38bdf8] bg-slate-900/60 flex-1 flex flex-col justify-center">
             <div className="flex items-center space-x-2 text-xs font-extrabold text-white">
-              <Activity size={16} className="text-[#38bdf8]" />
+              <Activity size={15} className="text-[#38bdf8]" />
               <span>Raw Pearson Correlation</span>
             </div>
-            <p className="text-xs text-slate-300 font-medium mt-2 leading-relaxed">
-              Measures direct association between active Fire Radiative Power (FRP) upstream and AQI in Delhi-NCR. Shows highest peak at <b className="text-[#38bdf8]">Lag 2d</b>.
+            <p className="text-[11px] text-slate-300 font-medium mt-1.5 leading-relaxed">
+              Measures direct association between active Fire Radiative Power (FRP) upstream and AQI in Delhi-NCR. Shows peak impact at <b className="text-[#38bdf8]">Lag 2d (48h)</b>.
             </p>
           </div>
 
-          <div className="glass-panel rounded-2xl p-4 border-l-4 border-l-[#f97316] bg-slate-900/60 flex flex-col justify-between">
+          <div className="glass-panel rounded-xl p-3.5 border-l-4 border-l-[#f97316] bg-slate-900/60 flex-1 flex flex-col justify-center">
             <div className="flex items-center space-x-2 text-xs font-extrabold text-white">
-              <Layers size={16} className="text-[#f97316]" />
+              <Layers size={15} className="text-[#f97316]" />
               <span>Meteorology-Controlled Partial</span>
             </div>
-            <p className="text-xs text-slate-300 font-medium mt-2 leading-relaxed">
-              Regresses out boundary layer compression, temperature, and rain. Proves stubble smoke is an <b className="text-[#f97316]">independent driver</b> accounting for 65%+ of the spike.
+            <p className="text-[11px] text-slate-300 font-medium mt-1.5 leading-relaxed">
+              Regresses out boundary layer compression and weather. Proves stubble smoke is an <b className="text-[#f97316]">independent driver</b> accounting for 65%+ of the AQI spike.
             </p>
           </div>
 
-          <div className="glass-panel rounded-2xl p-4 border border-blue-500/30 bg-blue-950/25 flex items-start space-x-3">
-            <Navigation size={18} className="text-blue-400 flex-shrink-0 mt-0.5" />
-            <div className="text-xs text-slate-200 leading-relaxed font-medium">
-              <b className="text-blue-300">Kinematic Verification:</b> 12.4 km/h wind speeds along a 280km trajectory perfectly account for the 48-hour peak arrival window observed in receptor stations.
+          <div className="glass-panel rounded-xl p-3.5 border-l-4 border-l-blue-400 bg-slate-900/60 flex-1 flex flex-col justify-center">
+            <div className="flex items-center space-x-2 text-xs font-extrabold text-white">
+              <Navigation size={15} className="text-blue-400" />
+              <span>Kinematic Transport Verification</span>
             </div>
+            <p className="text-[11px] text-slate-300 font-medium mt-1.5 leading-relaxed">
+              <b className="text-blue-300">12.4 km/h</b> wind speed along the <b className="text-blue-300">280 km NW corridor</b> matches the observed 48-hour transport lag at receptor basins.
+            </p>
+          </div>
+
+          <div className="glass-panel rounded-xl p-3.5 border-l-4 border-l-emerald-400 bg-emerald-950/20 border border-emerald-500/20 flex-1 flex flex-col justify-center">
+            <div className="flex items-center justify-between text-xs font-extrabold text-white">
+              <span className="text-emerald-400 font-bold flex items-center">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>
+                Lagrangian Early Warning Window
+              </span>
+              <span className="text-[10px] text-emerald-400/80 font-mono font-bold">p &lt; 0.01</span>
+            </div>
+            <p className="text-[11px] text-slate-300 font-medium mt-1 leading-relaxed">
+              Provides municipal and CPCB enforcement teams a <b className="text-emerald-300">24-to-48 hour actionable early-intervention buffer</b> before plume touchdown.
+            </p>
           </div>
 
         </div>
