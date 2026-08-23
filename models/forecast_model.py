@@ -125,10 +125,21 @@ class AQIForecastEngine:
             return True
         return False
 
-    def predict_forecast(self, current_district_row: dict, fires_count: int = 0) -> dict:
+    def predict_forecast(self, current_district_row: dict, fires_data = None) -> dict:
         """
         Generates genuine 24-hour and 48-hour atmospheric forecasts and dynamic inversion risk.
         """
+        # Determine actual fires count and total upstream FRP
+        if isinstance(fires_data, pd.DataFrame):
+            fire_frp = float(fires_data["frp"].sum()) if ("frp" in fires_data.columns and not fires_data.empty) else 0.0
+            fires_count = len(fires_data)
+        elif isinstance(fires_data, (int, float)):
+            fires_count = int(fires_data)
+            fire_frp = float(fires_count * 35.0)
+        else:
+            fires_count = 0
+            fire_frp = 0.0
+
         if self.model_day1 is None or self.model_day2 is None:
             if not self.load_models():
                 # Fallback rule if models not trained yet
@@ -163,7 +174,7 @@ class AQIForecastEngine:
             "wind_v": float(current_district_row.get("wind_v", -1.5)),
             "temperature": float(current_district_row.get("temperature", 28.0)),
             "humidity": float(current_district_row.get("humidity", 60.0)),
-            "upstream_fire_frp": float(fires_count * 35.0),
+            "upstream_fire_frp": float(fire_frp),
             "hcho_column": float(current_district_row.get("hcho_column", 3.5)),
             "is_winter_stubble": 1.0 if month in [10, 11, 12] else 0.0
         }])[self.feature_cols]
