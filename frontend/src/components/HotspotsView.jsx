@@ -27,7 +27,7 @@ export default function HotspotsView() {
     return (
       <div className="flex items-center justify-center h-[50vh]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4b6bf5]"></div>
-        <span className="ml-3 text-slate-300 font-medium">Running DBSCAN spatial hotspot clustering calculations...</span>
+        <span className="ml-3 text-slate-300 font-medium">Finding pollution hotspot clusters from satellite data...</span>
       </div>
     )
   }
@@ -65,41 +65,41 @@ export default function HotspotsView() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="glass-panel rounded-2xl p-5 border-purple-500/30 bg-gradient-to-br from-purple-950/30 via-slate-900/60 to-slate-900/90 flex flex-col justify-between h-[135px]">
           <span className="text-[11px] font-extrabold text-purple-300 uppercase tracking-wider flex items-center">
-            <Radio size={12} className="mr-1.5 animate-pulse text-purple-400" /> Active Hotspot Clusters
+            <Radio size={12} className="mr-1.5 animate-pulse text-purple-400" /> Active Pollution Clusters
           </span>
           <span className="text-4xl font-black text-purple-400 tracking-tight">{clusterList.length}</span>
-          <span className="text-xs text-slate-300 font-medium">Across {hotspots.length} anomalous monitoring grid cells</span>
+          <span className="text-xs text-slate-300 font-medium">Across {hotspots.length} detected grid areas</span>
         </div>
 
         <div className="glass-panel rounded-2xl p-5 border-orange-500/30 bg-gradient-to-br from-orange-950/30 via-slate-900/60 to-slate-900/90 flex flex-col justify-between h-[135px]">
           <span className="text-[11px] font-extrabold text-orange-300 uppercase tracking-wider flex items-center">
-            <Flame size={12} className="mr-1.5 text-orange-400" /> Biomass Driven Clusters
+            <Flame size={12} className="mr-1.5 text-orange-400" /> Farm Fire / Stubble Clusters
           </span>
           <span className="text-4xl font-black text-orange-400 flex items-center tracking-tight">
             {totalBiomass} <Flame className="ml-2 text-orange-400 animate-pulse" size={24} />
           </span>
-          <span className="text-xs text-slate-300 font-medium">Attributed to active stubble combustion</span>
+          <span className="text-xs text-slate-300 font-medium">From stubble burning and open farm fires</span>
         </div>
 
         <div className="glass-panel rounded-2xl p-5 border-sky-500/30 bg-gradient-to-br from-sky-950/30 via-slate-900/60 to-slate-900/90 flex flex-col justify-between h-[135px]">
           <span className="text-[11px] font-extrabold text-sky-300 uppercase tracking-wider flex items-center">
-            <Building2 size={12} className="mr-1.5 text-sky-400" /> Industrial & Urban Clusters
+            <Building2 size={12} className="mr-1.5 text-sky-400" /> City & Factory Clusters
           </span>
           <span className="text-4xl font-black text-sky-400 flex items-center tracking-tight">
             {totalIndustrial} <Building2 className="ml-2 text-sky-400" size={24} />
           </span>
-          <span className="text-xs text-slate-300 font-medium">Attributed to vehicular or factory stack sources</span>
+          <span className="text-xs text-slate-300 font-medium">From vehicle exhaust and factory chimneys</span>
         </div>
       </div>
 
       {/* 2. Interactive Cluster Grid */}
       <div className="space-y-4">
         <h3 className="text-sm font-extrabold text-white uppercase tracking-wider border-b border-slate-800/80 pb-2 flex items-center">
-          <Layers size={16} className="text-[#4b6bf5] mr-2" /> Spatial Cluster Decomposition
+          <Layers size={16} className="text-[#4b6bf5] mr-2" /> Hotspot Cluster Breakdown
         </h3>
         {clusterList.length === 0 ? (
           <div className="glass-panel rounded-2xl p-8 text-center text-slate-300 font-medium">
-            No anomalous HCHO column hotspots detected on this date. Clean atmospheric baseline.
+            No pollution hotspots detected on this date. Clean air conditions across the region.
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -61,10 +61,10 @@ export default function AttributionView() {
       <div className="glass-panel rounded-2xl p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h2 className="text-lg font-extrabold text-white flex items-center tracking-tight">
-            Trace Gas Chemical Source Apportionment
+            Pollution Source Attribution
           </h2>
           <p className="text-xs text-slate-300 font-medium mt-1">
-            Isolating emission fingerprints by cross-referencing TROPOMI columnar ratios of HCHO, NO₂, CO, and SO₂
+            Identifying where pollution comes from by analyzing chemical satellite data (Farm Fires, Vehicles, or Factories).
           </p>
         </div>
 
@@ -95,12 +95,12 @@ export default function AttributionView() {
           <div className="flex justify-between items-center mb-4">
             <div>
               <h3 className="text-sm font-extrabold text-white uppercase tracking-wider">
-                {viewMode === 'stacked' ? "District-Level Source Contribution (%)" : "Regional Basin Chemical Contribution"}
+                {viewMode === 'stacked' ? "District Pollution Sources (%)" : "Overall Regional Source Share"}
               </h3>
               <span className="text-xs text-slate-400 font-medium mt-0.5 block">
                 {viewMode === 'stacked' 
-                  ? "Normalized 100% composition breakdown based on trace gas satellite column densities"
-                  : "Mean source share across all active monitoring districts"}
+                  ? "Percentage breakdown of Farm Fires, Vehicles, and Factories across each district"
+                  : "Average pollution source share across the entire region"}
               </span>
             </div>
           </div>
@@ -126,104 +126,95 @@ export default function AttributionView() {
                       borderColor: '#334155', 
                       color: '#ffffff', 
                       borderRadius: '12px',
-                      fontSize: '12px'
+                      fontSize: '12px',
+                      fontWeight: 'bold'
                     }} 
+                    formatter={(value) => [`${value}%`]}
                   />
                   <Legend wrapperStyle={{ paddingTop: '10px', fontSize: '12px', color: '#cbd5e1' }} />
-                  <Bar dataKey="Biomass Burning %" stackId="a" fill="#f97316" radius={[0, 0, 0, 0]} />
-                  <Bar dataKey="Vehicular %" stackId="a" fill="#38bdf8" radius={[0, 0, 0, 0]} />
-                  <Bar dataKey="Industrial Stack %" stackId="a" fill="#a855f7" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="Vehicular Exhaust" stackId="a" fill="#38bdf8" radius={[0, 0, 0, 0]} />
+                  <Bar dataKey="Industrial Stacks" stackId="a" fill="#a855f7" radius={[0, 0, 0, 0]} />
+                  <Bar dataKey="Biomass Burning" stackId="a" fill="#f97316" radius={[4, 4, 0, 0]} />
                 </BarChart>
               ) : (
-                <div className="flex flex-col md:flex-row items-center justify-around h-full">
-                  <div className="h-[280px] w-[280px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={pieData}
-                          innerRadius={70}
-                          outerRadius={105}
-                          paddingAngle={4}
-                          dataKey="value"
-                        >
-                          {pieData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Pie>
-                        <Tooltip 
-                          contentStyle={{ 
-                            backgroundColor: '#090d16', 
-                            borderColor: '#334155', 
-                            color: '#ffffff', 
-                            borderRadius: '12px',
-                            fontSize: '12px'
-                          }} 
-                        />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-
-                  <div className="space-y-4 pr-6">
-                    {pieData.map(item => (
-                      <div key={item.name} className="flex items-center justify-between space-x-6 min-w-[200px]">
-                        <div className="flex items-center space-x-2.5">
-                          <span className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></span>
-                          <span className="text-xs text-white font-bold">{item.name}</span>
-                        </div>
-                        <span className="text-base font-extrabold font-mono" style={{ color: item.color }}>
-                          {item.value}%
-                        </span>
-                      </div>
+                <PieChart>
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: '#090d16', 
+                      borderColor: '#334155', 
+                      color: '#ffffff', 
+                      borderRadius: '12px',
+                      fontSize: '12px',
+                      fontWeight: 'bold'
+                    }} 
+                    formatter={(value) => [`${value}%`]}
+                  />
+                  <Legend wrapperStyle={{ paddingTop: '20px', fontSize: '13px', color: '#cbd5e1' }} />
+                  <Pie
+                    data={pieData}
+                    cx="50%"
+                    cy="45%"
+                    innerRadius={75}
+                    outerRadius={120}
+                    paddingAngle={4}
+                    dataKey="value"
+                    label={({ name, value }) => `${name}: ${value}%`}
+                  >
+                    {pieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
-                  </div>
-                </div>
+                  </Pie>
+                </PieChart>
               )}
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* Right Explanatory Chemical Guide Cards (Span 4) */}
-        <div className="col-span-12 lg:col-span-4 flex flex-col justify-between space-y-4">
+        <div className="col-span-12 lg:col-span-4 flex flex-col justify-between h-[460px] gap-3">
           
           {/* Card 1: Biomass */}
-          <div className="glass-panel rounded-2xl p-4 border-l-4 border-l-[#f97316] bg-slate-900/60 flex flex-col justify-between">
+          <div className="glass-panel rounded-xl p-3.5 border-l-4 border-l-[#f97316] bg-slate-900/60 flex-1 flex flex-col justify-center">
             <div className="flex items-center space-x-2 text-xs font-extrabold text-white">
-              <Flame size={16} className="text-[#f97316]" />
-              <span>Biomass & Stubble Combustion</span>
+              <Flame size={15} className="text-[#f97316]" />
+              <span>Biomass & Farm Fires</span>
             </div>
-            <p className="text-xs text-slate-300 font-medium mt-2 leading-relaxed">
-              Flagged by elevated <b className="text-[#f97316]">HCHO : NO₂</b> column ratios from Sentinel-5P. Agricultural burning releases large fractions of volatile organics relative to combustion NO₂.
+            <p className="text-[11px] text-slate-300 font-medium mt-1 leading-relaxed">
+              Detected from Formaldehyde (HCHO) satellite data. Stubble burning and wood smoke release high organic gases into the air.
             </p>
           </div>
 
           {/* Card 2: Vehicular */}
-          <div className="glass-panel rounded-2xl p-4 border-l-4 border-l-[#38bdf8] bg-slate-900/60 flex flex-col justify-between">
+          <div className="glass-panel rounded-xl p-3.5 border-l-4 border-l-[#38bdf8] bg-slate-900/60 flex-1 flex flex-col justify-center">
             <div className="flex items-center space-x-2 text-xs font-extrabold text-white">
-              <Car size={16} className="text-[#38bdf8]" />
+              <Car size={15} className="text-[#38bdf8]" />
               <span>Vehicular & Traffic Exhaust</span>
             </div>
-            <p className="text-xs text-slate-300 font-medium mt-2 leading-relaxed">
-              Identified by high surface <b className="text-[#38bdf8]">NO₂ and CO</b> columns with low HCHO ratios. Internal combustion engines dominate congested urban traffic corridors.
+            <p className="text-[11px] text-slate-300 font-medium mt-1 leading-relaxed">
+              Identified by high Nitrogen Dioxide (NO₂) and Carbon Monoxide (CO). Common in city traffic and busy highway corridors.
             </p>
           </div>
 
           {/* Card 3: Industrial */}
-          <div className="glass-panel rounded-2xl p-4 border-l-4 border-l-[#a855f7] bg-slate-900/60 flex flex-col justify-between">
+          <div className="glass-panel rounded-xl p-3.5 border-l-4 border-l-[#a855f7] bg-slate-900/60 flex-1 flex flex-col justify-center">
             <div className="flex items-center space-x-2 text-xs font-extrabold text-white">
-              <Factory size={16} className="text-[#a855f7]" />
-              <span>Industrial Stacks & Power Plants</span>
+              <Factory size={15} className="text-[#a855f7]" />
+              <span>Factories & Power Plants</span>
             </div>
-            <p className="text-xs text-slate-300 font-medium mt-2 leading-relaxed">
-              Attributed when isolated <b className="text-[#a855f7]">SO₂</b> column anomalies occur independently of fire clusters, indicating coal-fired boilers, thermal plants, or brick kilns.
+            <p className="text-[11px] text-slate-300 font-medium mt-1 leading-relaxed">
+              Identified by Sulfur Dioxide (SO₂) emissions from coal power plants, heavy industrial boilers, and brick kilns.
             </p>
           </div>
 
           {/* Diagnostic Note */}
-          <div className="glass-panel rounded-2xl p-4 border border-purple-500/30 bg-purple-950/25 flex items-start space-x-3">
-            <ShieldAlert size={18} className="text-purple-400 flex-shrink-0 mt-0.5" />
-            <div className="text-xs text-slate-200 leading-relaxed font-medium">
-              <b className="text-purple-300">Diagnostic Threshold:</b> HCHO column densities exceeding <span className="font-mono text-purple-400 font-bold">2.5 × 10¹⁵ molec/cm²</span> are statutory signatures of open-field agricultural biomass combustion.
+          <div className="glass-panel rounded-xl p-3.5 border-l-4 border-l-purple-400 bg-purple-950/20 border border-purple-500/20 flex-1 flex flex-col justify-center">
+            <div className="flex items-center space-x-2 text-xs font-extrabold text-white">
+              <ShieldAlert size={15} className="text-purple-400" />
+              <span>Detection Standard</span>
             </div>
+            <p className="text-[11px] text-slate-300 font-medium mt-1 leading-relaxed">
+              When satellite HCHO gas rises significantly above background levels, it directly confirms open farm fire smoke.
+            </p>
           </div>
 
         </div>

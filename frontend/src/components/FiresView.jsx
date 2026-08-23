@@ -26,7 +26,7 @@ export default function FiresView() {
     return (
       <div className="flex items-center justify-center h-[50vh]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4b6bf5]"></div>
-        <span className="ml-3 text-slate-300 font-medium">Fetching NASA FIRMS VIIRS/MODIS thermal coordinates...</span>
+        <span className="ml-3 text-slate-300 font-medium">Fetching active fire detections from NASA satellites...</span>
       </div>
     )
   }
@@ -45,51 +45,51 @@ export default function FiresView() {
       <div className="glass-panel rounded-2xl p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h2 className="text-lg font-extrabold text-white mb-1 flex items-center tracking-tight">
-            <Flame size={20} className="text-orange-500 mr-2.5" /> NASA FIRMS Active Thermal Anomaly Detection
+            <Flame size={20} className="text-orange-500 mr-2.5" /> Active Farm Fires & Stubble Burning Detection
           </h2>
           <p className="text-xs text-slate-300 font-medium">
-            Near Real-Time (NRT) active fire pixels, Fire Radiative Power (FRP), and confidence ratings from VIIRS & MODIS
+            Real-time active fire locations and fire heat power (FRP) detected by NASA satellites (VIIRS & MODIS)
           </p>
         </div>
         <span className="text-xs font-extrabold px-3 py-1.5 rounded-xl bg-orange-500/15 text-orange-400 border border-orange-500/30 uppercase tracking-wider flex items-center">
-          <Zap size={12} className="mr-1.5" /> Satellite Direct Downlink
+          <Zap size={12} className="mr-1.5" /> NASA Satellite Feed
         </span>
       </div>
 
       {/* Overview stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="glass-panel rounded-2xl p-5 border-orange-500/30 bg-gradient-to-br from-orange-950/30 via-slate-900/60 to-slate-900/90 flex flex-col justify-between h-[135px]">
-          <span className="text-[11px] font-extrabold text-orange-300 uppercase tracking-wider">Active Fire Pixels</span>
+          <span className="text-[11px] font-extrabold text-orange-300 uppercase tracking-wider">Active Farm Fires</span>
           <span className="text-4xl font-black text-orange-400 flex items-center tracking-tight">
             {totalFires} <Flame className="ml-2 text-orange-400 animate-pulse" size={24} />
           </span>
-          <span className="text-xs text-slate-300 font-medium">VIIRS & MODIS detections</span>
+          <span className="text-xs text-slate-300 font-medium">Detected by NASA satellites</span>
         </div>
 
         <div className="glass-panel rounded-2xl p-5 border-red-500/30 bg-gradient-to-br from-red-950/30 via-slate-900/60 to-slate-900/90 flex flex-col justify-between h-[135px]">
-          <span className="text-[11px] font-extrabold text-red-300 uppercase tracking-wider">Peak Thermal Energy</span>
+          <span className="text-[11px] font-extrabold text-red-300 uppercase tracking-wider">Peak Fire Heat</span>
           <span className="text-4xl font-black text-red-400 tracking-tight">
             {maxFrp.toFixed(1)} <span className="text-sm font-semibold text-slate-400">MW</span>
           </span>
-          <span className="text-xs text-slate-300 font-medium">Maximum Fire Radiative Power</span>
+          <span className="text-xs text-slate-300 font-medium">Maximum heat power released</span>
         </div>
 
         <div className="glass-panel rounded-2xl p-5 border-emerald-500/30 bg-gradient-to-br from-emerald-950/30 via-slate-900/60 to-slate-900/90 flex flex-col justify-between h-[135px]">
           <span className="text-[11px] font-extrabold text-emerald-300 uppercase tracking-wider">Detection Confidence</span>
           <span className="text-4xl font-black text-emerald-400 tracking-tight">{avgConf}%</span>
-          <span className="text-xs text-slate-300 font-medium">Mean sensor reliability index</span>
+          <span className="text-xs text-slate-300 font-medium">Satellite sensor reliability rating</span>
         </div>
       </div>
 
       {/* Critical fires list */}
       <div className="glass-panel rounded-2xl p-6 space-y-4">
         <h3 className="text-sm font-extrabold text-white uppercase tracking-wider border-b border-slate-800/80 pb-3 flex items-center">
-          <AlertTriangle size={16} className="text-orange-500 mr-2" /> Highest Radiative Power Stubble Burning Coordinates
+          <AlertTriangle size={16} className="text-orange-500 mr-2" /> Top Active Fire Locations (Ranked by Intensity)
         </h3>
 
         {sortedFires.length === 0 ? (
           <div className="text-center py-8 text-slate-300 font-medium text-xs">
-            No active thermal fire detections recorded on this date.
+            No active farm fires or stubble burning detected on this date.
           </div>
         ) : (
           <div className="space-y-3 overflow-y-auto max-h-[380px] pr-2">
