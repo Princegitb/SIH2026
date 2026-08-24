@@ -203,27 +203,35 @@ def simulate_data():
             # B. Base Concentrations based on Seasonal Regime
             if is_monsoon:
                 # Clean monsoon / summer atmosphere
-                if row["type"] == "urban":
-                    base_pm25 = 28.0 + np.random.normal(0, 3.0)
+                is_delhi_ncr = row["district"] in ["Delhi", "Gurugram", "Faridabad"]
+                if is_delhi_ncr:
+                    # Persistent vehicular and industrial emission floor in Delhi-NCR
+                    base_pm25 = (74.0 if row["type"] == "urban" else 88.0 if row["type"] == "industrial" else 56.0) + np.random.normal(0, 3.5)
+                    base_no2 = (36.0 if row["type"] == "urban" else 48.0 if row["type"] == "industrial" else 22.0) + np.random.normal(0, 2.0)
+                    base_so2 = (14.0 if row["type"] == "urban" else 26.0 if row["type"] == "industrial" else 8.0) + np.random.normal(0, 1.0)
+                    base_co = 0.85 + np.random.normal(0, 0.04)
+                    base_o3 = 26.0 + np.random.normal(0, 2.0)
+                elif row["type"] == "urban":
+                    base_pm25 = 44.0 + np.random.normal(0, 3.0)
                     base_no2 = 22.0 + np.random.normal(0, 2.0)
-                    base_so2 = 8.0 + np.random.normal(0, 1.0)
+                    base_so2 = 10.0 + np.random.normal(0, 1.0)
                     base_co = 0.6 + np.random.normal(0, 0.04)
                     base_o3 = 24.0 + np.random.normal(0, 2.0)
                 elif row["type"] == "industrial":
-                    base_pm25 = 44.0 + np.random.normal(0, 4.0)
+                    base_pm25 = 58.0 + np.random.normal(0, 4.0)
                     base_no2 = 32.0 + np.random.normal(0, 3.0)
                     base_so2 = 18.0 + np.random.normal(0, 2.0)
                     base_co = 0.9 + np.random.normal(0, 0.06)
                     base_o3 = 20.0 + np.random.normal(0, 2.0)
                 elif row["type"] == "agricultural":
-                    base_pm25 = 20.0 + np.random.normal(0, 2.5)
-                    base_no2 = 12.0 + np.random.normal(0, 1.5)
+                    base_pm25 = 35.0 + np.random.normal(0, 2.5)
+                    base_no2 = 14.0 + np.random.normal(0, 1.5)
                     base_so2 = 6.0 + np.random.normal(0, 0.8)
                     base_co = 0.4 + np.random.normal(0, 0.03)
                     base_o3 = 26.0 + np.random.normal(0, 2.0)
                 else: # rural
-                    base_pm25 = 16.0 + np.random.normal(0, 2.0)
-                    base_no2 = 9.0 + np.random.normal(0, 1.0)
+                    base_pm25 = 26.0 + np.random.normal(0, 2.0)
+                    base_no2 = 10.0 + np.random.normal(0, 1.0)
                     base_so2 = 5.0 + np.random.normal(0, 0.6)
                     base_co = 0.3 + np.random.normal(0, 0.02)
                     base_o3 = 28.0 + np.random.normal(0, 2.0)
@@ -273,7 +281,7 @@ def simulate_data():
             
             # E. Total Surface Concentrations
             pm25 = max(10.0, base_pm25 + pm25_smoke)
-            pm10 = max(20.0, pm25 * 1.5 + pm10_smoke * 0.8)
+            pm10 = max(20.0, pm25 * 1.35 + pm10_smoke * 0.8)
             no2_surf = max(2.0, base_no2 + no2_smoke)
             so2_surf = max(1.0, base_so2 + so2_smoke)
             co_surf = max(0.1, base_co + co_smoke)
@@ -281,7 +289,8 @@ def simulate_data():
             
             # F. Wet Scavenging (Rain Washout)
             if w["precipitation"] > 0.0:
-                washout = np.exp(-0.15 * w["precipitation"])
+                is_delhi_ncr = row["district"] in ["Delhi", "Gurugram", "Faridabad"]
+                washout = max(0.72 if is_delhi_ncr else 0.55, np.exp(-0.06 * w["precipitation"]))
                 pm25 *= washout
                 pm10 *= washout
                 no2_surf *= washout

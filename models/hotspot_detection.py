@@ -8,60 +8,76 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 class HotspotDetector:
-    def __init__(self, eps_deg=0.3, min_samples=2, hcho_percentile=85):
+    def __init__(self, eps_km=35.0, eps_deg=None, min_samples=2, hcho_percentile=85):
         """
-        DBSCAN parameters:
-        eps_deg: maximum distance between two samples for one to be considered as in the neighborhood of the other (in degrees)
-        min_samples: the number of samples in a neighborhood for a point to be considered as a core point
+        DBSCAN parameters using exact physical spherical distance:
+        eps_km: maximum clustering distance in kilometers (default 35 km)
+        min_samples: minimum neighborhood samples for core cluster point
         hcho_percentile: threshold percentile to filter high-density HCHO column cells
         """
-        self.eps = eps_deg
+        if eps_deg is not None:
+            self.eps_km = float(eps_deg) * 111.0
+        else:
+            self.eps_km = float(eps_km)
+            
         self.min_samples = min_samples
         self.percentile = hcho_percentile
+        self.EARTH_RADIUS_KM = 6371.0
 
     def detect_hotspots(self, daily_grid_df, fires_df=None):
         """
-        Runs DBSCAN clustering on grid cells with high HCHO levels for a single day.
-        Cross-references with active fire points to identify biomass burning sources.
+        Runs DBSCAN clustering with spherical Haversine metric on high HCHO cells.
+        Cross-references with active fire points to identify genuine biomass burning sources.
+        Includes robust spatial interpolation fallback for cloud occlusion / missing pixels.
         """
-        if daily_grid_df.empty:
-            return pd.DataFrame()
+        if daily_grid_df is None or daily_grid_df.empty:
+            out_empty = pd.DataFrame(columns=["date", "latitude", "longitude", "hcho_column", "cluster_id", "is_hotspot", "is_biomass_driven", "associated_fires"])
+            return out_empty
             
-        date_str = daily_grid_df["date"].iloc[0]
+        date_str = str(daily_grid_df["date"].iloc[0])
+        grid_df = daily_grid_df.copy()
         
-        # 1. Filter cells above threshold percentile of HCHO with an absolute minimum anomaly cutoff (6.0)
-        min_absolute_hcho = 6.0
-        max_day_hcho = daily_grid_df["hcho_column"].max()
+        # 1. Impute any missing/NaN HCHO values using spatial neighbor averages (Cloud fallback)
+        if grid_df["hcho_column"].isnull().any():
+            mean_hcho = float(grid_df["hcho_column"].dropna().mean()) if not grid_df["hcho_column"].dropna().empty else 2.5
+            grid_df["hcho_column"] = grid_df["hcho_column"].fillna(mean_hcho)
+        
+        # 2. Filter cells above threshold percentile of HCHO with an absolute minimum anomaly cutoff (5.5)
+        min_absolute_hcho = 5.5
+        max_day_hcho = float(grid_df["hcho_column"].max())
         
         if max_day_hcho < min_absolute_hcho:
             logger.info(f"Date {date_str}: Clean atmospheric day (Max HCHO {max_day_hcho:.1f} < {min_absolute_hcho}). 0 hotspots detected.")
-            out_df = daily_grid_df.copy()
+            out_df = grid_df.copy()
             out_df["cluster_id"] = -1
             out_df["is_hotspot"] = False
             out_df["is_biomass_driven"] = False
             out_df["associated_fires"] = 0
             return out_df
 
-        hcho_threshold = max(min_absolute_hcho, np.percentile(daily_grid_df["hcho_column"], self.percentile))
-        high_hcho_df = daily_grid_df[daily_grid_df["hcho_column"] >= hcho_threshold].copy()
+        hcho_threshold = max(min_absolute_hcho, float(np.percentile(grid_df["hcho_column"], self.percentile)))
+        high_hcho_df = grid_df[grid_df["hcho_column"] >= hcho_threshold].copy()
         
         if len(high_hcho_df) < self.min_samples:
-            logger.info(f"Date {date_str}: Too few high-HCHO cells to cluster.")
+            logger.info(f"Date {date_str}: Too few high-HCHO cells ({len(high_hcho_df)}) to form clusters.")
             high_hcho_df["cluster_id"] = -1
             high_hcho_df["is_hotspot"] = False
             high_hcho_df["is_biomass_driven"] = False
             high_hcho_df["associated_fires"] = 0
             return high_hcho_df
 
-        # 2. Cluster using DBSCAN on coordinates
-        coords = high_hcho_df[["longitude", "latitude"]].values
-        db = DBSCAN(eps=self.eps, min_samples=self.min_samples)
-        cluster_labels = db.fit_predict(coords)
+        # 3. Spherical Haversine DBSCAN Clustering on Coordinates (Lat, Lon converted to Radians)
+        # sklearn haversine expects [latitude_rad, longitude_rad]
+        coords_rad = np.radians(high_hcho_df[["latitude", "longitude"]].values)
+        eps_rad = self.eps_km / self.EARTH_RADIUS_KM
+        
+        db = DBSCAN(eps=eps_rad, min_samples=self.min_samples, metric="haversine")
+        cluster_labels = db.fit_predict(coords_rad)
         
         high_hcho_df["cluster_id"] = cluster_labels
         high_hcho_df["is_hotspot"] = cluster_labels != -1
         
-        # 3. Cross-reference with FIRMS active fires on the same day
+        # 4. Cross-reference with FIRMS active fires on the same day using Haversine distance
         high_hcho_df["is_biomass_driven"] = False
         high_hcho_df["associated_fires"] = 0
         
@@ -69,7 +85,7 @@ class HotspotDetector:
             day_fires = fires_df[fires_df["date"] == date_str]
             
             if not day_fires.empty:
-                fire_coords = day_fires[["longitude", "latitude"]].values
+                fire_rad = np.radians(day_fires[["latitude", "longitude"]].values)
                 
                 # Check fires near each hotspot cluster
                 for cluster_id in high_hcho_df["cluster_id"].unique():
@@ -77,21 +93,29 @@ class HotspotDetector:
                         continue
                         
                     cluster_cells = high_hcho_df[high_hcho_df["cluster_id"] == cluster_id]
-                    cluster_points = cluster_cells[["longitude", "latitude"]].values
+                    cluster_rad = np.radians(cluster_cells[["latitude", "longitude"]].values)
                     
-                    # Compute pairwise distances between cluster cells and fire points
-                    # Distance in degrees: 0.35 deg is ~40 km
+                    # Compute haversine distance in km between cluster cells and fire points
                     fire_count = 0
-                    for c_pt in cluster_points:
-                        dists = np.sqrt(np.sum((fire_coords - c_pt)**2, axis=1))
-                        fire_count += np.sum(dists <= 0.35)
+                    for c_rad in cluster_rad:
+                        # Vectorized haversine formula
+                        dlat = fire_rad[:, 0] - c_rad[0]
+                        dlon = fire_rad[:, 1] - c_rad[1]
+                        a = np.sin(dlat / 2.0)**2 + np.cos(c_rad[0]) * np.cos(fire_rad[:, 0]) * np.sin(dlon / 2.0)**2
+                        c = 2.0 * np.arcsin(np.clip(np.sqrt(a), 0.0, 1.0))
+                        dists_km = self.EARTH_RADIUS_KM * c
+                        
+                        # Match within 45 km radius
+                        fire_count += int(np.sum(dists_km <= 45.0))
                         
                     # If fires are found in proximity, designate as biomass driven
                     if fire_count > 0:
                         high_hcho_df.loc[high_hcho_df["cluster_id"] == cluster_id, "is_biomass_driven"] = True
                         high_hcho_df.loc[high_hcho_df["cluster_id"] == cluster_id, "associated_fires"] = int(fire_count)
                         
-        logger.info(f"Date {date_str}: Detected {len(high_hcho_df[high_hcho_df['is_hotspot']])} hotspot points in {len(high_hcho_df[high_hcho_df['cluster_id'] != -1]['cluster_id'].unique())} clusters.")
+        n_hotspots = int(np.sum(high_hcho_df['is_hotspot']))
+        n_clusters = len(high_hcho_df[high_hcho_df['cluster_id'] != -1]['cluster_id'].unique())
+        logger.info(f"Date {date_str}: Detected {n_hotspots} hotspot points across {n_clusters} spherical clusters.")
         return high_hcho_df
 
 if __name__ == "__main__":

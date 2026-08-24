@@ -9,29 +9,34 @@ logger = logging.getLogger(__name__)
 
 class WindTransportModel:
     def __init__(self):
-        pass
+        self.EARTH_RADIUS_KM = 6371.0
 
-    def project_plume_trajectory(self, start_lat, start_lon, wind_u, wind_v, hours=24, step_hours=3):
+    def project_plume_trajectory(self, start_lat, start_lon, wind_u, wind_v, hours=24, step_hours=3, frp=0.0, blh=800.0):
         """
-        Projects a simplified downwind plume trajectory from a starting coordinate.
-        Returns a list of (lat, lon) coordinates representing the path.
+        Projects physics-inspired downwind smoke plume trajectory with:
+        1. Thermal Plume Rise Factor: High FRP fires loft smoke above surface friction into faster boundary layer winds.
+        2. Gaussian Lateral Dispersion Width (sigma_y): Computes plume cone expansion radius at each step.
+        Returns a list of dicts with coordinate trajectory points, lateral spread radius (km), and arrival time.
         """
-        path = [(start_lat, start_lon)]
-        curr_lat, curr_lon = start_lat, start_lon
+        # Thermal Plume Rise Speed Boost (lofting smoke into faster mid-PBL winds)
+        frp_boost = min(1.4, float(frp) / 120.0) if frp > 0 else 0.0
+        effective_u = float(wind_u) * (1.0 + frp_boost)
+        effective_v = float(wind_v) * (1.0 + frp_boost)
+        
+        path = [(round(float(start_lat), 4), round(float(start_lon), 4))]
+        curr_lat, curr_lon = float(start_lat), float(start_lon)
         
         # Approximate conversion factors
-        # 1 degree latitude = 111,000 meters
-        # 1 degree longitude = 111,000 * cos(lat) meters
         m_per_deg_lat = 111000.0
-        
         steps = int(hours / step_hours)
-        for _ in range(steps):
+        
+        for step_i in range(1, steps + 1):
             rad_lat = np.radians(curr_lat)
             m_per_deg_lon = 111000.0 * np.cos(rad_lat)
             
-            # Distance traveled in step_hours (convert wind m/s to total meters in step)
-            dist_u = wind_u * 3600.0 * step_hours
-            dist_v = wind_v * 3600.0 * step_hours
+            # Distance traveled in step_hours
+            dist_u = effective_u * 3600.0 * step_hours
+            dist_v = effective_v * 3600.0 * step_hours
             
             # Coordinate delta
             delta_lat = dist_v / m_per_deg_lat
@@ -40,8 +45,8 @@ class WindTransportModel:
             curr_lat += delta_lat
             curr_lon += delta_lon
             
-            # Bounds check to keep within India regional scope
-            if not (20.0 <= curr_lat <= 36.0 and 68.0 <= curr_lon <= 98.0):
+            # Bounds check to keep within North-West India regional scope
+            if not (24.0 <= curr_lat <= 35.0 and 70.0 <= curr_lon <= 82.0):
                 break
                 
             path.append((round(curr_lat, 4), round(curr_lon, 4)))

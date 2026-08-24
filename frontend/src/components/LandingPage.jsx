@@ -21,6 +21,190 @@ const MiniSparkline = ({ values, color }) => {
   )
 }
 
+// Procedural Starfield & Cosmic Space Atmosphere Environment Component with Interactive Cursor Constellations
+const CosmicSpaceEnvironment = () => {
+  const canvasRef = useRef(null)
+
+  // Deterministic star field data (85 stars with varied depths and colors)
+  const stars = [
+    { top: 5, left: 12, size: 1.5, opacity: 0.7, color: '#93c5fd', dur: '2.5s', del: '0.2s' },
+    { top: 8, left: 45, size: 2.2, opacity: 0.9, color: '#ffffff', dur: '3.8s', del: '1.1s' },
+    { top: 12, left: 78, size: 1.0, opacity: 0.6, color: '#c7d2fe', dur: '4.2s', del: '0.5s' },
+    { top: 15, left: 28, size: 1.8, opacity: 0.8, color: '#fef08a', dur: '2.1s', del: '1.8s' },
+    { top: 18, left: 92, size: 2.5, opacity: 0.95, color: '#60a5fa', dur: '3.2s', del: '0.9s' },
+    { top: 22, left: 63, size: 1.2, opacity: 0.5, color: '#ffffff', dur: '4.5s', del: '2.3s' },
+    { top: 25, left: 8, size: 1.5, opacity: 0.7, color: '#e0e7ff', dur: '3.1s', del: '0.4s' },
+    { top: 28, left: 37, size: 2.0, opacity: 0.85, color: '#93c5fd', dur: '2.7s', del: '1.5s' },
+    { top: 32, left: 82, size: 1.0, opacity: 0.4, color: '#ffffff', dur: '5.0s', del: '3.0s' },
+    { top: 35, left: 52, size: 2.8, opacity: 1.0, color: '#38bdf8', dur: '2.3s', del: '0.1s' },
+    { top: 38, left: 19, size: 1.3, opacity: 0.6, color: '#fef08a', dur: '3.6s', del: '2.0s' },
+    { top: 42, left: 71, size: 1.7, opacity: 0.75, color: '#ffffff', dur: '4.0s', del: '1.2s' },
+    { top: 46, left: 89, size: 2.1, opacity: 0.9, color: '#c7d2fe', dur: '2.9s', del: '0.7s' },
+    { top: 50, left: 33, size: 1.2, opacity: 0.5, color: '#93c5fd', dur: '4.8s', del: '2.5s' },
+    { top: 54, left: 6, size: 2.4, opacity: 0.95, color: '#ffffff', dur: '3.3s', del: '1.0s' },
+    { top: 58, left: 77, size: 1.5, opacity: 0.7, color: '#60a5fa', dur: '2.6s', del: '0.3s' },
+    { top: 62, left: 48, size: 1.0, opacity: 0.45, color: '#e0e7ff', dur: '5.2s', del: '3.2s' },
+    { top: 66, left: 22, size: 2.0, opacity: 0.8, color: '#fef08a', dur: '3.5s', del: '1.7s' },
+    { top: 70, left: 95, size: 1.6, opacity: 0.75, color: '#ffffff', dur: '2.8s', del: '0.8s' },
+    { top: 74, left: 61, size: 2.6, opacity: 1.0, color: '#38bdf8', dur: '3.7s', del: '2.2s' },
+    { top: 78, left: 15, size: 1.1, opacity: 0.5, color: '#93c5fd', dur: '4.4s', del: '1.4s' },
+    { top: 82, left: 85, size: 1.9, opacity: 0.85, color: '#ffffff', dur: '3.0s', del: '0.6s' },
+    { top: 86, left: 41, size: 1.4, opacity: 0.65, color: '#c7d2fe', dur: '4.1s', del: '2.7s' },
+    { top: 90, left: 68, size: 2.2, opacity: 0.9, color: '#60a5fa', dur: '2.4s', del: '1.3s' },
+    { top: 94, left: 26, size: 1.2, opacity: 0.55, color: '#ffffff', dur: '3.9s', del: '0.5s' },
+    { top: 6, left: 60, size: 1.0, opacity: 0.5, color: '#93c5fd', dur: '4.0s', del: '1.9s' },
+    { top: 14, left: 96, size: 1.8, opacity: 0.8, color: '#ffffff', dur: '2.9s', del: '0.3s' },
+    { top: 29, left: 15, size: 2.5, opacity: 0.95, color: '#38bdf8', dur: '3.4s', del: '2.4s' },
+    { top: 48, left: 55, size: 1.3, opacity: 0.6, color: '#c7d2fe', dur: '4.6s', del: '1.1s' },
+    { top: 67, left: 88, size: 2.0, opacity: 0.85, color: '#fef08a', dur: '2.7s', del: '0.8s' },
+    { top: 83, left: 3, size: 1.6, opacity: 0.7, color: '#60a5fa', dur: '3.8s', del: '2.1s' },
+    { top: 92, left: 50, size: 2.3, opacity: 0.9, color: '#ffffff', dur: '3.1s', del: '1.6s' }
+  ]
+
+  // Interactive Constellation Cursor Tracking on HTML5 Canvas
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+
+    let width = (canvas.width = window.innerWidth)
+    let height = (canvas.height = window.innerHeight)
+
+    const handleResize = () => {
+      if (!canvas) return
+      width = canvas.width = window.innerWidth
+      height = canvas.height = window.innerHeight
+    }
+    window.addEventListener('resize', handleResize)
+
+    // Calculate fixed pixel star positions
+    const starPoints = stars.map(s => ({
+      x: (s.left / 100) * width,
+      y: (s.top / 100) * height,
+      size: s.size,
+      color: s.color
+    }))
+
+    let mouseX = -9999
+    let mouseY = -9999
+    let targetMouseX = -9999
+    let targetMouseY = -9999
+
+    const handleMouseMove = (e) => {
+      targetMouseX = e.clientX
+      targetMouseY = e.clientY
+    }
+    window.addEventListener('mousemove', handleMouseMove)
+
+    let animId
+    const render = () => {
+      ctx.clearRect(0, 0, width, height)
+
+      // Smooth cursor interpolation
+      mouseX += (targetMouseX - mouseX) * 0.15
+      mouseY += (targetMouseY - mouseY) * 0.15
+
+      // Draw interactive constellation connections to cursor
+      if (mouseX > 0 && mouseY > 0) {
+        const connectRadius = 150
+
+        // Draw cursor beacon aura
+        const grad = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, connectRadius)
+        grad.addColorStop(0, 'rgba(56, 189, 248, 0.15)')
+        grad.addColorStop(0.5, 'rgba(99, 102, 241, 0.05)')
+        grad.addColorStop(1, 'rgba(0, 0, 0, 0)')
+        ctx.fillStyle = grad
+        ctx.beginPath()
+        ctx.arc(mouseX, mouseY, connectRadius, 0, Math.PI * 2)
+        ctx.fill()
+
+        // Connect nearby stars with luminous quantum filaments
+        starPoints.forEach((pt) => {
+          const dx = mouseX - pt.x
+          const dy = mouseY - pt.y
+          const dist = Math.sqrt(dx * dx + dy * dy)
+
+          if (dist < connectRadius) {
+            const alpha = (1 - dist / connectRadius) * 0.75
+            ctx.strokeStyle = `rgba(56, 189, 248, ${alpha})`
+            ctx.lineWidth = 1.2
+            ctx.beginPath()
+            ctx.moveTo(mouseX, mouseY)
+            ctx.lineTo(pt.x, pt.y)
+            ctx.stroke()
+
+            // Draw glowing star connection halo
+            ctx.fillStyle = `rgba(255, 255, 255, ${alpha + 0.2})`
+            ctx.beginPath()
+            ctx.arc(pt.x, pt.y, pt.size * 1.5, 0, Math.PI * 2)
+            ctx.fill()
+          }
+        })
+      }
+
+      animId = requestAnimationFrame(render)
+    }
+
+    render()
+
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      window.removeEventListener('mousemove', handleMouseMove)
+      cancelAnimationFrame(animId)
+    }
+  }, [])
+
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+      {/* 1. Deep Space Cosmic Background Radial Voids */}
+      <div className="absolute inset-0 bg-[#02040a]"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_90%_70%_at_50%_-15%,rgba(37,99,235,0.28),rgba(0,0,0,0))]"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_80%,rgba(99,102,241,0.15),transparent_60%)]"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_65%,rgba(6,182,212,0.12),transparent_50%)]"></div>
+
+      {/* 2. Drifting Cosmic Nebulae & Ionospheric Plasma Dust */}
+      <div className="absolute top-[-10%] left-[-5%] w-[850px] h-[500px] bg-gradient-to-br from-indigo-600/18 via-blue-600/12 to-cyan-500/10 rounded-full blur-[120px] animate-nebula-drift"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-[900px] h-[550px] bg-gradient-to-tl from-purple-700/16 via-indigo-600/14 to-sky-500/10 rounded-full blur-[140px] animate-nebula-drift" style={{ animationDelay: '-14s' }}></div>
+
+      {/* 3. Luminous Stratospheric Aurora Wave Stream */}
+      <div className="absolute top-[10%] left-[15%] w-[700px] h-[220px] bg-gradient-to-r from-emerald-500/12 via-teal-400/15 to-indigo-500/12 rounded-full blur-[90px] transform -rotate-12 animate-aurora"></div>
+
+      {/* 4. Realistic Atmospheric Limb Horizon Arc (Earth's Curved Luminous Exosphere Horizon at Bottom) */}
+      <div className="absolute bottom-[-320px] left-1/2 transform -translate-x-1/2 w-[1600px] sm:w-[2200px] h-[480px] rounded-[100%] bg-gradient-to-t from-sky-400/15 via-blue-500/8 to-transparent border-t border-sky-400/30 shadow-[0_-25px_90px_rgba(56,189,248,0.2)]"></div>
+      <div className="absolute bottom-[-280px] left-1/2 transform -translate-x-1/2 w-[1400px] sm:w-[1900px] h-[380px] rounded-[100%] bg-gradient-to-t from-cyan-300/20 via-sky-500/10 to-transparent blur-[40px]"></div>
+
+      {/* 5. Deep Space Twinkling Starfield */}
+      {stars.map((star, idx) => (
+        <div
+          key={`star-${idx}`}
+          className="absolute rounded-full animate-star-twinkle"
+          style={{
+            top: `${star.top}%`,
+            left: `${star.left}%`,
+            width: `${star.size}px`,
+            height: `${star.size}px`,
+            backgroundColor: star.color,
+            boxShadow: star.size > 2 ? `0 0 6px ${star.color}` : 'none',
+            '--twinkle-duration': star.dur,
+            '--twinkle-delay': star.del
+          }}
+        />
+      ))}
+
+      {/* 6. Periodic Shooting Stars / Meteor Streaks Traversing the Upper Atmosphere */}
+      <div className="absolute top-[12%] left-[10%] w-[120px] h-[2px] bg-gradient-to-r from-transparent via-white to-sky-400 shadow-[0_0_8px_#ffffff] rounded-full animate-shooting-star" style={{ animationDelay: '1.2s' }}></div>
+      <div className="absolute top-[35%] left-[55%] w-[150px] h-[2px] bg-gradient-to-r from-transparent via-white to-cyan-300 shadow-[0_0_8px_#38bdf8] rounded-full animate-shooting-star" style={{ animationDelay: '5.8s' }}></div>
+      <div className="absolute top-[60%] left-[25%] w-[100px] h-[1.5px] bg-gradient-to-r from-transparent via-white to-indigo-300 shadow-[0_0_6px_#ffffff] rounded-full animate-shooting-star" style={{ animationDelay: '9.4s' }}></div>
+
+      {/* 7. Interactive Constellation Canvas Filament Overlay */}
+      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none z-10" />
+
+      {/* 8. Subtle Geospatial Latitude/Longitude Orbital Grid */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#38bdf806_1px,transparent_1px),linear-gradient(to_bottom,#38bdf806_1px,transparent_1px)] bg-[size:64px_64px]"></div>
+    </div>
+  )
+}
+
 export default function LandingPage({ onEnterDashboard }) {
   const [activeCard, setActiveCard] = useState(null)
   const [pulseCount, setPulseCount] = useState(0)
@@ -104,55 +288,35 @@ export default function LandingPage({ onEnterDashboard }) {
         ringsRef.current.style.transform = `translate(0px, 0px)`
       }
 
-      // 2. WIND VELOCITY CARD — "THE WIND ESCAPES"
+      // 2. WIND CARD EVASION PHYSICS
       if (windCardRef.current && heroRef.current) {
         const heroRect = heroRef.current.getBoundingClientRect()
-        const windRect = windCardRef.current.getBoundingClientRect()
+        const cardRect = windCardRef.current.getBoundingClientRect()
+        const cardCenterX = cardRect.left + cardRect.width / 2 - heroRect.left
+        const cardCenterY = cardRect.top + cardRect.height / 2 - heroRect.top
 
-        const windCenterX = windRect.left + windRect.width / 2 - heroRect.left
-        const windCenterY = windRect.top + windRect.height / 2 - heroRect.top
-
-        const mouseX = mouseCoords.current.x
-        const mouseY = mouseCoords.current.y
-
-        const dx = windCenterX - mouseX
-        const dy = windCenterY - mouseY
+        const dx = mouseCoords.current.x - cardCenterX
+        const dy = mouseCoords.current.y - cardCenterY
         const dist = Math.sqrt(dx * dx + dy * dy)
+        const repulseRadius = 140
 
-        const evasionRadius = 140
-
-        if (mouseCoords.current.isInside && dist < evasionRadius && dist > 0) {
-          // Stronger repulsion the closer cursor gets
-          const intensity = Math.pow((evasionRadius - dist) / evasionRadius, 1.2) * 55
-          const angle = Math.atan2(dy, dx)
-          
-          // Evasion vector with subtle tangential breeze curl
-          const curl = Math.sin(time * 3) * 8
-          windPos.current.targetX = Math.max(-45, Math.min(45, Math.cos(angle) * intensity + curl))
-          windPos.current.targetY = Math.max(-35, Math.min(35, Math.sin(angle) * intensity - 5))
+        if (dist < repulseRadius && dist > 0 && mouseCoords.current.isInside) {
+          const force = (repulseRadius - dist) / repulseRadius
+          const pushX = -(dx / dist) * force * 45
+          const pushY = -(dy / dist) * force * 45
+          windPos.current.targetX = pushX
+          windPos.current.targetY = pushY
           setWindTrails(true)
         } else {
-          // Resting floating breath motion when cursor is far
-          windPos.current.targetX = Math.sin(time * 1.5) * 3
-          windPos.current.targetY = Math.cos(time * 2) * 4
-          if (windPos.current.speed < 0.2) {
-            setWindTrails(false)
-          }
+          windPos.current.targetX = Math.sin(time) * 4
+          windPos.current.targetY = Math.cos(time * 0.8) * 4
+          if (Math.abs(windPos.current.x) < 2) setWindTrails(false)
         }
 
-        // Spring-like interpolation (lerp with damping)
-        const prevX = windPos.current.x
-        const prevY = windPos.current.y
         windPos.current.x += (windPos.current.targetX - windPos.current.x) * 0.12
         windPos.current.y += (windPos.current.targetY - windPos.current.y) * 0.12
 
-        const stepSpeed = Math.sqrt(
-          Math.pow(windPos.current.x - prevX, 2) + Math.pow(windPos.current.y - prevY, 2)
-        )
-        windPos.current.speed = stepSpeed
-
-        const tiltDeg = (windPos.current.x * 0.25).toFixed(2)
-        windCardRef.current.style.transform = `translate3d(${windPos.current.x.toFixed(2)}px, ${windPos.current.y.toFixed(2)}px, 20px) rotate(${tiltDeg}deg)`
+        windCardRef.current.style.transform = `translate(${windPos.current.x}px, ${windPos.current.y}px)`
       }
 
       animationFrameId = requestAnimationFrame(updatePhysics)
@@ -167,12 +331,15 @@ export default function LandingPage({ onEnterDashboard }) {
     const rect = heroRef.current.getBoundingClientRect()
     const x = e.clientX - rect.left
     const y = e.clientY - rect.top
-    const nx = (x / rect.width) * 2 - 1
-    const ny = (y / rect.height) * 2 - 1
 
-    mouseCoords.current = { x, y, isInside: true, nx, ny }
+    mouseCoords.current = {
+      x,
+      y,
+      isInside: true,
+      nx: (x / rect.width) * 2 - 1,
+      ny: (y / rect.height) * 2 - 1
+    }
 
-    // Proximity check for Fire Card Awakening
     if (fireCardRef.current) {
       const fireRect = fireCardRef.current.getBoundingClientRect()
       const fireCenterX = fireRect.left + fireRect.width / 2 - rect.left
@@ -196,20 +363,10 @@ export default function LandingPage({ onEnterDashboard }) {
   return (
     <div
       className="h-screen overflow-y-auto font-outfit overflow-x-hidden relative flex flex-col justify-between selection:bg-[#4b6bf5]/30"
-      style={{ backgroundColor: '#03050c', color: '#f1f5f9' }}
+      style={{ backgroundColor: '#02040a', color: '#f1f5f9' }}
     >
-
-      {/* Background Atmospheric Grids, Aurora Streams & Glowing Orbits */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(75,107,245,0.22),rgba(0,0,0,0))] pointer-events-none z-0"></div>
-      
-      {/* Stratospheric Aurora Wave Stream (Top-Left to Center) */}
-      <div className="absolute top-[-5%] left-[5%] w-[800px] h-[350px] bg-gradient-to-r from-sky-500/10 via-emerald-500/10 to-indigo-500/10 rounded-full blur-[100px] pointer-events-none transform -rotate-12 animate-pulse z-0"></div>
-      
-      {/* Tropospheric Ozone Glow (Bottom Right) */}
-      <div className="absolute bottom-[5%] right-[-5%] w-[700px] h-[450px] bg-gradient-to-l from-indigo-500/12 via-sky-500/10 to-transparent rounded-full blur-[130px] pointer-events-none z-0"></div>
-      
-      {/* Subtle Atmospheric Isobar Pressure Contours in Background */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b08_1px,transparent_1px),linear-gradient(to_bottom,#1e293b08_1px,transparent_1px)] bg-[size:48px_48px] pointer-events-none z-0"></div>
+      {/* Dynamic Deep Space Cosmic Atmosphere Environment Background with Interactive Quantum Constellation Cursor Tracker */}
+      <CosmicSpaceEnvironment />
 
       {/* 1. HEADER ROW */}
       <header className="max-w-7xl mx-auto w-full px-6 py-6 flex justify-between items-center z-10 relative">

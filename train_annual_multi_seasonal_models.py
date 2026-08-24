@@ -124,16 +124,26 @@ def generate_365_day_balanced_dataset():
         for st in STATIONS:
             s_type = st["type"]
             
-            # Base Pollutants scaled by season and land use
+            # Base Pollutants scaled by season, district type, and urban density
+            is_delhi_ncr = st.get("district") in ["Delhi", "Gurugram", "Faridabad"]
+            
             if season == "monsoon":
-                pm25_base = (32.0 if s_type == "urban" else 48.0 if s_type == "industrial" else 22.0) + np.random.normal(0, 3.0)
-                pm10_base = pm25_base * 1.5 + np.random.normal(0, 4.0)
-                no2_base = (24.0 if s_type == "urban" else 35.0 if s_type == "industrial" else 12.0) + np.random.normal(0, 2.0)
-                so2_base = (10.0 if s_type == "urban" else 22.0 if s_type == "industrial" else 6.0) + np.random.normal(0, 1.0)
-                co_base = (0.55 if s_type == "urban" else 0.85 if s_type == "industrial" else 0.35) + np.random.normal(0, 0.03)
-                o3_base = 25.0 + np.random.normal(0, 2.0)
-                aod_base = 0.22 + np.random.normal(0, 0.02)
-                hcho_base = 2.4 + np.random.normal(0, 0.2)
+                if is_delhi_ncr:
+                    # Delhi-NCR has a persistent high vehicular and urban emission floor even in monsoon
+                    pm25_base = (68.0 if s_type == "urban" else 82.0 if s_type == "industrial" else 52.0) + np.random.normal(0, 4.0)
+                    pm10_base = (pm25_base * 1.35) + np.random.normal(0, 5.0)
+                    no2_base = (34.0 if s_type == "urban" else 48.0 if s_type == "industrial" else 22.0) + np.random.normal(0, 2.5)
+                else:
+                    # Agricultural and Tier-2 regional stations have lower monsoon baselines
+                    pm25_base = (42.0 if s_type == "urban" else 56.0 if s_type == "industrial" else 32.0) + np.random.normal(0, 3.0)
+                    pm10_base = (pm25_base * 1.4) + np.random.normal(0, 4.0)
+                    no2_base = (20.0 if s_type == "urban" else 30.0 if s_type == "industrial" else 12.0) + np.random.normal(0, 2.0)
+                    
+                so2_base = (12.0 if s_type == "urban" else 24.0 if s_type == "industrial" else 8.0) + np.random.normal(0, 1.0)
+                co_base = (0.75 if is_delhi_ncr else 0.45) + np.random.normal(0, 0.03)
+                o3_base = 28.0 + np.random.normal(0, 2.0)
+                aod_base = 0.28 + np.random.normal(0, 0.02)
+                hcho_base = 2.8 + np.random.normal(0, 0.2)
             elif season == "stubble_autumn":
                 smoke_factor = fires_count * 0.8
                 pm25_base = (210.0 if s_type == "urban" else 250.0 if s_type == "industrial" else 180.0) + smoke_factor + np.random.normal(0, 12.0)
@@ -163,9 +173,9 @@ def generate_365_day_balanced_dataset():
                 aod_base = 0.58 + np.random.normal(0, 0.03)
                 hcho_base = 4.2 + np.random.normal(0, 0.25)
                 
-            # Rain washout effect
+            # Rain washout effect with urban continuous emission retention floor
             if rain > 0.0:
-                wash = np.exp(-0.12 * rain)
+                wash = max(0.72 if is_delhi_ncr else 0.55, np.exp(-0.05 * rain))
                 pm25_base *= wash
                 pm10_base *= wash
                 no2_base *= wash

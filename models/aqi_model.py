@@ -258,6 +258,14 @@ class AQIModelManager:
         for target_col, model in self.models.items():
             output_df[target_col] = model.predict(X).round(2)
             
+        # Physical consistency guardrails (Atmospheric Physics Constraints)
+        output_df["pm25"] = np.maximum(5.0, output_df["pm25"].values)
+        output_df["pm10"] = np.maximum(output_df["pm25"].values * 1.15, output_df["pm10"].values)
+        output_df["no2_surface"] = np.maximum(1.0, output_df["no2_surface"].values)
+        output_df["so2_surface"] = np.maximum(0.5, output_df["so2_surface"].values)
+        output_df["co_surface"] = np.maximum(0.1, output_df["co_surface"].values)
+        output_df["o3_surface"] = np.maximum(2.0, output_df["o3_surface"].values)
+            
         # Calculate CPCB AQI
         aqi_values = []
         categories = []

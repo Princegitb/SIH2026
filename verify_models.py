@@ -48,8 +48,8 @@ def verify_pipeline():
     from models.hotspot_detection import HotspotDetector
     detector = HotspotDetector(hcho_percentile=90)
     
-    # Take a specific day
-    target_date = "2025-11-05"
+    # Take a specific day dynamically from the available dates
+    target_date = str(grid_df["date"].max())
     day_grid = grid_df[grid_df["date"] == target_date]
     fires_df = pd.read_csv("data/fire_events.csv")
     
