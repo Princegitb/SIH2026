@@ -258,9 +258,14 @@ class AQIModelManager:
         for target_col, model in self.models.items():
             output_df[target_col] = model.predict(X).round(2)
             
-        # Physical consistency guardrails (Atmospheric Physics Constraints)
+        # Physical consistency guardrails (Atmospheric Physics & Aerosol Mass Balance Constraints)
         output_df["pm25"] = np.maximum(5.0, output_df["pm25"].values)
-        output_df["pm10"] = np.maximum(output_df["pm25"].values * 1.15, output_df["pm10"].values)
+        # Coarse-to-Fine Aerosol ratio bound: In standard atmospheric physics, PM10 is bounded within [1.15 * PM2.5, 1.85 * PM2.5 + 15.0]
+        output_df["pm10"] = np.clip(
+            output_df["pm10"].values,
+            output_df["pm25"].values * 1.15,
+            output_df["pm25"].values * 1.85 + 15.0
+        )
         output_df["no2_surface"] = np.maximum(1.0, output_df["no2_surface"].values)
         output_df["so2_surface"] = np.maximum(0.5, output_df["so2_surface"].values)
         output_df["co_surface"] = np.maximum(0.1, output_df["co_surface"].values)

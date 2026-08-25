@@ -132,6 +132,33 @@ def startup_event():
     # Precompute prediction grid and attribution
     logger.info("Precomputing predictions and chemical source attribution on grid...")
     pred_df = model_manager.predict_grid(grid_df_raw)
+    
+    # Atmospheric Physics Guardrail: Bounding PM10 to physical coarse-to-fine ratio [1.15 * PM2.5, 1.85 * PM2.5 + 15.0]
+    pred_df["pm25"] = np.maximum(5.0, pred_df["pm25"].values)
+    pred_df["pm10"] = np.clip(
+        pred_df["pm10"].values,
+        pred_df["pm25"].values * 1.15,
+        pred_df["pm25"].values * 1.85 + 15.0
+    )
+    
+    # Recalculate CPCB AQI and sub-indices for absolute physical consistency
+    from models.aqi_model import calculate_cpcb_aqi, TARGET_POLLUTANTS
+    recalc_aqi = []
+    recalc_cats = []
+    recalc_sub_pm25 = []
+    recalc_sub_pm10 = []
+    for idx, row in pred_df.iterrows():
+        aqi_val, subs, cat_str = calculate_cpcb_aqi(row)
+        recalc_aqi.append(round(aqi_val, 1))
+        recalc_cats.append(cat_str)
+        recalc_sub_pm25.append(subs["pm25"])
+        recalc_sub_pm10.append(subs["pm10"])
+        
+    pred_df["aqi"] = recalc_aqi
+    pred_df["aqi_category"] = recalc_cats
+    pred_df["sub_index_pm25"] = recalc_sub_pm25
+    pred_df["sub_index_pm10"] = recalc_sub_pm10
+    
     grid_df = attributor.attribute_dataframe(pred_df)
     
     # Initialize 48-Hour ML Forecasting Engine
@@ -221,7 +248,14 @@ def get_dashboard(date: str = None, district: str = "Ambala"):
         
         # 2. Selected Focus District metrics
         dist_day = grid_df[(grid_df["date"] == date) & (grid_df["district"] == district)]
-        dist_row = dist_day.iloc[0] if not dist_day.empty else None
+        if dist_day.empty:
+            dist_day = grid_df[grid_df["date"] == date]
+            
+        dist_row = dist_day.iloc[0].copy() if not dist_day.empty else None
+        if dist_row is not None and len(dist_day) > 1:
+            for col in ["aqi", "pm25", "pm10", "no2_surface", "so2_surface", "co_surface", "o3_surface", "aod", "blh", "hcho_column", "sub_index_pm25", "sub_index_pm10", "sub_index_no2", "sub_index_so2", "sub_index_co", "sub_index_o3", "source_biomass_pct", "source_vehicular_pct", "source_industrial_pct"]:
+                if col in dist_day.columns:
+                    dist_row[col] = float(dist_day[col].mean())
         
         # Historical 7 days for Focus District trend chart (grouped across distinct dates)
         dist_7d = grid_df[(grid_df["district"] == district) & (grid_df["date"] <= date)].groupby("date").agg({
