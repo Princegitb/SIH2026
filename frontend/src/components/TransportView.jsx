@@ -138,11 +138,11 @@ export default function TransportView() {
         </div>
 
         {/* View Mode Switcher */}
-        <div className="flex items-center space-x-1.5 bg-[#090d16]/90 border border-slate-800 rounded-xl p-1 text-xs font-bold">
+        <div className="flex items-center space-x-1.5 bg-[#09090c] border border-zinc-800 rounded-xl p-1 text-xs font-bold shadow-sm">
           <button
             onClick={() => setActiveTab('corridor')}
             className={`px-3.5 py-1.5 rounded-lg transition-all flex items-center space-x-1.5 ${
-              activeTab === 'corridor' ? 'bg-[#4b6bf5] text-white shadow-md' : 'text-slate-400 hover:text-slate-200'
+              activeTab === 'corridor' ? 'bg-indigo-600 text-white shadow-md font-bold' : 'text-zinc-400 hover:text-zinc-200'
             }`}
           >
             <Navigation size={13} />
@@ -151,7 +151,7 @@ export default function TransportView() {
           <button
             onClick={() => setActiveTab('pathway')}
             className={`px-3.5 py-1.5 rounded-lg transition-all flex items-center space-x-1.5 ${
-              activeTab === 'pathway' ? 'bg-[#4b6bf5] text-white shadow-md' : 'text-slate-400 hover:text-slate-200'
+              activeTab === 'pathway' ? 'bg-indigo-600 text-white shadow-md font-bold' : 'text-zinc-400 hover:text-zinc-200'
             }`}
           >
             <Clock size={13} />
@@ -160,7 +160,7 @@ export default function TransportView() {
           <button
             onClick={() => setActiveTab('scientific')}
             className={`px-3.5 py-1.5 rounded-lg transition-all flex items-center space-x-1.5 ${
-              activeTab === 'scientific' ? 'bg-[#4b6bf5] text-white shadow-md' : 'text-slate-400 hover:text-slate-200'
+              activeTab === 'scientific' ? 'bg-indigo-600 text-white shadow-md font-bold' : 'text-zinc-400 hover:text-zinc-200'
             }`}
           >
             <Activity size={13} />
@@ -593,11 +593,11 @@ export default function TransportView() {
                 </span>
               </div>
 
-              <div className="flex items-center space-x-1.5 bg-slate-950/80 border border-slate-800 p-1 rounded-xl text-xs font-bold">
+              <div className="flex items-center space-x-1.5 bg-[#09090c] border border-zinc-800 p-1 rounded-xl text-xs font-bold shadow-sm">
                 <button
                   onClick={() => setChartMode('bars')}
                   className={`px-3 py-1 rounded-lg transition-all ${
-                    chartMode === 'bars' ? 'bg-[#4b6bf5] text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'
+                    chartMode === 'bars' ? 'bg-indigo-600 text-white shadow-sm font-bold' : 'text-zinc-400 hover:text-zinc-200'
                   }`}
                 >
                   Correlation Bars
@@ -605,7 +605,7 @@ export default function TransportView() {
                 <button
                   onClick={() => setChartMode('decay')}
                   className={`px-3 py-1 rounded-lg transition-all ${
-                    chartMode === 'decay' ? 'bg-[#4b6bf5] text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'
+                    chartMode === 'decay' ? 'bg-indigo-600 text-white shadow-sm font-bold' : 'text-zinc-400 hover:text-zinc-200'
                   }`}
                 >
                   Decay Area
