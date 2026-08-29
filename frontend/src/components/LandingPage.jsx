@@ -362,8 +362,8 @@ export default function LandingPage({ onEnterDashboard }) {
 
   return (
     <div
-      className="h-screen overflow-y-auto font-outfit overflow-x-hidden relative flex flex-col justify-between selection:bg-[#4b6bf5]/30"
-      style={{ backgroundColor: '#02040a', color: '#f1f5f9' }}
+      className="h-screen overflow-y-auto font-outfit overflow-x-hidden relative flex flex-col justify-between selection:bg-indigo-500/30"
+      style={{ backgroundColor: '#010103', color: '#f4f4f5' }}
     >
       {/* Dynamic Deep Space Cosmic Atmosphere Environment Background with Interactive Quantum Constellation Cursor Tracker */}
       <CosmicSpaceEnvironment />
@@ -376,13 +376,13 @@ export default function LandingPage({ onEnterDashboard }) {
             <h1 className="text-base font-extrabold tracking-tight text-white flex items-center">
               VayuShetra
             </h1>
-            <span className="text-[9px] text-[#4b6bf5] font-bold tracking-widest uppercase block mt-0.5">India's Atmospheric Intelligence</span>
+            <span className="text-[9px] text-indigo-400 font-bold tracking-widest uppercase block mt-0.5">India's Atmospheric Intelligence</span>
           </div>
         </div>
 
         <button
           onClick={onEnterDashboard}
-          className="flex items-center space-x-2 bg-slate-900/60 border border-slate-800 hover:border-slate-700 hover:bg-slate-800/80 text-xs font-bold px-4 py-2 rounded-xl transition-all duration-300 shadow-lg text-slate-200 hover:text-white"
+          className="flex items-center space-x-2 bg-zinc-900/80 border border-zinc-800 hover:border-zinc-700 hover:bg-zinc-800 text-xs font-bold px-4 py-2 rounded-xl transition-all duration-300 shadow-lg text-zinc-200 hover:text-white"
         >
           <span>Explore Dashboard</span>
           <ArrowRight size={13} />
@@ -403,11 +403,11 @@ export default function LandingPage({ onEnterDashboard }) {
           {/* Heading */}
           <h2 className="text-4xl sm:text-6xl font-extrabold tracking-tight leading-[1.1] text-white">
             Breathe Better. <br />
-            <span className="bg-gradient-to-r from-[#4b6bf5] to-[#7c93fe] bg-clip-text text-transparent">Live Smarter.</span>
+            <span className="bg-gradient-to-r from-indigo-400 via-sky-400 to-indigo-300 bg-clip-text text-transparent">Live Smarter.</span>
           </h2>
 
           {/* Description Paragraph */}
-          <p className="text-sm sm:text-base text-slate-400 max-w-xl leading-relaxed font-medium">
+          <p className="text-sm sm:text-base text-zinc-400 max-w-xl leading-relaxed font-medium">
             VayuShetra delivers real-time, hyperlocal air quality insights, fire & smoke detection, and wind intelligence using satellite data and AI models — for a cleaner, safer tomorrow.
           </p>
 
@@ -415,7 +415,7 @@ export default function LandingPage({ onEnterDashboard }) {
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 pt-3">
             <button
               onClick={onEnterDashboard}
-              className="flex items-center justify-center space-x-2.5 bg-[#4b6bf5] hover:bg-[#3b56cf] hover:shadow-[0_0_25px_rgba(75,107,245,0.4)] text-white text-sm font-bold px-6 py-3.5 rounded-xl transition-all duration-350 transform active:scale-98"
+              className="flex items-center justify-center space-x-2.5 bg-gradient-to-r from-indigo-600 via-indigo-500 to-indigo-600 hover:brightness-110 hover:shadow-[0_0_30px_rgba(99,102,241,0.5)] text-white text-sm font-bold px-6 py-3.5 rounded-xl transition-all duration-350 transform active:scale-98"
             >
               <span>Explore Live Dashboard</span>
               <ArrowRight size={16} />
@@ -876,24 +876,24 @@ export default function LandingPage({ onEnterDashboard }) {
           </div>
 
           {/* Card 4: Actionable Alerts */}
-          <div className="bg-[#080b16]/60 border border-slate-850/60 p-4 rounded-xl space-y-2 hover:border-slate-800 transition-all duration-200">
+          <div className="bg-[#07070a]/90 border border-zinc-800/80 p-4 rounded-xl space-y-2 hover:border-zinc-700 transition-all duration-200">
             <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-400">
               <Bell size={15} />
             </div>
             <div>
               <h4 className="text-xs font-bold text-white tracking-wide">Actionable Alerts</h4>
-              <p className="text-[10px] text-slate-500 leading-normal mt-1">Timely alerts on pollution, fires & hazardous levels.</p>
+              <p className="text-[10px] text-zinc-400 leading-normal mt-1">Timely alerts on pollution, fires & hazardous levels.</p>
             </div>
           </div>
 
           {/* Card 5: Data You Can Trust */}
-          <div className="bg-[#080b16]/60 border border-slate-850/60 p-4 rounded-xl space-y-2 hover:border-slate-800 transition-all duration-200">
-            <div className="w-8 h-8 rounded-lg bg-[#4b6bf5]/10 flex items-center justify-center text-[#7c93fe]">
+          <div className="bg-[#07070a]/90 border border-zinc-800/80 p-4 rounded-xl space-y-2 hover:border-zinc-700 transition-all duration-200">
+            <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400">
               <Database size={15} />
             </div>
             <div>
               <h4 className="text-xs font-bold text-white tracking-wide">Data You Can Trust</h4>
-              <p className="text-[10px] text-slate-500 leading-normal mt-1">Backed by global datasets & government standards.</p>
+              <p className="text-[10px] text-zinc-400 leading-normal mt-1">Backed by global datasets & government standards.</p>
             </div>
           </div>
 
@@ -902,17 +902,17 @@ export default function LandingPage({ onEnterDashboard }) {
 
       {/* 4. BOTTOM CTAs BANNER */}
       <footer className="max-w-7xl mx-auto w-full px-6 py-6 z-10 relative">
-        <div className="bg-gradient-to-r from-[#080b16]/90 to-[#0e1326]/90 border border-slate-800/80 p-5 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-4 shadow-xl">
+        <div className="bg-gradient-to-r from-[#070709] via-[#0a0a0d] to-[#070709] border border-zinc-800 p-5 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-4 shadow-2xl">
           <div className="text-left space-y-1.5">
             <div className="text-[9px] text-emerald-400 font-extrabold uppercase tracking-widest flex items-center">
               <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full mr-2"></span> Together for Cleaner Air
             </div>
             <h3 className="text-base font-extrabold text-white tracking-tight">Better Data. Better Decisions. Better Tomorrow.</h3>
-            <p className="text-[10px] text-slate-400">Join us in building a healthier, sustainable future through intelligent air monitoring.</p>
+            <p className="text-[10px] text-zinc-400">Join us in building a healthier, sustainable future through intelligent air monitoring.</p>
           </div>
           <button
             onClick={onEnterDashboard}
-            className="flex items-center space-x-2 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-extrabold px-6 py-3 rounded-xl transition-all duration-300 shadow-md whitespace-nowrap"
+            className="flex items-center space-x-2 bg-white hover:bg-zinc-200 text-black text-xs font-extrabold px-6 py-3 rounded-xl transition-all duration-300 shadow-md whitespace-nowrap"
           >
             <span>Get Started</span>
             <ArrowRight size={13} />

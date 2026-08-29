@@ -3,14 +3,13 @@
 @tailwind utilities;
 
 /* -------------------------------------------------------------
-   OBSIDIAN CARBON PRO DESIGN SYSTEM (PURE MATTE BLACK + CLEAN LIGHT THEME)
+   OBSIDIAN CARBON PRO DESIGN SYSTEM (PURE MATTE BLACK ATMOSPHERE)
    ------------------------------------------------------------- */
 
-/* Dark Theme Variables (Default) */
 :root {
   --bg-color: #030304; /* True Obsidian Pitch Black */
   --text-color: #f4f4f5; /* Crisp Zinc White */
-  --panel-bg: rgba(14, 14, 17, 0.82); /* Deep Carbon Glass */
+  --panel-bg: rgba(12, 12, 16, 0.88); /* Deep Carbon Glass */
   --panel-border: rgba(255, 255, 255, 0.08); /* Minimal 1px hairline border */
   --sidebar-bg: #070709; /* Sleek Matte Black Sidebar */
   --input-bg: #0c0c0f; /* Pure Charcoal Input */
@@ -22,30 +21,6 @@
   --control-bg: #0c0c0f;
   --footer-bg: #050507;
   --subcard-bg: #09090c;
-  --tab-container-bg: #09090c;
-  --active-tab-bg: #27272a;
-  --active-tab-text: #ffffff;
-}
-
-/* Light Theme Variables */
-.light, :root.light {
-  --bg-color: #f8fafc;
-  --text-color: #0f172a;
-  --panel-bg: #ffffff;
-  --panel-border: rgba(15, 23, 42, 0.08);
-  --sidebar-bg: #ffffff;
-  --input-bg: #f1f5f9;
-  --input-border: #cbd5e1;
-  --leaflet-bg: #f8fafc;
-  --popup-bg: #ffffff;
-  --popup-text: #0f172a;
-  --popup-border: rgba(15, 23, 42, 0.12);
-  --control-bg: #ffffff;
-  --footer-bg: #ffffff;
-  --subcard-bg: #f8fafc;
-  --tab-container-bg: #f1f5f9;
-  --active-tab-bg: #ffffff;
-  --active-tab-text: #0f172a;
 }
 
 /* Custom Scrollbars */
@@ -60,46 +35,33 @@
   background: #27272a;
   border-radius: 4px;
 }
-.light ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-}
 ::-webkit-scrollbar-thumb:hover {
   background: #3f3f46;
 }
 
 /* Base Body Styles */
 body {
-  background-color: var(--bg-color) !important;
-  color: var(--text-color) !important;
+  background-color: #030304 !important;
+  color: #f4f4f5 !important;
   font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif;
   overflow: hidden;
-  transition: background-color 0.25s ease, color 0.25s ease;
   letter-spacing: -0.01em;
 }
 
-/* Glassmorphism Styles - Theme Adaptive */
+/* Glassmorphism Styles - Pure Obsidian Dark */
 .glass-panel {
-  background: var(--panel-bg) !important;
-  border: 1px solid var(--panel-border) !important;
+  background: rgba(12, 12, 16, 0.88) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
   backdrop-filter: blur(16px) !important;
   -webkit-backdrop-filter: blur(16px) !important;
-  box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.5);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.light .glass-panel {
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 4px 12px 0 rgba(0, 0, 0, 0.02) !important;
 }
 
 .glass-panel:hover {
   border-color: rgba(255, 255, 255, 0.16) !important;
-  box-shadow: 0 8px 32px -2px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 8px 32px -2px rgba(0, 0, 0, 0.7);
   transform: translateY(-1px);
-}
-
-.light .glass-panel:hover {
-  border-color: rgba(99, 102, 241, 0.3) !important;
-  box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.06) !important;
 }
 
 /* Conic gradient radar sweep */
@@ -115,46 +77,41 @@ body {
 
 /* Leaflet Theme Overrides */
 .leaflet-container {
-  background: var(--leaflet-bg) !important;
+  background: #040406 !important;
   border-radius: 16px !important;
-  border: 1px solid var(--panel-border) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
 .leaflet-popup-content-wrapper {
-  background: var(--popup-bg) !important;
-  color: var(--popup-text) !important;
-  border: 1px solid var(--popup-border) !important;
+  background: rgba(10, 10, 14, 0.96) !important;
+  color: #f4f4f5 !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
   border-radius: 14px !important;
   backdrop-filter: blur(12px) !important;
-  box-shadow: 0 20px 30px -8px rgba(0, 0, 0, 0.3) !important;
+  box-shadow: 0 20px 30px -8px rgba(0, 0, 0, 0.7) !important;
 }
 
 .leaflet-popup-tip {
-  background: var(--popup-bg) !important;
-  border: 1px solid var(--popup-border) !important;
+  background: rgba(10, 10, 14, 0.96) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
 }
 
 .leaflet-bar {
-  border: 1px solid var(--panel-border) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
   box-shadow: none !important;
   border-radius: 8px !important;
   overflow: hidden !important;
 }
 
 .leaflet-bar a {
-  background-color: var(--control-bg) !important;
-  color: var(--text-color) !important;
-  border-bottom: 1px solid var(--panel-border) !important;
+  background-color: #0c0c0f !important;
+  color: #f4f4f5 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
 .leaflet-bar a:hover {
   background-color: #18181b !important;
   color: #6366f1 !important;
-}
-
-.light .leaflet-bar a:hover {
-  background-color: #f1f5f9 !important;
-  color: #4f46e5 !important;
 }
 
 /* Bottom Card Grid Layout */
@@ -166,8 +123,8 @@ body {
 }
 
 .bottom-card {
-  background: var(--panel-bg);
-  border: 1px solid var(--panel-border);
+  background: rgba(12, 12, 16, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 14px;
   padding: 16px;
   height: 145px;
@@ -182,19 +139,13 @@ body {
 .bottom-card:hover {
   border-color: rgba(255, 255, 255, 0.18);
   transform: translateY(-2px);
-  box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.5);
-}
-
-.light .bottom-card:hover {
-  border-color: rgba(99, 102, 241, 0.3);
-  box-shadow: 0 6px 20px -2px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.6);
 }
 
 .kpi-title {
   font-size: 0.65rem;
   text-transform: uppercase;
-  color: var(--text-color);
-  opacity: 0.6;
+  color: #a1a1aa;
   margin-bottom: 2px;
   letter-spacing: 0.8px;
   font-weight: 700;
@@ -206,6 +157,7 @@ body {
   line-height: 1.1;
   font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
   letter-spacing: -0.03em;
+  color: #ffffff;
 }
 
 /* Radar Animation */
@@ -272,15 +224,13 @@ body {
   opacity: 0.9;
 }
 
-/* -------------------------------------------------------------
-   DARK MODE COLOR DEFAULTS
-   ------------------------------------------------------------- */
+/* Background Utility Standardizations */
 .app-workspace .bg-slate-900,
 .app-workspace .bg-\[\#090d16\],
 .app-workspace .bg-\[\#0d1121\],
 .app-workspace .bg-\[\#080b16\],
 .app-workspace .bg-\[\#05070f\] {
-  background-color: #0a0a0d;
+  background-color: #09090c;
 }
 
 .app-workspace .bg-slate-950,
@@ -288,7 +238,7 @@ body {
 .app-workspace .bg-slate-950\/70,
 .app-workspace .bg-slate-950\/80,
 .app-workspace .bg-slate-950\/90 {
-  background-color: #060608;
+  background-color: #050507;
 }
 
 .app-workspace .border-slate-800,
@@ -296,230 +246,4 @@ body {
 .app-workspace .border-slate-800\/80,
 .app-workspace .border-slate-700 {
   border-color: rgba(255, 255, 255, 0.08);
-}
-
-/* -------------------------------------------------------------
-   LIGHT MODE FULL OVERHAUL (CRISP, PROFESSIONAL & HIGH CONTRAST)
-   ------------------------------------------------------------- */
-.light .app-workspace {
-  background-color: #f8fafc !important;
-  color: #0f172a !important;
-}
-
-.light .app-workspace aside {
-  background-color: #ffffff !important;
-  border-right: 1px solid rgba(15, 23, 42, 0.08) !important;
-}
-
-/* Footer in Light Mode */
-.light .app-workspace footer {
-  background-color: #ffffff !important;
-  border-top: 1px solid rgba(15, 23, 42, 0.08) !important;
-  color: #64748b !important;
-  box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.02) !important;
-}
-.light .app-workspace footer span,
-.light .app-workspace footer b {
-  color: #64748b !important;
-}
-
-/* Sidebar Navigation Tabs in Light Mode */
-.light .app-workspace aside nav button {
-  color: #64748b !important;
-}
-.light .app-workspace aside nav button:hover {
-  background-color: #f1f5f9 !important;
-  color: #0f172a !important;
-}
-.light .app-workspace aside nav button.bg-zinc-800\/80,
-.light .app-workspace aside nav button[class*="bg-zinc-800"],
-.light .app-workspace aside nav button[class*="shadow-"] {
-  background-color: #eef2ff !important;
-  color: #4338ca !important;
-  border: 1px solid rgba(99, 102, 241, 0.3) !important;
-  box-shadow: 0 1px 4px rgba(99, 102, 241, 0.12) !important;
-}
-.light .app-workspace aside nav button.bg-zinc-800\/80 span,
-.light .app-workspace aside nav button.bg-zinc-800\/80 svg {
-  color: #4338ca !important;
-}
-
-/* Bottom Sidebar Diagnostics Card */
-.light .app-workspace aside div[class*="bg-zinc-900"],
-.light .app-workspace aside div[class*="bg-slate-900"] {
-  background-color: #f8fafc !important;
-  border-color: rgba(15, 23, 42, 0.1) !important;
-  color: #475569 !important;
-}
-.light .app-workspace aside div[class*="bg-zinc-900"] .text-zinc-200 {
-  color: #0f172a !important;
-}
-
-/* Diagnostics popup overlay in Light Mode */
-.light .app-workspace aside div[class*="bg-zinc-950\/95"],
-.light .app-workspace aside div[class*="bg-slate-950\/95"] {
-  background-color: rgba(255, 255, 255, 0.98) !important;
-  border-color: rgba(15, 23, 42, 0.12) !important;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12) !important;
-  color: #334155 !important;
-}
-
-/* General Card and Subcard Backgrounds in Light Mode */
-.light .app-workspace .bg-slate-900,
-.light .app-workspace .bg-zinc-900,
-.light .app-workspace .bg-\[\#090d16\],
-.light .app-workspace .bg-\[\#0d1121\],
-.light .app-workspace .bg-\[\#080b16\],
-.light .app-workspace .bg-\[\#05070f\],
-.light .app-workspace .bg-\[\#0a0a0d\] {
-  background-color: #ffffff !important;
-  border-color: rgba(15, 23, 42, 0.08) !important;
-  color: #0f172a !important;
-}
-
-.light .app-workspace .bg-slate-950,
-.light .app-workspace .bg-zinc-950,
-.light .app-workspace .bg-\[\#050507\],
-.light .app-workspace .bg-\[\#060608\],
-.light .app-workspace .bg-\[\#070709\],
-.light .app-workspace .bg-\[\#09090c\],
-.light .app-workspace .bg-\[\#0c0c0f\],
-.light .app-workspace .bg-slate-950\/60,
-.light .app-workspace .bg-slate-950\/70,
-.light .app-workspace .bg-slate-950\/80 {
-  background-color: #f8fafc !important;
-  border-color: rgba(15, 23, 42, 0.08) !important;
-  color: #0f172a !important;
-}
-
-/* Tab Switcher Containers (e.g. Smoke Corridor Map / 48h Pathway in TransportView) */
-.light .app-workspace div[class*="bg-\[\#090d16\]"],
-.light .app-workspace div[class*="bg-zinc-900"],
-.light .app-workspace div[class*="bg-\[\#070b14\]"],
-.light .app-workspace div[class*="bg-slate-900"] {
-  background-color: #f1f5f9 !important;
-  border-color: rgba(15, 23, 42, 0.08) !important;
-}
-
-/* Buttons inside Tab Switchers in Light Mode */
-.light .app-workspace div[class*="bg-\[\#090d16\]"] button,
-.light .app-workspace div[class*="bg-zinc-900"] button,
-.light .app-workspace div[class*="bg-slate-900"] button {
-  color: #64748b !important;
-}
-.light .app-workspace div[class*="bg-\[\#090d16\]"] button:hover,
-.light .app-workspace div[class*="bg-zinc-900"] button:hover {
-  color: #0f172a !important;
-}
-
-/* Active tab buttons */
-.light .app-workspace button.bg-\[\#4b6bf5\],
-.light .app-workspace button[class*="bg-\[\#4b6bf5\]"],
-.light .app-workspace button.bg-indigo-600,
-.light .app-workspace button.bg-indigo-500 {
-  background-color: #4f46e5 !important;
-  color: #ffffff !important;
-  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25) !important;
-}
-.light .app-workspace button.bg-\[\#4b6bf5\] span,
-.light .app-workspace button.bg-\[\#4b6bf5\] svg {
-  color: #ffffff !important;
-}
-
-/* Typography Overrides in Light Mode */
-.light .app-workspace .text-white,
-.light .app-workspace .text-zinc-100,
-.light .app-workspace .text-slate-100 {
-  color: #0f172a !important;
-}
-.light .app-workspace .text-zinc-200,
-.light .app-workspace .text-slate-200 {
-  color: #1e293b !important;
-}
-.light .app-workspace .text-zinc-300,
-.light .app-workspace .text-slate-300 {
-  color: #334155 !important;
-}
-.light .app-workspace .text-zinc-400,
-.light .app-workspace .text-slate-400 {
-  color: #64748b !important;
-}
-.light .app-workspace .text-zinc-500,
-.light .app-workspace .text-slate-500 {
-  color: #64748b !important;
-}
-
-/* Inputs, dropdowns, and date selectors in Light Mode */
-.light .app-workspace select,
-.light .app-workspace input {
-  background-color: #ffffff !important;
-  color: #0f172a !important;
-  border-color: #cbd5e1 !important;
-}
-.light .app-workspace select option {
-  background-color: #ffffff !important;
-  color: #0f172a !important;
-}
-
-/* Border overrides in Light Mode */
-.light .app-workspace .border-slate-800,
-.light .app-workspace .border-zinc-800,
-.light .app-workspace .border-zinc-850,
-.light .app-workspace .border-slate-700,
-.light .app-workspace .border-zinc-700 {
-  border-color: rgba(15, 23, 42, 0.08) !important;
-}
-
-/* Badge Colors & High Contrast in Light Mode */
-.light .app-workspace .text-amber-300,
-.light .app-workspace .text-amber-400 {
-  color: #b45309 !important;
-}
-.light .app-workspace .text-indigo-300,
-.light .app-workspace .text-indigo-400,
-.light .app-workspace .text-blue-300,
-.light .app-workspace .text-blue-400 {
-  color: #4338ca !important;
-}
-.light .app-workspace .text-emerald-300,
-.light .app-workspace .text-emerald-400 {
-  color: #047857 !important;
-}
-.light .app-workspace .text-purple-300,
-.light .app-workspace .text-purple-400 {
-  color: #6b21a8 !important;
-}
-.light .app-workspace .text-red-300,
-.light .app-workspace .text-red-400 {
-  color: #b91c1c !important;
-}
-
-.light .app-workspace .bg-amber-500\/10,
-.light .app-workspace .bg-amber-500\/20 {
-  background-color: rgba(245, 158, 11, 0.12) !important;
-  border-color: rgba(245, 158, 11, 0.25) !important;
-}
-.light .app-workspace .bg-indigo-500\/10,
-.light .app-workspace .bg-indigo-500\/20,
-.light .app-workspace .bg-blue-500\/10,
-.light .app-workspace .bg-blue-500\/20 {
-  background-color: rgba(99, 102, 241, 0.12) !important;
-  border-color: rgba(99, 102, 241, 0.25) !important;
-}
-.light .app-workspace .bg-emerald-500\/10,
-.light .app-workspace .bg-emerald-500\/20 {
-  background-color: rgba(16, 185, 129, 0.12) !important;
-  border-color: rgba(16, 185, 129, 0.25) !important;
-}
-.light .app-workspace .bg-purple-500\/10,
-.light .app-workspace .bg-purple-500\/20 {
-  background-color: rgba(168, 85, 247, 0.12) !important;
-  border-color: rgba(168, 85, 247, 0.25) !important;
-}
-.light .app-workspace .bg-red-500\/10,
-.light .app-workspace .bg-red-500\/20,
-.light .app-workspace .bg-red-950\/25,
-.light .app-workspace .bg-red-950\/40 {
-  background-color: rgba(239, 68, 68, 0.08) !important;
-  border-color: rgba(239, 68, 68, 0.2) !important;
 }

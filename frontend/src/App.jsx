@@ -42,9 +42,7 @@ export default function App() {
     selectedDate, 
     setSelectedDate, 
     dates, 
-    fetchMetadata,
-    theme,
-    setTheme
+    fetchMetadata
   } = useStore()
 
   const [sidebarOpen, setSidebarOpen] = useState(true)
@@ -53,22 +51,16 @@ export default function App() {
   const [enteredDashboard, setEnteredDashboard] = useState(false)
 
   useEffect(() => {
+    // Ensure dark mode is active
+    document.documentElement.classList.remove('light')
+    localStorage.setItem('theme', 'dark')
+    
     fetchMetadata()
     fetch('/api/diagnostics')
       .then(res => res.json())
       .then(data => setDiagnosticsData(data))
       .catch(err => console.error("Could not load diagnostics:", err))
   }, [])
-
-  useEffect(() => {
-    if (theme === 'light') {
-      document.documentElement.classList.add('light')
-      localStorage.setItem('theme', 'light')
-    } else {
-      document.documentElement.classList.remove('light')
-      localStorage.setItem('theme', 'dark')
-    }
-  }, [theme])
 
   if (!enteredDashboard) {
     return <LandingPage onEnterDashboard={() => setEnteredDashboard(true)} />
@@ -98,30 +90,22 @@ export default function App() {
       {/* 1. LEFT SIDEBAR NAVIGATION */}
       <aside className={`bg-[var(--sidebar-bg)] border-r border-[var(--panel-border)] flex flex-col justify-between p-4 flex-shrink-0 relative transition-all duration-300 ${sidebarOpen ? 'w-64' : 'w-18'}`}>
         <div className="space-y-6">
-          {/* Header Row: Logo & Modern Inside-Sidebar Toggle Button + Theme Toggle */}
+          {/* Header Row: Logo & Modern Inside-Sidebar Toggle Button */}
           <div className="flex items-center justify-between px-1 overflow-hidden">
             <div className="flex items-center space-x-2.5 overflow-hidden whitespace-nowrap group cursor-pointer">
               <span className="text-2xl flex-shrink-0 transition-transform duration-300 group-hover:scale-110">🛰️</span>
               {sidebarOpen && (
                 <div className="transition-opacity duration-300">
-                  <h1 className="text-sm font-extrabold text-white tracking-tight group-hover:text-[#4b6bf5] transition-colors">VayuShetra</h1>
-                  <span className="text-[8px] text-slate-400 font-bold tracking-wider uppercase mt-0.5 block">Satellite Intelligence</span>
+                  <h1 className="text-sm font-extrabold text-white tracking-tight group-hover:text-indigo-400 transition-colors">VayuShetra</h1>
+                  <span className="text-[8px] text-zinc-400 font-bold tracking-wider uppercase mt-0.5 block">Satellite Intelligence</span>
                 </div>
               )}
             </div>
             
             <div className="flex items-center space-x-1.5 flex-shrink-0">
               <button
-                onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-                className="p-1.5 rounded-lg bg-slate-800/20 hover:bg-slate-800/40 text-slate-400 hover:text-white transition-colors focus:outline-none"
-                title={theme === 'light' ? "Switch to Dark Mode" : "Switch to Light Mode"}
-              >
-                {theme === 'light' ? <Moon size={15} /> : <Sun size={15} />}
-              </button>
-
-              <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="p-1.5 rounded-lg bg-slate-800/20 hover:bg-slate-800/40 text-slate-400 hover:text-white transition-colors focus:outline-none"
+                className="p-1.5 rounded-lg bg-zinc-850 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors focus:outline-none"
                 title={sidebarOpen ? "Collapse Sidebar" : "Expand Sidebar"}
               >
                 <Menu size={15} />
