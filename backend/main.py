@@ -172,9 +172,8 @@ def startup_event():
     # Initialize Hyperlocal GPS & Village Point Predictor
     hyperlocal_predictor = HyperlocalPredictor()
     
-    # Initialize Digital Twin Policy Simulator & 3D Atmospheric Sounding Engine
+    # Initialize Digital Twin Policy Simulator
     policy_simulator = PolicySimulator()
-    sounding_engine = AtmosphericSoundingEngine()
     
     # Sync in-memory DataFrames to Database
     logger.info("Syncing grid observations and fire events into database...")
