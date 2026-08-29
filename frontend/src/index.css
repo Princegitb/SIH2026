@@ -2,74 +2,80 @@
 @tailwind components;
 @tailwind utilities;
 
+/* -------------------------------------------------------------
+   OBSIDIAN CARBON PRO DESIGN SYSTEM (PURE MATTE BLACK MINIMALISM)
+   ------------------------------------------------------------- */
+
 /* Theme Variables */
 :root {
-  --bg-color: #05070f;
-  --text-color: #f1f5f9;
-  --panel-bg: rgba(13, 17, 33, 0.7);
-  --panel-border: rgba(255, 255, 255, 0.07);
-  --sidebar-bg: #080b16;
-  --input-bg: #0d1121;
-  --input-border: #1e293b;
-  --leaflet-bg: #080b14;
-  --popup-bg: rgba(15, 23, 42, 0.95);
-  --popup-text: #f1f5f9;
-  --popup-border: rgba(255, 255, 255, 0.15);
-  --control-bg: #0f172a;
+  --bg-color: #030304; /* True Obsidian Pitch Black */
+  --text-color: #f4f4f5; /* Crisp Zinc White */
+  --panel-bg: rgba(14, 14, 17, 0.82); /* Deep Carbon Glass */
+  --panel-border: rgba(255, 255, 255, 0.08); /* Minimal 1px hairline border */
+  --sidebar-bg: #070709; /* Sleek Matte Black Sidebar */
+  --input-bg: #0c0c0f; /* Pure Charcoal Input */
+  --input-border: #222227;
+  --leaflet-bg: #040406;
+  --popup-bg: rgba(10, 10, 14, 0.96);
+  --popup-text: #f4f4f5;
+  --popup-border: rgba(255, 255, 255, 0.12);
+  --control-bg: #0c0c0f;
 }
 
 .light, :root.light {
   --bg-color: #f8fafc;
-  --text-color: #0f172a;
-  --panel-bg: rgba(255, 255, 255, 0.85);
-  --panel-border: rgba(15, 23, 42, 0.08);
+  --text-color: #09090b;
+  --panel-bg: rgba(255, 255, 255, 0.88);
+  --panel-border: rgba(0, 0, 0, 0.08);
   --sidebar-bg: #ffffff;
-  --input-bg: #f1f5f9;
-  --input-border: rgba(15, 23, 42, 0.12);
+  --input-bg: #f4f4f5;
+  --input-border: rgba(0, 0, 0, 0.12);
   --leaflet-bg: #f8fafc;
-  --popup-bg: rgba(255, 255, 255, 0.95);
-  --popup-text: #0f172a;
-  --popup-border: rgba(15, 23, 42, 0.15);
+  --popup-bg: rgba(255, 255, 255, 0.98);
+  --popup-text: #09090b;
+  --popup-border: rgba(0, 0, 0, 0.12);
   --control-bg: #ffffff;
 }
 
 /* Custom Scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--input-bg);
+  background: var(--bg-color);
 }
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
-  border-radius: 3px;
+  background: #27272a;
+  border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: #3f3f46;
 }
 
 /* Base Body Styles */
 body {
   background-color: var(--bg-color) !important;
   color: var(--text-color) !important;
-  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif;
   overflow: hidden;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background-color 0.25s ease, color 0.25s ease;
+  letter-spacing: -0.01em;
 }
 
-/* Glassmorphism Styles - Theme Adaptive */
+/* Glassmorphism Styles - Pure Obsidian Dark */
 .glass-panel {
   background: var(--panel-bg) !important;
   border: 1px solid var(--panel-border) !important;
-  backdrop-filter: blur(12px) !important;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15);
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.4);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .glass-panel:hover {
-  border-color: rgba(75, 107, 245, 0.4) !important;
-  box-shadow: 0 12px 40px 0 rgba(75, 107, 245, 0.12);
+  border-color: rgba(255, 255, 255, 0.16) !important;
+  box-shadow: 0 8px 32px -2px rgba(0, 0, 0, 0.6);
   transform: translateY(-1px);
 }
 
@@ -84,10 +90,10 @@ body {
   transform-origin: center;
 }
 
-/* Leaflet Theme Overrides */
+/* Leaflet Theme Overrides - Deep Pitch Black */
 .leaflet-container {
   background: var(--leaflet-bg) !important;
-  border-radius: 12px !important;
+  border-radius: 16px !important;
   border: 1px solid var(--panel-border) !important;
 }
 
@@ -95,9 +101,9 @@ body {
   background: var(--popup-bg) !important;
   color: var(--popup-text) !important;
   border: 1px solid var(--popup-border) !important;
-  border-radius: 10px !important;
-  backdrop-filter: blur(8px) !important;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15) !important;
+  border-radius: 14px !important;
+  backdrop-filter: blur(12px) !important;
+  box-shadow: 0 20px 30px -8px rgba(0, 0, 0, 0.7) !important;
 }
 
 .leaflet-popup-tip {
@@ -108,6 +114,8 @@ body {
 .leaflet-bar {
   border: 1px solid var(--panel-border) !important;
   box-shadow: none !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
 }
 
 .leaflet-bar a {
@@ -117,8 +125,8 @@ body {
 }
 
 .leaflet-bar a:hover {
-  background-color: var(--panel-bg) !important;
-  color: #4b6bf5 !important;
+  background-color: #18181b !important;
+  color: #6366f1 !important;
 }
 
 /* Bottom Card Grid Layout */
@@ -132,7 +140,7 @@ body {
 .bottom-card {
   background: var(--panel-bg);
   border: 1px solid var(--panel-border);
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 16px;
   height: 145px;
   display: flex;
@@ -140,13 +148,13 @@ body {
   justify-content: space-between;
   position: relative;
   overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .bottom-card:hover {
-  border-color: rgba(75, 107, 245, 0.4);
+  border-color: rgba(255, 255, 255, 0.18);
   transform: translateY(-2px);
-  box-shadow: 0 12px 40px 0 rgba(75, 107, 245, 0.15);
+  box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.5);
 }
 
 .kpi-title {
@@ -163,7 +171,8 @@ body {
   font-size: 2rem;
   font-weight: 800;
   line-height: 1.1;
-  font-family: 'Manrope', sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  letter-spacing: -0.03em;
 }
 
 /* Radar Animation */
@@ -173,7 +182,7 @@ body {
   bottom: 12px;
   width: 50px;
   height: 50px;
-  border: 1px solid rgba(168, 85, 247, 0.2);
+  border: 1px solid rgba(168, 85, 247, 0.25);
   border-radius: 50%;
   overflow: hidden;
 }
@@ -210,20 +219,20 @@ body {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #f97316;
-  box-shadow: 0 0 20px 6px rgba(249, 115, 22, 0.6);
+  background: #f59e0b;
+  box-shadow: 0 0 20px 6px rgba(245, 158, 11, 0.5);
   animation: glowPulse 1.2s infinite alternate;
 }
 
 @keyframes glowPulse {
-  0% { transform: scale(0.8); box-shadow: 0 0 15px 4px rgba(249, 115, 22, 0.5); }
-  100% { transform: scale(1.1); box-shadow: 0 0 25px 10px rgba(249, 115, 22, 0.7); }
+  0% { transform: scale(0.85); box-shadow: 0 0 15px 3px rgba(245, 158, 11, 0.4); }
+  100% { transform: scale(1.1); box-shadow: 0 0 25px 8px rgba(245, 158, 11, 0.65); }
 }
 
 /* Scale Colorbar */
 .scale-bar {
   background: linear-gradient(90deg, #10b981 0%, #84cc16 20%, #eab308 40%, #f97316 60%, #ef4444 80%, #7f1d1d 100%);
-  height: 8px;
+  height: 6px;
   border-radius: 4px;
   margin-top: 10px;
   width: 100%;
@@ -231,214 +240,76 @@ body {
 }
 
 /* -------------------------------------------------------------
-   LIGHT MODE OVERRIDES - ELEGANT COMPATIBILITY (SCOPED TO DASHBOARD)
+   GLOBAL OBSIDIAN COLOR OVERRIDES
+   ------------------------------------------------------------- */
+.app-workspace .bg-slate-900,
+.app-workspace .bg-\[\#090d16\],
+.app-workspace .bg-\[\#0d1121\],
+.app-workspace .bg-\[\#080b16\],
+.app-workspace .bg-\[\#05070f\] {
+  background-color: #0a0a0d !important;
+}
+
+.app-workspace .bg-slate-950,
+.app-workspace .bg-slate-950\/60,
+.app-workspace .bg-slate-950\/70,
+.app-workspace .bg-slate-950\/80,
+.app-workspace .bg-slate-950\/90 {
+  background-color: #060608 !important;
+}
+
+.app-workspace .border-slate-800,
+.app-workspace .border-slate-800\/60,
+.app-workspace .border-slate-800\/80,
+.app-workspace .border-slate-700 {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.app-workspace .hover\:border-slate-700:hover {
+  border-color: rgba(255, 255, 255, 0.16) !important;
+}
+
+/* -------------------------------------------------------------
+   LIGHT MODE OVERRIDES - ELEGANT COMPATIBILITY
    ------------------------------------------------------------- */
 .light .app-workspace .text-white,
 .light .app-workspace .text-slate-100 {
-  color: #0f172a !important;
+  color: #09090b !important;
 }
 .light .app-workspace .text-slate-200 {
-  color: #1e293b !important;
+  color: #18181b !important;
 }
+.light .app-workspace .text-slate-300,
 .light .app-workspace .text-slate-350 {
-  color: #334155 !important;
-}
-.light .app-workspace .text-slate-300 {
-  color: #334155 !important;
+  color: #27272a !important;
 }
 .light .app-workspace .text-slate-400 {
-  color: #475569 !important;
+  color: #52525b !important;
 }
 .light .app-workspace .text-slate-500 {
-  color: #64748b !important;
-}
-.light .app-workspace .text-slate-650 {
-  color: #475569 !important;
-}
-.light .app-workspace .text-slate-600 {
-  color: #475569 !important;
+  color: #71717a !important;
 }
 
-.light .app-workspace select {
-  background-color: var(--input-bg) !important;
-  color: var(--text-color) !important;
-  border-color: var(--input-border) !important;
-}
-
+.light .app-workspace select,
 .light .app-workspace input {
   background-color: var(--input-bg) !important;
   color: var(--text-color) !important;
   border-color: var(--input-border) !important;
 }
 
-.light .app-workspace .bg-slate-900 {
-  background-color: #e2e8f0 !important;
-}
-.light .app-workspace .bg-\[\#090d16\] {
-  background-color: #ffffff !important;
-  color: #0f172a !important;
-  border-color: rgba(15, 23, 42, 0.1) !important;
-}
+.light .app-workspace .bg-slate-900,
+.light .app-workspace .bg-\[\#090d16\],
 .light .app-workspace .bg-\[\#0d1121\] {
   background-color: #ffffff !important;
-  color: #0f172a !important;
-  border-color: rgba(15, 23, 42, 0.1) !important;
+  color: #09090b !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
 }
-.light .app-workspace .bg-slate-950\/95 {
-  background-color: rgba(255, 255, 255, 0.95) !important;
-  border-color: rgba(15, 23, 42, 0.1) !important;
-  color: #0f172a !important;
-}
-.light .app-workspace .bg-slate-900\/40 {
-  background-color: rgba(0, 0, 0, 0.03) !important;
+
+.light .app-workspace .bg-slate-950,
+.light .app-workspace .bg-slate-950\/60,
+.light .app-workspace .bg-slate-950\/70,
+.light .app-workspace .bg-slate-950\/80 {
+  background-color: #f4f4f5 !important;
   border-color: rgba(0, 0, 0, 0.08) !important;
-}
-.light .app-workspace .bg-slate-900\/50 {
-  background-color: rgba(0, 0, 0, 0.04) !important;
-}
-.light .app-workspace .border-slate-800\/60 {
-  border-color: var(--panel-border) !important;
-}
-.light .app-workspace .border-slate-800 {
-  border-color: var(--panel-border) !important;
-}
-.light .app-workspace .border-slate-700\/60 {
-  border-color: var(--panel-border) !important;
-}
-.light .app-workspace .border-slate-700\/45 {
-  border-color: var(--panel-border) !important;
-}
-.light .app-workspace .bg-slate-950\/20 {
-  background-color: rgba(0, 0, 0, 0.03) !important;
-}
-.light .app-workspace .bg-gradient-to-r {
-  background-image: linear-gradient(to right, rgba(168, 85, 247, 0.08), rgba(99, 102, 241, 0.08)) !important;
-  border-color: rgba(168, 85, 247, 0.2) !important;
-}
-.light .app-workspace .text-purple-400\/90 {
-  color: #7c3aed !important;
-}
-.light .app-workspace .text-purple-400 {
-  color: #6d28d9 !important;
-}
-.light .app-workspace .text-emerald-400 {
-  color: #047857 !important;
-}
-.light .app-workspace .text-orange-500 {
-  color: #c2410c !important;
-}
-.light .app-workspace .text-sky-400 {
-  color: #0369a1 !important;
-}
-.light .app-workspace .text-yellow-400 {
-  color: #b45309 !important;
-}
-.light .app-workspace .text-\[\#10b981\] {
-  color: #059669 !important;
-}
-.light .app-workspace .text-\[\#84cc16\] {
-  color: #4d7c0f !important;
-}
-.light .app-workspace .text-\[\#0ea5e9\] {
-  color: #0369a1 !important;
-}
-
-/* Custom Alert and Warning banners */
-.theme-adapt-text {
-  color: #f1f5f9;
-}
-.light .app-workspace .theme-adapt-text {
-  color: #0f172a !important;
-}
-
-.light .app-workspace .light-theme-warning {
-  background-color: #fffbeb !important;
-  border-color: #fde68a !important;
-  color: #78350f !important;
-}
-
-.light .app-workspace .light-theme-info {
-  background-color: #f0f9ff !important;
-  border-color: #bae6fd !important;
-  color: #0369a1 !important;
-}
-
-.light .app-workspace .light-theme-banner {
-  background-color: #f8fafc !important;
-  border-color: #e2e8f0 !important;
-  color: #0f172a !important;
-}
-
-.light .app-workspace .light-theme-critical-tag {
-  background-color: #fee2e2 !important;
-  color: #dc2626 !important;
-  border-color: #fecaca !important;
-}
-
-/* ==========================================================================
-   Space Atmosphere Cosmic Environment Keyframes & Styles
-   ========================================================================== */
-@keyframes starTwinkle {
-  0%, 100% { opacity: 0.2; transform: scale(0.8); }
-  50% { opacity: 1; transform: scale(1.2); }
-}
-
-@keyframes shootingStar {
-  0% {
-    transform: translateX(0) translateY(0) rotate(-35deg) scale(0);
-    opacity: 0;
-  }
-  15% {
-    transform: translateX(50px) translateY(35px) rotate(-35deg) scale(1);
-    opacity: 1;
-  }
-  70% {
-    transform: translateX(350px) translateY(245px) rotate(-35deg) scale(1);
-    opacity: 1;
-  }
-  100% {
-    transform: translateX(500px) translateY(350px) rotate(-35deg) scale(0);
-    opacity: 0;
-  }
-}
-
-@keyframes nebulaDrift {
-  0% { transform: translate(0, 0) rotate(0deg) scale(1); }
-  33% { transform: translate(30px, -20px) rotate(3deg) scale(1.08); }
-  66% { transform: translate(-20px, 25px) rotate(-2deg) scale(0.95); }
-  100% { transform: translate(0, 0) rotate(0deg) scale(1); }
-}
-
-@keyframes satelliteOrbitTrack {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-@keyframes auroraBorealis {
-  0%, 100% {
-    opacity: 0.45;
-    filter: blur(80px) hue-rotate(0deg);
-    transform: scaleY(1) rotate(-5deg);
-  }
-  50% {
-    opacity: 0.8;
-    filter: blur(100px) hue-rotate(45deg);
-    transform: scaleY(1.3) rotate(5deg);
-  }
-}
-
-.animate-star-twinkle {
-  animation: starTwinkle var(--twinkle-duration, 3s) ease-in-out infinite var(--twinkle-delay, 0s);
-}
-
-.animate-shooting-star {
-  animation: shootingStar 7s cubic-bezier(0.25, 1, 0.5, 1) infinite;
-}
-
-.animate-nebula-drift {
-  animation: nebulaDrift 28s ease-in-out infinite;
-}
-
-.animate-aurora {
-  animation: auroraBorealis 12s ease-in-out infinite alternate;
+  color: #09090b !important;
 }

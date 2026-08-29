@@ -139,19 +139,19 @@ export default function App() {
                   key={item.value}
                   onClick={() => setActiveTab(item.value)}
                   title={!sidebarOpen ? item.name : undefined}
-                  className={`w-full flex items-center rounded-lg text-xs font-semibold tracking-wide relative transition-all duration-200 transform ${
-                    sidebarOpen ? 'space-x-3 px-3 py-2.5 hover:translate-x-1' : 'justify-center p-2.5'
+                  className={`w-full flex items-center rounded-xl text-xs font-semibold tracking-wide relative transition-all duration-200 transform ${
+                    sidebarOpen ? 'space-x-3 px-3 py-2.5 hover:translate-x-0.5' : 'justify-center p-2.5'
                   } ${
                     isActive 
-                      ? 'bg-[#4b6bf5]/15 text-[#7c93fe] font-bold border border-[#4b6bf5]/35 shadow-[0_0_15px_rgba(75,107,245,0.18)]' 
-                      : 'text-slate-400 hover:bg-slate-800/20 hover:text-slate-100'
+                      ? 'bg-zinc-800/80 text-white font-bold border border-zinc-700/80 shadow-[0_2px_12px_rgba(0,0,0,0.5)]' 
+                      : 'text-zinc-400 hover:bg-zinc-900/60 hover:text-zinc-200'
                   }`}
                 >
                   {/* Left indicator bar */}
                   {isActive && sidebarOpen && (
-                    <div className="absolute left-0 top-2 bottom-2 w-1 rounded-r bg-[#4b6bf5]"></div>
+                    <div className="absolute left-0 top-2 bottom-2 w-1 rounded-r bg-indigo-500"></div>
                   )}
-                  <Icon size={16} className={`flex-shrink-0 transition-transform duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-105'}`} />
+                  <Icon size={16} className={`flex-shrink-0 transition-transform duration-200 ${isActive ? 'scale-110 text-indigo-400' : 'group-hover:scale-105 text-zinc-400'}`} />
                   {sidebarOpen && <span className="truncate transition-opacity duration-300">{item.name}</span>}
                 </button>
               );
@@ -161,14 +161,14 @@ export default function App() {
 
         {/* Dynamic Diagnostics Overlay Popup */}
         {showDiagnostic && sidebarOpen && (
-          <div className="absolute bottom-18 left-4 right-4 glass-panel p-3.5 rounded-xl z-50 text-[10px] text-slate-350 space-y-1.5 shadow-2xl border-emerald-500/20 bg-slate-950/95 backdrop-blur-md">
-            <div className="flex justify-between items-center border-b border-slate-800 pb-1.5">
+          <div className="absolute bottom-18 left-4 right-4 glass-panel p-3.5 rounded-xl z-50 text-[10px] text-zinc-400 space-y-1.5 shadow-2xl border-emerald-500/20 bg-zinc-950/95 backdrop-blur-md">
+            <div className="flex justify-between items-center border-b border-zinc-800 pb-1.5">
               <span className="font-bold text-emerald-400 uppercase tracking-wider flex items-center">
                 <Info size={11} className="mr-1" /> System Diagnostics
               </span>
               <button 
                 onClick={(e) => { e.stopPropagation(); setShowDiagnostic(false); }} 
-                className="text-slate-500 hover:text-white text-xs font-bold focus:outline-none"
+                className="text-zinc-500 hover:text-white text-xs font-bold focus:outline-none"
               >
                 ×
               </button>
@@ -190,7 +190,7 @@ export default function App() {
                 <span>Satellite Stream:</span> 
                 <span className="text-white font-bold">{diagnosticsData?.telemetry_feeds?.satellite_stream || "NASA FIRMS & S5P"}</span>
               </div>
-              <div className="flex justify-between border-t border-slate-800/60 pt-1 text-[9px] text-slate-500">
+              <div className="flex justify-between border-t border-zinc-800/60 pt-1 text-[9px] text-zinc-500">
                 <span>Synced UTC:</span>
                 <span>{diagnosticsData?.telemetry_feeds?.last_synced_at || "Live Telemetry"}</span>
               </div>
@@ -201,16 +201,16 @@ export default function App() {
         {/* Bottom Card: Data Updated (Interactive diagnostic toggler) */}
         <div 
           onClick={() => sidebarOpen && setShowDiagnostic(!showDiagnostic)}
-          className={`border rounded-lg text-[10px] space-y-1 text-slate-400 transition-all duration-300 select-none bg-slate-900/40 border-slate-800/80 ${
+          className={`border rounded-xl text-[10px] space-y-1 text-zinc-400 transition-all duration-300 select-none bg-zinc-900/40 border-zinc-800/80 ${
             sidebarOpen 
-              ? 'p-3 cursor-pointer hover:bg-slate-800/25 hover:border-slate-700/60' 
+              ? 'p-3 cursor-pointer hover:bg-zinc-850 hover:border-zinc-700/60' 
               : 'p-1.5 flex flex-col items-center'
           }`}
           title={sidebarOpen ? "Click to view diagnostics" : "Grid Engine Active"}
         >
-          <div className="flex items-center space-x-2 text-slate-400">
+          <div className="flex items-center space-x-2 text-zinc-400">
             <div className={`w-2 h-2 rounded-full shadow-[0_0_8px] flex-shrink-0 animate-pulse ${
-              selectedDate?.startsWith("2026") ? "bg-[#00e676] shadow-[#00e676]" : "bg-sky-400 shadow-sky-400"
+              selectedDate?.startsWith("2026") ? "bg-emerald-400 shadow-emerald-400" : "bg-indigo-400 shadow-indigo-400"
             }`}></div>
             {sidebarOpen && (
               <span className="font-bold">
@@ -220,12 +220,12 @@ export default function App() {
           </div>
           {sidebarOpen && (
             <>
-              <div className="font-bold text-slate-200">
+              <div className="font-bold text-zinc-200">
                 {selectedDate?.startsWith("2026") ? "Satellite Stream Active" : "30-Day Sequence Loaded"}
               </div>
-              <div className="text-[9px] text-slate-500 flex justify-between items-center">
+              <div className="text-[9px] text-zinc-500 flex justify-between items-center">
                 <span>{diagnosticsData?.database?.grid_cells_total || 21180} Data Records</span>
-                <span className="text-sky-400 font-bold hover:underline">Diagnostics →</span>
+                <span className="text-indigo-400 font-bold hover:underline">Diagnostics →</span>
               </div>
             </>
           )}
@@ -240,7 +240,7 @@ export default function App() {
           <header className="px-6 pt-5 pb-2 flex justify-between items-start flex-shrink-0 bg-transparent">
             <div>
               <h2 className="text-xl font-extrabold text-white tracking-tight">VayuShetra</h2>
-              <div className="flex items-center space-x-2 text-xs text-slate-400 mt-1 font-medium">
+              <div className="flex items-center space-x-2 text-xs text-zinc-400 mt-1 font-medium">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
                 <span>India's Atmospheric Intelligence Platform • Geospatial Grid</span>
               </div>
@@ -254,10 +254,10 @@ export default function App() {
                     setSelectedDate(dates[dates.length - 1])
                   }
                 }}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
                   dates && dates.length > 0 && selectedDate === dates[dates.length - 1]
                     ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/35 shadow-sm shadow-emerald-500/10'
-                    : 'bg-[#0d1121] text-slate-400 border-slate-800 hover:text-white hover:border-slate-700'
+                    : 'bg-[#0c0c0f] text-zinc-400 border-zinc-800 hover:text-white hover:border-zinc-700'
                 }`}
                 title="Jump to today's real-time live telemetry"
               >
@@ -267,20 +267,20 @@ export default function App() {
 
               {/* Date Filter Dropdown */}
               <div className="relative flex items-center">
-                <Calendar size={13} className="absolute left-3 text-[#4b6bf5] pointer-events-none" />
+                <Calendar size={13} className="absolute left-3 text-zinc-400 pointer-events-none" />
                 <select
                   value={selectedDate}
                   onChange={(e) => setSelectedDate(e.target.value)}
-                  className="bg-[#0d1121] border border-slate-800/90 hover:border-slate-700 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-200 outline-none focus:border-[#4b6bf5] cursor-pointer shadow-sm font-semibold min-w-[145px]"
+                  className="bg-[#0c0c0f] border border-zinc-800 hover:border-zinc-700 rounded-xl pl-8 pr-3 py-1.5 text-xs text-zinc-200 outline-none focus:border-zinc-500 cursor-pointer shadow-sm font-semibold min-w-[145px]"
                 >
                   {dates && dates.length > 0 ? (
                     dates.map(d => (
-                      <option key={d} value={d} className="bg-[#0d1121] text-slate-200">
+                      <option key={d} value={d} className="bg-[#0c0c0f] text-zinc-200">
                         {d}
                       </option>
                     ))
                   ) : (
-                    <option value={selectedDate} className="bg-[#0d1121] text-slate-200">
+                    <option value={selectedDate} className="bg-[#0c0c0f] text-zinc-200">
                       {selectedDate || "2026-08-23"}
                     </option>
                   )}
@@ -290,7 +290,7 @@ export default function App() {
               {/* Export Report Button */}
               <button 
                 onClick={() => alert('NCAP Compliance report prepared for export!')}
-                className="bg-[#4b6bf5] hover:bg-[#3b56cf] text-white text-xs font-semibold px-4 py-1.5 rounded-lg transition-colors shadow-sm"
+                className="bg-white hover:bg-zinc-200 text-black text-xs font-bold px-4 py-1.5 rounded-xl transition-all shadow-sm"
               >
                 Export Report 📥
               </button>
@@ -304,7 +304,7 @@ export default function App() {
         </section>
 
         {/* Footer */}
-        <footer className="px-6 py-3 border-t border-slate-800/60 flex justify-between items-center text-[10px] text-slate-500 flex-shrink-0 bg-[#080b16] shadow-sm">
+        <footer className="px-6 py-3 border-t border-zinc-800/80 flex justify-between items-center text-[10px] text-zinc-500 flex-shrink-0 bg-[#050507] shadow-sm">
           <div className="flex space-x-4">
             <span><b>Data Sources:</b></span>
             <span>📡 Sentinel-5P</span>
@@ -316,7 +316,7 @@ export default function App() {
           </div>
           <div className="flex items-center space-x-1.5">
             <span>VayuShetra Platform v1.0.0</span>
-            <span className="w-1.5 h-1.5 bg-[#00e676] rounded-full"></span>
+            <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full"></span>
             <span>Online</span>
           </div>
         </footer>
