@@ -12,12 +12,11 @@ import ReportsView from './components/ReportsView'
 import AlertsView from './components/AlertsView'
 import DataExplorerView from './components/DataExplorerView'
 import PolicySimulatorView from './components/PolicySimulatorView'
-import Atmospheric3DView from './components/Atmospheric3DView'
 import LandingPage from './components/LandingPage'
 import { 
   LayoutDashboard, Map, Compass, Activity, Flame, Wind, 
   Tag, BarChart3, FileSpreadsheet, BellRing, Database, HelpCircle,
-  Menu, X, Sun, Moon, Info, Calendar, Sliders, Layers
+  Menu, X, Sun, Moon, Info, Calendar, Sliders
 } from 'lucide-react'
 
 // Icon mapping for navigation links
@@ -25,7 +24,6 @@ const navItems = [
   { name: 'Dashboard', value: 'Dashboard', icon: LayoutDashboard },
   { name: 'Live Map', value: 'Live Map', icon: Map },
   { name: 'Policy Simulator', value: 'Policy Simulator', icon: Sliders },
-  { name: '3D Atmospheric Profile', value: '3D Atmospheric Profile', icon: Layers },
   { name: 'Wind Transport', value: 'Wind Transport', icon: Wind },
   { name: 'AQI Forecast', value: 'AQI Forecast', icon: Compass },
   { name: 'HCHO Hotspots', value: 'HCHO Hotspots', icon: Activity },
@@ -82,7 +80,6 @@ export default function App() {
       case 'Dashboard': return <DashboardView />
       case 'Live Map': return <LiveMapView />
       case 'Policy Simulator': return <PolicySimulatorView />
-      case '3D Atmospheric Profile': return <Atmospheric3DView />
       case 'AQI Forecast': return <ForecastView />
       case 'HCHO Hotspots': return <HotspotsView />
       case 'Fire Detection': return <FiresView />

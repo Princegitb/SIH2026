@@ -29,7 +29,6 @@ from models.forecast_model import AQIForecastEngine
 from models.hyperlocal_engine import HyperlocalPredictor
 from models.insight_engine import insight_engine
 from models.policy_simulator import PolicySimulator
-from models.sounding_engine import AtmosphericSoundingEngine
 from backend.database import init_db, sync_dataframes_to_db, db_session, SensitiveReceptor
 
 # Setup logging
@@ -60,11 +59,10 @@ hotspot_detector = None
 forecast_engine = None
 hyperlocal_predictor = None
 policy_simulator = None
-sounding_engine = None
 
 @app.on_event("startup")
 def startup_event():
-    global grid_df, fires_df, model_manager, explainer, attributor, transport, hotspot_detector, forecast_engine, hyperlocal_predictor, policy_simulator, sounding_engine
+    global grid_df, fires_df, model_manager, explainer, attributor, transport, hotspot_detector, forecast_engine, hyperlocal_predictor, policy_simulator
     logger.info("Initializing VayuShetra database, models, and telemetry feeds...")
     
     # 1. Initialize persistent relational database
@@ -1032,15 +1030,25 @@ def simulate_policy(
     if not date or date not in grid_df["date"].values:
         date = str(grid_df["date"].max())
         
-    # Get baseline Delhi-NCR metrics
-    delhi_rows = grid_df[(grid_df["date"] == date) & (grid_df["district"] == "Delhi")]
-    base_pm25 = float(delhi_rows["pm25"].mean()) if not delhi_rows.empty else 165.0
-    base_aqi = int(round(delhi_rows["aqi"].mean())) if not delhi_rows.empty else 280
-    base_blh = float(delhi_rows["blh"].mean()) if not delhi_rows.empty else 515.0
+    # 1. Filter rows for selected district (or state if "All Punjab" / "All Haryana")
+    if district == "All Punjab":
+        target_rows = grid_df[(grid_df["date"] == date) & (grid_df["state"] == "Punjab")]
+    elif district == "All Haryana":
+        target_rows = grid_df[(grid_df["date"] == date) & (grid_df["state"] == "Haryana")]
+    elif district == "All North India (Regional Blanket Ban)":
+        target_rows = grid_df[grid_df["date"] == date]
+    else:
+        target_rows = grid_df[(grid_df["date"] == date) & (grid_df["district"] == district)]
+        if target_rows.empty:
+            target_rows = grid_df[grid_df["date"] == date]
+
+    base_pm25 = float(target_rows["pm25"].mean()) if not target_rows.empty else 165.0
+    base_aqi = int(round(target_rows["aqi"].mean())) if not target_rows.empty else 280
+    base_blh = float(target_rows["blh"].mean()) if not target_rows.empty else 515.0
     
     # Wind speed
-    wind_u = float(delhi_rows.iloc[0]["wind_u"]) if not delhi_rows.empty else 2.0
-    wind_v = float(delhi_rows.iloc[0]["wind_v"]) if not delhi_rows.empty else -1.5
+    wind_u = float(target_rows.iloc[0]["wind_u"]) if not target_rows.empty else 2.0
+    wind_v = float(target_rows.iloc[0]["wind_v"]) if not target_rows.empty else -1.5
     wind_spd = float(np.round(np.sqrt(wind_u**2 + wind_v**2) * 3.6, 1))
     
     day_fires = fires_df[fires_df["date"] == date] if fires_df is not None and not fires_df.empty else pd.DataFrame()
@@ -1057,43 +1065,6 @@ def simulate_policy(
         active_fires_df=day_fires
     )
     return sim_res
-
-@app.get("/api/atmospheric-profile")
-def get_atmospheric_profile(date: str = None, district: str = "Delhi"):
-    """
-    Returns 3D atmospheric altitude slices, vertical temperature sounding T(z),
-    inversion lid geometry, and 3D Lagrangian streamline coordinates for Three.js rendering.
-    """
-    if grid_df is None or sounding_engine is None:
-        raise HTTPException(status_code=503, detail="Service loading data.")
-        
-    if not date or date not in grid_df["date"].values:
-        date = str(grid_df["date"].max())
-        
-    dist_rows = grid_df[(grid_df["date"] == date) & (grid_df["district"] == district)]
-    if dist_rows.empty:
-        dist_rows = grid_df[grid_df["date"] == date]
-        
-    row = dist_rows.iloc[0] if not dist_rows.empty else None
-    blh_val = float(row["blh"]) if row is not None else 515.0
-    temp_val = float(row["temperature"]) if row is not None else 18.0
-    pm25_val = float(row["pm25"]) if row is not None else 145.0
-    
-    wind_u = float(row["wind_u"]) if row is not None else 2.0
-    wind_v = float(row["wind_v"]) if row is not None else -1.5
-    wind_spd = float(np.round(np.sqrt(wind_u**2 + wind_v**2) * 3.6, 1))
-    
-    day_fires = fires_df[fires_df["date"] == date] if fires_df is not None and not fires_df.empty else pd.DataFrame()
-    frp_tot = float(day_fires["frp"].sum()) if not day_fires.empty else 12.0
-    
-    profile_res = sounding_engine.generate_atmospheric_profile(
-        blh_m=blh_val,
-        surface_temp_c=temp_val,
-        wind_speed_kmh=wind_spd,
-        frp_total=frp_tot,
-        smoke_intensity_ug=pm25_val
-    )
-    return profile_res
 
 if __name__ == "__main__":
     import uvicorn
