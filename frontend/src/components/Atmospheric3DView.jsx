@@ -2,11 +2,10 @@ import React, { useRef, useEffect, useState } from 'react'
 import * as THREE from 'three'
 import { useStore } from '../store'
 import { 
-  Layers, Compass, Activity, Eye, EyeOff, RotateCcw, 
-  Maximize2, Wind, Sparkles, Thermometer, CloudRain, 
-  ShieldAlert, Info, Flame, MapPin
+  Layers, Compass, Sparkles, HelpCircle, 
+  Flame, Wind, MapPin, Eye, Play, ArrowRight,
+  Shield, CheckCircle, Info, Thermometer
 } from 'lucide-react'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
 export default function Atmospheric3DView() {
   const { selectedDate } = useStore()
@@ -19,12 +18,8 @@ export default function Atmospheric3DView() {
   // Interactive 3D layer toggles
   const [showInversionLid, setShowInversionLid] = useState(true)
   const [showParticles, setShowParticles] = useState(true)
-  const [showLandmarks, setShowLandmarks] = useState(true)
-  const [showStreamlines, setShowStreamlines] = useState(true)
   const [altitudeScrub, setAltitudeScrub] = useState(500) // in meters
-
-  // Camera preset
-  const [activeCameraView, setActiveCameraView] = useState('isometric')
+  const [activeStoryStep, setActiveStoryStep] = useState(0)
 
   // Three.js scene refs
   const sceneRef = useRef(null)
@@ -67,8 +62,8 @@ export default function Atmospheric3DView() {
 
     // 1. Scene & Background
     const scene = new THREE.Scene()
-    scene.background = new THREE.Color(0x070b14)
-    scene.fog = new THREE.FogExp2(0x070b14, 0.007)
+    scene.background = new THREE.Color(0x060913)
+    scene.fog = new THREE.FogExp2(0x060913, 0.008)
     sceneRef.current = scene
 
     // 2. Camera
@@ -88,25 +83,24 @@ export default function Atmospheric3DView() {
     container.appendChild(renderer.domElement)
 
     // 4. Lights
-    const ambientLight = new THREE.AmbientLight(0x38425d, 1.2)
+    const ambientLight = new THREE.AmbientLight(0x475569, 1.4)
     scene.add(ambientLight)
 
-    const dirLight = new THREE.DirectionalLight(0xffffff, 1.0)
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1.2)
     dirLight.position.set(30, 60, 40)
     scene.add(dirLight)
 
-    // Blue ground glow
-    const groundPointLight = new THREE.PointLight(0x4b6bf5, 2.5, 90)
-    groundPointLight.position.set(0, 2, 0)
-    scene.add(groundPointLight)
+    // Neon Ground Glow Light
+    const groundLight = new THREE.PointLight(0x6366f1, 2.5, 90)
+    groundLight.position.set(0, 2, 0)
+    scene.add(groundLight)
 
-    // 5. 3D Regional Ground Mesh & Wireframe
+    // 5. 3D Regional Ground Mesh & Glowing Wireframe
     const groundGeo = new THREE.PlaneGeometry(100, 70, 32, 32)
     const groundMat = new THREE.MeshStandardMaterial({
-      color: 0x0f172a,
+      color: 0x090d16,
       roughness: 0.8,
-      metalness: 0.2,
-      wireframe: false
+      metalness: 0.2
     })
     const groundMesh = new THREE.Mesh(groundGeo, groundMat)
     groundMesh.rotation.x = -Math.PI / 2
@@ -114,20 +108,20 @@ export default function Atmospheric3DView() {
     scene.add(groundMesh)
 
     // Glowing coordinate grid lines
-    const gridHelper = new THREE.GridHelper(100, 20, 0x334155, 0x1e293b)
+    const gridHelper = new THREE.GridHelper(100, 20, 0x475569, 0x1e293b)
     gridHelper.position.y = 0.05
     scene.add(gridHelper)
 
-    // 6. Inversion Lid (Semi-Transparent Glowing Plane)
+    // 6. Inversion Lid (Semi-Transparent Glowing Holographic Plane)
     const blhNormY = ((profileData.telemetry?.blh_m || 500) / 2500.0) * 35.0
     const lidGeo = new THREE.PlaneGeometry(100, 70, 16, 16)
     const lidMat = new THREE.MeshPhysicalMaterial({
       color: 0xa855f7,
       transparent: true,
-      opacity: 0.28,
+      opacity: 0.32,
       roughness: 0.1,
       transmission: 0.6,
-      thickness: 1.2,
+      thickness: 1.5,
       side: THREE.DoubleSide
     })
     const lidMesh = new THREE.Mesh(lidGeo, lidMat)
@@ -136,30 +130,30 @@ export default function Atmospheric3DView() {
     lidMeshRef.current = lidMesh
     scene.add(lidMesh)
 
-    // Inversion Lid Wireframe Frame
+    // Inversion Lid Wireframe Grid Frame
     const lidWireGeo = new THREE.WireframeGeometry(lidGeo)
-    const lidWireMat = new THREE.LineBasicMaterial({ color: 0xc084fc, transparent: true, opacity: 0.35 })
+    const lidWireMat = new THREE.LineBasicMaterial({ color: 0xc084fc, transparent: true, opacity: 0.4 })
     const lidWire = new THREE.LineSegments(lidWireGeo, lidWireMat)
     lidWire.rotation.x = -Math.PI / 2
     lidWire.position.y = blhNormY
     scene.add(lidWire)
 
-    // 7. 3D Regional Landmarks (Pins & Beacon Cylinders)
+    // 7. 3D Regional Landmarks (Pillars & Rings)
     const landmarkGroup = new THREE.Group()
     profileData.landmarks?.forEach(lm => {
-      // Base Marker Pillar
-      const pinGeo = new THREE.CylinderGeometry(0.5, 0.5, 2.5, 16)
+      // Pillar
+      const pinGeo = new THREE.CylinderGeometry(0.6, 0.6, 3.0, 16)
       const pinMat = new THREE.MeshStandardMaterial({
         color: lm.color || 0x4b6bf5,
         emissive: lm.color || 0x4b6bf5,
-        emissiveIntensity: 0.6
+        emissiveIntensity: 0.7
       })
       const pinMesh = new THREE.Mesh(pinGeo, pinMat)
-      pinMesh.position.set(lm.x, 1.25, -lm.y)
+      pinMesh.position.set(lm.x, 1.5, -lm.y)
       landmarkGroup.add(pinMesh)
 
-      // Beacon Ring
-      const ringGeo = new THREE.RingGeometry(1.2, 1.8, 16)
+      // Beacon Ground Ring
+      const ringGeo = new THREE.RingGeometry(1.5, 2.2, 16)
       const ringMat = new THREE.MeshBasicMaterial({ color: lm.color, side: THREE.DoubleSide, transparent: true, opacity: 0.6 })
       const ringMesh = new THREE.Mesh(ringGeo, ringMat)
       ringMesh.rotation.x = -Math.PI / 2
@@ -168,7 +162,7 @@ export default function Atmospheric3DView() {
     })
     scene.add(landmarkGroup)
 
-    // 8. 3D Streamlines & Animated Smoke Particles
+    // 8. 3D Smoke Streamline Curves
     const streamlineGroup = new THREE.Group()
     const curves = []
 
@@ -177,12 +171,12 @@ export default function Atmospheric3DView() {
       const curve = new THREE.CatmullRomCurve3(pts3d)
       curves.push(curve)
 
-      // Tube Geometry for streamline
-      const tubeGeo = new THREE.TubeGeometry(curve, 64, 0.35, 8, false)
+      // Glowing tube line
+      const tubeGeo = new THREE.TubeGeometry(curve, 64, 0.45, 8, false)
       const tubeMat = new THREE.MeshBasicMaterial({
         color: 0xf97316,
         transparent: true,
-        opacity: 0.45
+        opacity: 0.4
       })
       const tubeMesh = new THREE.Mesh(tubeGeo, tubeMat)
       streamlineGroup.add(tubeMesh)
@@ -190,8 +184,8 @@ export default function Atmospheric3DView() {
     particleCurvesRef.current = curves
     scene.add(streamlineGroup)
 
-    // 9. Volumetric Smoke Particles along Streamlines
-    const particleCount = 280
+    // 9. Volumetric Smoke Particles
+    const particleCount = 320
     const particleGeo = new THREE.BufferGeometry()
     const particlePositions = new Float32Array(particleCount * 3)
     const particleColors = new Float32Array(particleCount * 3)
@@ -200,27 +194,27 @@ export default function Atmospheric3DView() {
     for (let i = 0; i < particleCount; i++) {
       const curveIdx = i % curves.length
       const prog = Math.random()
-      particleProgress.push({ curveIdx, prog, speed: 0.0015 + Math.random() * 0.002 })
+      particleProgress.push({ curveIdx, prog, speed: 0.0018 + Math.random() * 0.0022 })
 
       const pos = curves[curveIdx] ? curves[curveIdx].getPoint(prog) : new THREE.Vector3(0, 0, 0)
       particlePositions[i * 3] = pos.x
       particlePositions[i * 3 + 1] = pos.y
       particlePositions[i * 3 + 2] = pos.z
 
-      // Color from warm fire orange to smog purple/grey
-      particleColors[i * 3] = 0.95
-      particleColors[i * 3 + 1] = 0.45 + (1.0 - prog) * 0.4
-      particleColors[i * 3 + 2] = 0.2 + prog * 0.6
+      // Warm Fire Orange to Trapped Purple/Gray
+      particleColors[i * 3] = 0.98
+      particleColors[i * 3 + 1] = 0.4 + (1.0 - prog) * 0.5
+      particleColors[i * 3 + 2] = 0.15 + prog * 0.7
     }
 
     particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3))
     particleGeo.setAttribute('color', new THREE.BufferAttribute(particleColors, 3))
 
     const particleMat = new THREE.PointsMaterial({
-      size: 1.4,
+      size: 1.6,
       vertexColors: true,
       transparent: true,
-      opacity: 0.85,
+      opacity: 0.9,
       blending: THREE.AdditiveBlending
     })
 
@@ -252,7 +246,7 @@ export default function Atmospheric3DView() {
 
       rotY += deltaX * 0.008
       rotX += deltaY * 0.008
-      rotX = Math.max(-0.2, Math.min(1.2, rotX)) // Restrict vertical angle
+      rotX = Math.max(-0.1, Math.min(1.2, rotX))
 
       const radius = 80
       camera.position.x = radius * Math.sin(rotY) * Math.cos(rotX)
@@ -275,21 +269,20 @@ export default function Atmospheric3DView() {
     window.addEventListener('mouseup', onMouseUp)
     container.addEventListener('wheel', onWheel, { passive: false })
 
-    // 11. Animation Loop (60 FPS)
+    // 11. Animation Loop
     let animationFrameId
     const clock = new THREE.Clock()
 
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate)
-      const delta = clock.getDelta()
       const time = clock.getElapsedTime()
 
-      // Pulse Inversion Lid opacity
+      // Subtle Inversion Lid Opacity Pulse
       if (lidMeshRef.current) {
-        lidMeshRef.current.material.opacity = 0.24 + Math.sin(time * 2.0) * 0.06
+        lidMeshRef.current.material.opacity = 0.28 + Math.sin(time * 2.2) * 0.06
       }
 
-      // Animate Smoke Particles along 3D CatmullRom Curves
+      // Animate Volumetric Particles
       if (particlesRef.current && particlePositionsRef.current && particleCurvesRef.current.length > 0) {
         const positions = particlePositionsRef.current
         const progressList = particleProgressRef.current
@@ -314,7 +307,6 @@ export default function Atmospheric3DView() {
     }
     animate()
 
-    // Resize Handler
     const handleResize = () => {
       if (!container) return
       const w = container.clientWidth
@@ -338,290 +330,285 @@ export default function Atmospheric3DView() {
     }
   }, [profileData])
 
-  // Camera presets
-  const switchCameraPreset = (preset) => {
-    setActiveCameraView(preset)
-    if (!cameraRef.current) return
-    const cam = cameraRef.current
-
-    if (preset === 'isometric') {
-      cam.position.set(0, 48, 72)
-      cam.lookAt(0, 6, 0)
-    } else if (preset === 'topdown') {
-      cam.position.set(0, 95, 5)
-      cam.lookAt(0, 0, 0)
-    } else if (preset === 'delhi_basin') {
-      cam.position.set(28, 16, -10)
-      cam.lookAt(28, 4, -22)
-    } else if (preset === 'cross_section') {
-      cam.position.set(80, 15, 0)
-      cam.lookAt(0, 8, 0)
+  // 1-Click Guided Story Mode Tour
+  const storySteps = [
+    {
+      step: 1,
+      title: "1. Punjab Farm Fires (Origin)",
+      desc: "Farmers ignite thousands of crop stubble fires in Punjab. High fire heat lofts thick smoke upwards into the sky.",
+      camPos: { x: -45, y: 25, z: 45 },
+      lookAt: { x: -40, y: 5, z: 20 },
+      color: "border-amber-500/40 bg-amber-500/10 text-amber-300"
+    },
+    {
+      step: 2,
+      title: "2. Smoke Highway (Transport)",
+      desc: "Strong North-Westerly winds (18 km/h) push the floating smoke southeast across Haryana towards Delhi.",
+      camPos: { x: 0, y: 45, z: 65 },
+      lookAt: { x: 0, y: 6, z: 0 },
+      color: "border-blue-500/40 bg-blue-500/10 text-blue-300"
+    },
+    {
+      step: 3,
+      title: "3. The Inversion Lid (Invisible Ceiling)",
+      desc: "At 500m altitude, cold winter air forms an impenetrable ceiling. Smoke cannot escape into the upper clean sky!",
+      camPos: { x: 50, y: 20, z: 30 },
+      lookAt: { x: 10, y: 8, z: -10 },
+      color: "border-purple-500/40 bg-purple-500/10 text-purple-300"
+    },
+    {
+      step: 4,
+      title: "4. Delhi Smog Trap (Breathing Level)",
+      desc: "Smoke hits the cold lid over Delhi and gets squashed down into the ground breathing zone where 3 Crore people live.",
+      camPos: { x: 28, y: 16, z: 5 },
+      lookAt: { x: 28, y: 2, z: -22 },
+      color: "border-red-500/40 bg-red-500/10 text-red-300"
     }
+  ]
+
+  const playStoryStep = (idx) => {
+    setActiveStoryStep(idx)
+    const step = storySteps[idx]
+    if (!cameraRef.current || !step) return
+    const cam = cameraRef.current
+    cam.position.set(step.camPos.x, step.camPos.y, step.camPos.z)
+    cam.lookAt(step.lookAt.x, step.lookAt.y, step.lookAt.z)
   }
 
-  // Toggle Visibility Handlers
-  useEffect(() => {
-    if (lidMeshRef.current) lidMeshRef.current.visible = showInversionLid
-  }, [showInversionLid])
-
-  useEffect(() => {
-    if (particlesRef.current) particlesRef.current.visible = showParticles
-  }, [showParticles])
-
   const telemetry = profileData?.telemetry
-  const activeLayer = profileData?.layers?.find(
-    l => altitudeScrub <= l.altitude_m + 150 && altitudeScrub >= l.altitude_m - 150
-  ) || profileData?.layers?.[2]
-
-  // Chart data for Skew-T Temperature Inversion Sounding
-  const soundingChartData = profileData?.sounding_profile?.altitudes_m?.map((alt, idx) => ({
-    altitude: alt,
-    temperature: profileData.sounding_profile.temperatures_c[idx],
-    pm25: profileData.sounding_profile.pm25_concentrations[idx],
-    humidity: profileData.sounding_profile.humidities_pct[idx]
-  })) || []
 
   return (
     <div className="space-y-6">
       
-      {/* 1. Header Bar */}
-      <div className="glass-panel p-6 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <div className="flex items-center space-x-2.5">
-            <span className="p-2 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20">
-              <Layers size={20} />
-            </span>
+      {/* 1. Hero Banner with Simple Real-Life Analogy */}
+      <div className="glass-panel p-6 rounded-3xl relative overflow-hidden bg-gradient-to-r from-purple-950/50 via-slate-900/70 to-indigo-950/40 border border-purple-500/30 shadow-[0_0_30px_rgba(168,85,247,0.15)]">
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-xs font-bold border border-purple-500/30 mb-2">
+              <Layers size={13} className="text-purple-300" />
+              <span>3D ATMOSPHERIC SCANNER • WHY SMOG GETS TRAPPED</span>
+            </div>
+            <h1 className="text-2xl lg:text-3xl font-black text-white tracking-tight">
+              3D Atmospheric Altitude Profiler
+            </h1>
+            <p className="text-sm text-slate-300 max-w-3xl mt-1 leading-relaxed">
+              <strong className="text-purple-300">The Simple Analogy:</strong> In winter, cold air creates an invisible <strong className="text-purple-300">"Glass Ceiling" at {telemetry?.blh_m || 500}m height (The Inversion Lid)</strong>. Stubble smoke rises from Punjab, hits this cold ceiling, and gets squashed down into Delhi where people breathe!
+            </p>
+          </div>
+
+          {/* Key Altitude Stat Pill */}
+          <div className="bg-slate-900/90 border border-purple-500/40 px-5 py-3 rounded-2xl flex items-center gap-3">
+            <div className="w-3 h-3 rounded-full bg-purple-400 animate-ping"></div>
             <div>
-              <h2 className="text-xl font-extrabold theme-adapt-text tracking-tight flex items-center gap-2">
-                3D Atmospheric Sounding & Altitude Volume Profiler
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-bold border border-purple-500/30 uppercase tracking-wider">
-                  Three.js WebGL 3D
-                </span>
-              </h2>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Volumetric vertical profiling demonstrating Planetary Boundary Layer (PBL) thermal inversion lid, Briggs plume rise, and smoke trapping.
-              </p>
+              <div className="text-[10px] text-slate-400 font-bold uppercase">Inversion Lid Ceiling</div>
+              <div className="text-xl font-black text-purple-300 font-mono">{telemetry?.blh_m || 500} Meters</div>
             </div>
           </div>
         </div>
-
-        {/* Telemetry Status Pills */}
-        {telemetry && (
-          <div className="flex flex-wrap items-center gap-2 font-mono text-xs">
-            <div className="bg-slate-900/80 px-3 py-1.5 rounded-xl border border-slate-800 flex items-center gap-1.5">
-              <span className="text-slate-500">Inversion Lid:</span>
-              <span className="text-purple-400 font-bold">{telemetry.blh_m} m</span>
-            </div>
-            <div className="bg-slate-900/80 px-3 py-1.5 rounded-xl border border-slate-800 flex items-center gap-1.5">
-              <span className="text-slate-500">Inversion Strength:</span>
-              <span className="text-amber-400 font-bold">+{telemetry.inversion_strength_c} °C</span>
-            </div>
-            <div className="bg-slate-900/80 px-3 py-1.5 rounded-xl border border-slate-800 flex items-center gap-1.5">
-              <span className="text-slate-500">Status:</span>
-              <span className="text-red-400 font-bold">{telemetry.inversion_status}</span>
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* 2. Main 3D Canvas + Slicing Controls (8 Cols) & Vertical Sounding Chart (4 Cols) */}
+      {/* 2. Interactive 1-Click Story Mode Tour (4 Steps) */}
+      <div className="glass-panel p-5 rounded-3xl border border-slate-800 bg-slate-900/60 space-y-3">
+        <div className="flex justify-between items-center">
+          <span className="text-xs font-extrabold text-slate-200 uppercase tracking-wider flex items-center gap-2">
+            <Play size={14} className="text-purple-400" /> 1-Click 3D Guided Story Tour
+          </span>
+          <span className="text-[10px] text-slate-400 font-medium">Click any step to fly the camera!</span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {storySteps.map((step, idx) => (
+            <button
+              key={step.step}
+              onClick={() => playStoryStep(idx)}
+              className={`p-3.5 rounded-2xl border text-left transition-all ${
+                activeStoryStep === idx
+                  ? `${step.color} shadow-md scale-[1.02]`
+                  : 'bg-slate-950/60 border-slate-800/80 text-slate-400 hover:border-slate-700 hover:text-slate-200'
+              }`}
+            >
+              <div className="text-xs font-black">{step.title}</div>
+              <div className="text-[11px] mt-1 leading-snug opacity-90">{step.desc}</div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* 3. Main 3D Canvas Area (8 Cols) & Simple Altitude Elevator (4 Cols) */}
       <div className="grid grid-cols-12 gap-6">
 
-        {/* 3D WebGL Canvas Container (8 Cols) */}
+        {/* 3D WebGL Canvas (8 Cols) */}
         <div className="col-span-12 lg:col-span-8 space-y-4">
-          <div className="glass-panel rounded-2xl p-4 relative overflow-hidden border border-slate-800">
+          <div className="glass-panel rounded-3xl p-4 relative overflow-hidden border border-slate-800 bg-slate-900/60 shadow-xl">
             
-            {/* Top Overlay Controls Bar */}
-            <div className="absolute top-6 left-6 right-6 z-10 flex flex-wrap justify-between items-center gap-2 pointer-events-none">
-              {/* Camera Presets */}
-              <div className="flex items-center gap-1.5 bg-slate-900/90 backdrop-blur-md p-1.5 rounded-xl border border-slate-800 pointer-events-auto">
-                <span className="text-[9px] font-bold text-slate-500 uppercase px-1.5">Camera:</span>
-                {[
-                  { id: 'isometric', label: 'Isometric 3D' },
-                  { id: 'delhi_basin', label: 'Delhi Receptor' },
-                  { id: 'cross_section', label: 'Plume Axis' },
-                  { id: 'topdown', label: 'Top View' }
-                ].map(p => (
-                  <button
-                    key={p.id}
-                    onClick={() => switchCameraPreset(p.id)}
-                    className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-all ${
-                      activeCameraView === p.id 
-                        ? 'bg-[#4b6bf5] text-white shadow-sm' 
-                        : 'text-slate-400 hover:text-slate-200'
-                    }`}
-                  >
-                    {p.label}
-                  </button>
-                ))}
+            {/* Top 3D Toggles Bar */}
+            <div className="absolute top-6 left-6 right-6 z-10 flex justify-between items-center pointer-events-none">
+              <div className="bg-slate-950/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-800 text-xs font-bold text-slate-300 pointer-events-auto flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>Interactive 3D Hologram</span>
               </div>
 
-              {/* Layer Visibility Toggles */}
-              <div className="flex items-center gap-1.5 bg-slate-900/90 backdrop-blur-md p-1.5 rounded-xl border border-slate-800 pointer-events-auto">
+              <div className="flex items-center gap-2 bg-slate-950/90 backdrop-blur-md p-1.5 rounded-xl border border-slate-800 pointer-events-auto">
                 <button
                   onClick={() => setShowInversionLid(!showInversionLid)}
-                  className={`px-2 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 transition-all ${
-                    showInversionLid ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' : 'text-slate-500'
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                    showInversionLid ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40' : 'text-slate-500'
                   }`}
-                  title="Toggle Inversion Lid Ceiling"
                 >
-                  <Layers size={11} /> Inversion Lid
+                  🟣 Inversion Lid
                 </button>
                 <button
                   onClick={() => setShowParticles(!showParticles)}
-                  className={`px-2 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 transition-all ${
-                    showParticles ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'text-slate-500'
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                    showParticles ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : 'text-slate-500'
                   }`}
-                  title="Toggle Smoke Particles"
                 >
-                  <Sparkles size={11} /> Smoke Particles
+                  🔥 Smoke Trail
                 </button>
               </div>
             </div>
 
-            {/* 3D WebGL Canvas Mount */}
+            {/* 3D Canvas Mount */}
             <div 
               ref={mountRef} 
-              className="w-full h-[520px] rounded-xl cursor-grab active:cursor-grabbing relative"
+              className="w-full h-[520px] rounded-2xl cursor-grab active:cursor-grabbing relative"
             >
               {loading && (
-                <div className="absolute inset-0 flex items-center justify-center bg-slate-950/80 z-20">
+                <div className="absolute inset-0 flex items-center justify-center bg-slate-950/90 z-20">
                   <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-500"></div>
-                  <span className="ml-3 text-sm text-slate-400 font-semibold">Generating 3D Atmospheric Volume...</span>
+                  <span className="ml-3 text-sm text-slate-300 font-bold">Building 3D Atmospheric Volume...</span>
                 </div>
               )}
             </div>
 
-            {/* Bottom Floating Legend / Interaction Hint */}
-            <div className="absolute bottom-6 left-6 right-6 z-10 flex justify-between items-center bg-slate-900/80 backdrop-blur-md p-2.5 rounded-xl border border-slate-800/80 text-[10px] text-slate-400 font-mono pointer-events-none">
-              <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></span>
-                Purple Plane: Nocturnal Inversion Ceiling (BLH: {telemetry?.blh_m}m)
-              </span>
-              <span>🖱️ Drag to Orbit • Scroll to Zoom • Right-click to Pan</span>
+            {/* Bottom 3D Helper Pill */}
+            <div className="absolute bottom-6 left-6 right-6 z-10 flex justify-between items-center bg-slate-950/80 backdrop-blur-md px-4 py-2 rounded-xl border border-slate-800 text-[11px] text-slate-400 pointer-events-none">
+              <span className="text-purple-300 font-bold">🟣 Purple Horizontal Plane = The {telemetry?.blh_m || 500}m Cold Inversion Trap Lid</span>
+              <span>🖱️ Drag to rotate • Scroll to zoom</span>
             </div>
 
           </div>
+        </div>
 
-          {/* Interactive Altitude Slicer Slider */}
-          <div className="glass-panel p-5 rounded-2xl space-y-3">
-            <div className="flex justify-between items-center">
-              <span className="text-xs font-extrabold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-                <Compass size={14} className="text-[#4b6bf5]" /> Vertical Altitude Slicer
-              </span>
-              <span className="text-xs font-mono font-bold text-purple-400 bg-purple-500/10 px-2.5 py-0.5 rounded-lg border border-purple-500/20">
-                Altitude: {altitudeScrub} meters
+        {/* RIGHT COLUMN: Simple Altitude Elevator (4 Cols) */}
+        <div className="col-span-12 lg:col-span-4 space-y-4">
+          
+          <div className="glass-panel p-6 rounded-3xl space-y-4 border border-slate-800 bg-slate-900/60">
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <div>
+                <span className="text-xs font-extrabold text-slate-300 uppercase tracking-wider">Atmospheric Elevator</span>
+                <h3 className="text-sm font-black text-white">What's in the Air at Each Altitude?</h3>
+              </div>
+              <span className="text-xs font-mono font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-lg border border-purple-500/20">
+                {altitudeScrub}m
               </span>
             </div>
 
+            {/* Altitude Slider */}
             <input
               type="range"
               min="0"
               max="2500"
-              step="25"
+              step="50"
               value={altitudeScrub}
               onChange={(e) => setAltitudeScrub(parseInt(e.target.value))}
               className="w-full accent-purple-500 cursor-pointer h-2 bg-slate-800 rounded-lg appearance-none"
             />
 
-            <div className="flex justify-between text-[10px] text-slate-500 font-mono">
-              <span>Ground (0m)</span>
-              <span>Nocturnal Layer (300m)</span>
-              <span className="text-purple-400 font-bold">Inversion Lid ({telemetry?.blh_m}m)</span>
-              <span>Plume Channel (1000m)</span>
-              <span>Free Troposphere (2500m)</span>
-            </div>
-
-            {/* Active Altitude Slice Card */}
-            {activeLayer && (
-              <div className="mt-3 bg-slate-900/60 border border-slate-800 p-3.5 rounded-xl flex items-center justify-between">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: activeLayer.color }}></span>
-                    <span className="text-xs font-bold text-white">{activeLayer.name}</span>
-                    <span className="text-[10px] text-slate-400 font-mono">({activeLayer.alt_range})</span>
-                  </div>
-                  <p className="text-[11px] text-slate-400 mt-1">{activeLayer.description}</p>
+            {/* 4 Simple Human Altitude Layers */}
+            <div className="space-y-2.5 pt-2">
+              
+              {/* Layer 1: Ground Level */}
+              <div 
+                onClick={() => setAltitudeScrub(75)}
+                className={`p-3.5 rounded-2xl border transition-all cursor-pointer ${
+                  altitudeScrub <= 150 ? 'bg-red-950/30 border-red-500/50 shadow-md' : 'bg-slate-950/60 border-slate-800/80 hover:border-slate-700'
+                }`}
+              >
+                <div className="flex justify-between items-center">
+                  <span className="text-xs font-bold text-red-400 flex items-center gap-1.5">
+                    🚶‍♂️ 1. Ground Level (0 - 150m)
+                  </span>
+                  <span className="text-[10px] font-bold text-red-400 bg-red-500/10 px-2 py-0.5 rounded border border-red-500/20">
+                    TOXIC SMOG
+                  </span>
                 </div>
-
-                <div className="text-right font-mono">
-                  <div className="text-sm font-extrabold text-purple-400">PM2.5: ~{activeLayer.pm25_avg} µg</div>
-                  <div className="text-[10px] text-slate-400">{activeLayer.temp_c}°C Ambient</div>
-                </div>
+                <p className="text-[11px] text-slate-300 mt-1">
+                  <strong>Where we breathe:</strong> 85% of heavy smoke & dust is trapped right at human breathing height.
+                </p>
               </div>
-            )}
 
+              {/* Layer 2: City Skyline */}
+              <div 
+                onClick={() => setAltitudeScrub(300)}
+                className={`p-3.5 rounded-2xl border transition-all cursor-pointer ${
+                  altitudeScrub > 150 && altitudeScrub <= 450 ? 'bg-amber-950/30 border-amber-500/50 shadow-md' : 'bg-slate-950/60 border-slate-800/80 hover:border-slate-700'
+                }`}
+              >
+                <div className="flex justify-between items-center">
+                  <span className="text-xs font-bold text-amber-400 flex items-center gap-1.5">
+                    🏢 2. City Skyline (150 - 450m)
+                  </span>
+                  <span className="text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                    DENSE SMOKE
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-300 mt-1">
+                  High-rise building level where nighttime smoke pools together into thick haze.
+                </p>
+              </div>
+
+              {/* Layer 3: The Inversion Lid */}
+              <div 
+                onClick={() => setAltitudeScrub(telemetry?.blh_m || 500)}
+                className={`p-3.5 rounded-2xl border transition-all cursor-pointer ${
+                  altitudeScrub > 450 && altitudeScrub <= 850 ? 'bg-purple-950/40 border-purple-500/60 shadow-lg' : 'bg-slate-950/60 border-slate-800/80 hover:border-slate-700'
+                }`}
+              >
+                <div className="flex justify-between items-center">
+                  <span className="text-xs font-black text-purple-300 flex items-center gap-1.5">
+                    🛡️ 3. The Inversion Lid ({telemetry?.blh_m || 500}m)
+                  </span>
+                  <span className="text-[10px] font-bold text-purple-300 bg-purple-500/20 px-2 py-0.5 rounded border border-purple-500/40">
+                    THE CEILING
+                  </span>
+                </div>
+                <p className="text-[11px] text-purple-200 mt-1 font-medium">
+                  <strong>The Cold Glass Ceiling:</strong> Smoke cannot penetrate above this barrier, forcing it to spread sideways over Delhi.
+                </p>
+              </div>
+
+              {/* Layer 4: Upper Sky */}
+              <div 
+                onClick={() => setAltitudeScrub(1800)}
+                className={`p-3.5 rounded-2xl border transition-all cursor-pointer ${
+                  altitudeScrub > 850 ? 'bg-emerald-950/30 border-emerald-500/50 shadow-md' : 'bg-slate-950/60 border-slate-800/80 hover:border-slate-700'
+                }`}
+              >
+                <div className="flex justify-between items-center">
+                  <span className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                    ✈️ 4. Clean Upper Sky (1000m+)
+                  </span>
+                  <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                    PRISTINE AIR
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-300 mt-1">
+                  Where airplanes fly: 100% clean, crisp mountain-quality air completely free from farm smoke!
+                </p>
+              </div>
+
+            </div>
           </div>
 
-        </div>
-
-        {/* Right Column: Skew-T Sounding Profile Chart & Layers Breakdown (4 Cols) */}
-        <div className="col-span-12 lg:col-span-4 space-y-5">
-          
-          {/* Skew-T Temperature Inversion Chart */}
-          <div className="glass-panel p-5 rounded-2xl space-y-3">
-            <div className="flex justify-between items-center border-b border-slate-800 pb-2">
-              <div>
-                <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Atmospheric Physics</span>
-                <h3 className="text-sm font-black text-white tracking-tight">Vertical Sounding Profile T(z)</h3>
-              </div>
-              <span className="text-[10px] font-mono text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded border border-purple-500/20">
-                dT/dz Inversion
-              </span>
+          {/* Quick FAQ Card */}
+          <div className="glass-panel p-5 rounded-3xl border border-slate-800 bg-slate-900/60 space-y-2">
+            <div className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+              <HelpCircle size={14} className="text-purple-400" /> Why does this happen only in winter?
             </div>
-
-            <div className="h-[220px] w-full pt-2">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={soundingChartData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                  <XAxis dataKey="temperature" unit="°C" stroke="#64748b" tick={{ fontSize: 10 }} />
-                  <YAxis dataKey="altitude" unit="m" stroke="#64748b" tick={{ fontSize: 10 }} domain={[0, 2500]} />
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: '#090d16', borderColor: '#334155', borderRadius: '12px', fontSize: '11px' }}
-                    formatter={(val, name) => [name === 'temperature' ? `${val} °C` : `${val} µg`, name]}
-                  />
-                  <Line type="monotone" dataKey="temperature" stroke="#a855f7" strokeWidth={2.5} dot={false} name="Temperature" />
-                  <Line type="monotone" dataKey="pm25" stroke="#f97316" strokeWidth={2} dot={false} name="PM2.5 Conc" />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-
-            <div className="text-[10px] text-slate-400 bg-slate-900/60 p-2.5 rounded-xl border border-slate-800/80 leading-relaxed font-mono">
-              <span className="text-purple-400 font-bold">Inversion Cap (400-650m):</span> Temperature increases with altitude, creating an impenetrable lid that traps ground smoke.
-            </div>
-          </div>
-
-          {/* 5 Altitude Strata Breakdown */}
-          <div className="glass-panel p-5 rounded-2xl space-y-3">
-            <span className="text-xs font-extrabold text-slate-300 uppercase tracking-wider block border-b border-slate-800 pb-2">
-              Atmospheric Stratification
-            </span>
-
-            <div className="space-y-2">
-              {profileData?.layers?.map((layer) => (
-                <div 
-                  key={layer.id}
-                  onClick={() => setAltitudeScrub(layer.altitude_m)}
-                  className={`p-2.5 rounded-xl border transition-all cursor-pointer ${
-                    altitudeScrub <= layer.altitude_m + 150 && altitudeScrub >= layer.altitude_m - 150
-                      ? 'bg-purple-950/25 border-purple-500/40 shadow-sm'
-                      : 'bg-slate-900/40 border-slate-800 hover:border-slate-700'
-                  }`}
-                >
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: layer.color }}></span>
-                      <span className="text-xs font-bold text-slate-200">{layer.name}</span>
-                    </div>
-                    <span className="text-[10px] font-mono text-slate-400">{layer.alt_range}</span>
-                  </div>
-                  <div className="flex justify-between items-center text-[10px] text-slate-400 mt-1 font-mono">
-                    <span className="text-slate-500">{layer.status}</span>
-                    <span className="text-purple-300 font-bold">~{layer.pm25_avg} µg/m³</span>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <p className="text-[11px] text-slate-400 leading-relaxed">
+              In summer, the sun heats the ground, and hot air rises up to 2,500m (flushing smoke away). In winter, the ground gets cold at night, trapping cold air underneath warm air — creating the <strong>500m Inversion Lid</strong>.
+            </p>
           </div>
 
         </div>
