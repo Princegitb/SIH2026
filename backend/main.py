@@ -1012,16 +1012,16 @@ def search_villages(q: str = "", limit: int = 10):
 
 @app.get("/api/simulate-policy")
 def simulate_policy(
-    district: str = "Sangrur",
+    district: str = "Ludhiana",
     stubble_ban_pct: float = 80.0,
     traffic_curb_pct: float = 0.0,
     industry_curb_pct: float = 0.0,
     date: str = None
 ):
     """
-    Digital Twin Policy Simulator Endpoint.
-    Evaluates 'What-If' scenarios for agricultural fire bans, Odd-Even vehicular restrictions,
-    and industrial curtailments, returning downwind PM2.5/AQI savings, health ROI, and GRAP stage de-escalation.
+    100% Data-Driven Digital Twin Policy Simulator.
+    Evaluates 'What-If' scenarios based on actual NASA VIIRS active fires,
+    Sentinel-5P HCHO/NO2 columns, CMB source attribution, and ERA5 winds on the selected date.
     """
     if grid_df is None or policy_simulator is None:
         raise HTTPException(status_code=503, detail="Service loading data.")
@@ -1029,39 +1029,14 @@ def simulate_policy(
     if not date or date not in grid_df["date"].values:
         date = str(grid_df["date"].max())
         
-    # 1. Filter rows for selected district (or state if "All Punjab" / "All Haryana")
-    if district == "All Punjab":
-        target_rows = grid_df[(grid_df["date"] == date) & (grid_df["state"] == "Punjab")]
-    elif district == "All Haryana":
-        target_rows = grid_df[(grid_df["date"] == date) & (grid_df["state"] == "Haryana")]
-    elif district == "All North India (Regional Blanket Ban)":
-        target_rows = grid_df[grid_df["date"] == date]
-    else:
-        target_rows = grid_df[(grid_df["date"] == date) & (grid_df["district"] == district)]
-        if target_rows.empty:
-            target_rows = grid_df[grid_df["date"] == date]
-
-    base_pm25 = float(target_rows["pm25"].mean()) if not target_rows.empty else 165.0
-    base_aqi = int(round(target_rows["aqi"].mean())) if not target_rows.empty else 280
-    base_blh = float(target_rows["blh"].mean()) if not target_rows.empty else 515.0
-    
-    # Wind speed
-    wind_u = float(target_rows.iloc[0]["wind_u"]) if not target_rows.empty else 2.0
-    wind_v = float(target_rows.iloc[0]["wind_v"]) if not target_rows.empty else -1.5
-    wind_spd = float(np.round(np.sqrt(wind_u**2 + wind_v**2) * 3.6, 1))
-    
-    day_fires = fires_df[fires_df["date"] == date] if fires_df is not None and not fires_df.empty else pd.DataFrame()
-    
     sim_res = policy_simulator.simulate_policy_intervention(
         target_district=district,
         stubble_ban_pct=stubble_ban_pct,
         traffic_curb_pct=traffic_curb_pct,
         industry_curb_pct=industry_curb_pct,
-        baseline_pm25=base_pm25,
-        baseline_aqi=base_aqi,
-        wind_speed_kmh=wind_spd,
-        blh_m=base_blh,
-        active_fires_df=day_fires
+        date_str=date,
+        grid_df=grid_df,
+        fires_df=fires_df
     )
     return sim_res
 
