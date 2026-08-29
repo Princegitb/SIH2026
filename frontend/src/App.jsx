@@ -11,21 +11,25 @@ import DistrictAnalyticsView from './components/DistrictAnalyticsView'
 import ReportsView from './components/ReportsView'
 import AlertsView from './components/AlertsView'
 import DataExplorerView from './components/DataExplorerView'
+import PolicySimulatorView from './components/PolicySimulatorView'
+import Atmospheric3DView from './components/Atmospheric3DView'
 import LandingPage from './components/LandingPage'
 import { 
   LayoutDashboard, Map, Compass, Activity, Flame, Wind, 
   Tag, BarChart3, FileSpreadsheet, BellRing, Database, HelpCircle,
-  Menu, X, Sun, Moon, Info, Calendar
+  Menu, X, Sun, Moon, Info, Calendar, Sliders, Layers
 } from 'lucide-react'
 
 // Icon mapping for navigation links
 const navItems = [
   { name: 'Dashboard', value: 'Dashboard', icon: LayoutDashboard },
   { name: 'Live Map', value: 'Live Map', icon: Map },
+  { name: 'Policy Simulator', value: 'Policy Simulator', icon: Sliders },
+  { name: '3D Atmospheric Profile', value: '3D Atmospheric Profile', icon: Layers },
+  { name: 'Wind Transport', value: 'Wind Transport', icon: Wind },
   { name: 'AQI Forecast', value: 'AQI Forecast', icon: Compass },
   { name: 'HCHO Hotspots', value: 'HCHO Hotspots', icon: Activity },
   { name: 'Fire Detection', value: 'Fire Detection', icon: Flame },
-  { name: 'Wind Transport', value: 'Wind Transport', icon: Wind },
   { name: 'Source Attribution', value: 'Source Attribution', icon: Tag },
   { name: 'District Analytics', value: 'District Analytics', icon: BarChart3 },
   { name: 'Reports', value: 'Reports', icon: FileSpreadsheet },
@@ -77,6 +81,8 @@ export default function App() {
     switch (activeTab) {
       case 'Dashboard': return <DashboardView />
       case 'Live Map': return <LiveMapView />
+      case 'Policy Simulator': return <PolicySimulatorView />
+      case '3D Atmospheric Profile': return <Atmospheric3DView />
       case 'AQI Forecast': return <ForecastView />
       case 'HCHO Hotspots': return <HotspotsView />
       case 'Fire Detection': return <FiresView />

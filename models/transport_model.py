@@ -22,7 +22,6 @@ class WindTransportModel:
         frp_boost = min(1.4, float(frp) / 120.0) if frp > 0 else 0.0
         effective_u = float(wind_u) * (1.0 + frp_boost)
         effective_v = float(wind_v) * (1.0 + frp_boost)
-        
         path = [(round(float(start_lat), 4), round(float(start_lon), 4))]
         curr_lat, curr_lon = float(start_lat), float(start_lon)
         
