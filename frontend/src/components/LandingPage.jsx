@@ -177,8 +177,68 @@ export default function LandingPage({ onEnterDashboard }) {
   const earthRef = useRef(null)
   const ringsRef = useRef(null)
 
+  // Wind evasion physics state
+  const windPos = useRef({ x: 0, y: 0, targetX: 0, targetY: 0 })
+
   // Mouse coords inside hero container
   const mouseCoords = useRef({ x: -9999, y: -9999, isInside: false, nx: 0, ny: 0 })
+
+  // Continuous 60fps RAF loop for Wind physics evasion & Earth 3D Parallax
+  useEffect(() => {
+    let animId
+    const loop = () => {
+      // 1. Wind Box evasion physics
+      if (windCardRef.current && heroRef.current) {
+        const heroRect = heroRef.current.getBoundingClientRect()
+        const cardRect = windCardRef.current.getBoundingClientRect()
+        
+        const cardCenterX = cardRect.left + cardRect.width / 2
+        const cardCenterY = cardRect.top + cardRect.height / 2
+        
+        const mouseAbsX = heroRect.left + mouseCoords.current.x
+        const mouseAbsY = heroRect.top + mouseCoords.current.y
+        
+        const dx = mouseAbsX - cardCenterX
+        const dy = mouseAbsY - cardCenterY
+        const dist = Math.sqrt(dx * dx + dy * dy)
+        
+        if (mouseCoords.current.isInside && dist < 140 && dist > 0) {
+          // Push away from mouse cursor
+          const force = (140 - dist) / 140
+          const angle = Math.atan2(dy, dx)
+          windPos.current.targetX = -Math.cos(angle) * force * 50
+          windPos.current.targetY = -Math.sin(angle) * force * 40
+          setWindTrails(true)
+        } else {
+          // Return smoothly to rest origin
+          windPos.current.targetX = 0
+          windPos.current.targetY = 0
+          if (Math.abs(windPos.current.x) < 1.5 && Math.abs(windPos.current.y) < 1.5) {
+            setWindTrails(false)
+          }
+        }
+        
+        windPos.current.x += (windPos.current.targetX - windPos.current.x) * 0.12
+        windPos.current.y += (windPos.current.targetY - windPos.current.y) * 0.12
+        
+        windCardRef.current.style.transform = `translate(calc(-50% + ${windPos.current.x}px), ${windPos.current.y}px)`
+      }
+
+      // 2. Earth 3D Parallax tilt
+      if (earthRef.current && mouseCoords.current.isInside) {
+        const tiltX = -mouseCoords.current.ny * 12
+        const tiltY = mouseCoords.current.nx * 15
+        earthRef.current.style.transform = `rotateX(${tiltX}deg) rotateY(${tiltY}deg)`
+      } else if (earthRef.current) {
+        earthRef.current.style.transform = `rotateX(0deg) rotateY(0deg)`
+      }
+
+      animId = requestAnimationFrame(loop)
+    }
+
+    loop()
+    return () => cancelAnimationFrame(animId)
+  }, [])
 
   // Ember generation when fire is active
   useEffect(() => {
@@ -202,7 +262,7 @@ export default function LandingPage({ onEnterDashboard }) {
     return () => clearInterval(emberInterval)
   }, [fireActive])
 
-  // Mouse Movement Handler for 3D Earth Parallax Tilt
+  // Mouse Movement Handler for 3D Earth Parallax Tilt & Fire Hover
   const handleHeroMouseMove = (e) => {
     if (!heroRef.current) return
     const rect = heroRef.current.getBoundingClientRect()
@@ -260,7 +320,7 @@ export default function LandingPage({ onEnterDashboard }) {
 
         <button
           onClick={onEnterDashboard}
-          className="flex items-center space-x-2 bg-[#09090b] border border-zinc-800 hover:border-zinc-700 hover:bg-zinc-850 text-xs font-bold px-5 py-2 rounded-full transition-all duration-300 shadow-md text-zinc-100 hover:text-white"
+          className="flex items-center space-x-2 bg-[#08080a] border border-white/[0.06] hover:border-white/[0.15] hover:bg-[#121216] text-xs font-bold px-5 py-2 rounded-full transition-all duration-300 shadow-md text-zinc-100 hover:text-white"
         >
           <span>Explore Dashboard</span>
           <ArrowRight size={13} />
@@ -274,7 +334,7 @@ export default function LandingPage({ onEnterDashboard }) {
         <div className="lg:col-span-6 space-y-6">
           
           {/* Cyber Neon Capsule Badge */}
-          <div className="inline-flex items-center space-x-2 bg-[#07130a] border border-[#22c55e]/40 px-3.5 py-1.5 rounded-full text-[10px] font-extrabold text-[#4ade80] uppercase tracking-wider shadow-[0_0_15px_rgba(34,197,94,0.15)]">
+          <div className="inline-flex items-center space-x-2 bg-[#07130a] border border-[#22c55e]/30 px-3.5 py-1.5 rounded-full text-[10px] font-extrabold text-[#4ade80] uppercase tracking-wider shadow-[0_0_15px_rgba(34,197,94,0.15)]">
             <span className="w-1.5 h-1.5 rounded-full bg-[#4ade80] animate-ping"></span>
             <span>REAL-TIME AIR INTELLIGENCE POWERED BY SATELLITE & CPCB</span>
           </div>
@@ -473,30 +533,66 @@ export default function LandingPage({ onEnterDashboard }) {
           <div
             onMouseEnter={() => setActiveCard(1)}
             onMouseLeave={() => setActiveCard(null)}
-            className="absolute top-[8%] left-[2%] bg-[#08080b]/90 border border-zinc-850 rounded-2xl p-4 w-[160px] text-left transition-all duration-300 z-30 cursor-pointer shadow-xl hover:border-[#4ade80]/40"
+            className="absolute top-[8%] left-[2%] bg-[#08080a] border border-white/[0.05] rounded-2xl p-4 w-[160px] text-left transition-all duration-300 z-30 cursor-pointer shadow-2xl hover:border-[#4ade80]/40"
           >
             <div className="text-[8px] font-extrabold text-zinc-500 uppercase tracking-wider">AQI (DELHI NCR)</div>
             <div className="flex items-baseline space-x-1.5 mt-1">
               <span className="text-2xl font-black text-[#84cc16]">76</span>
               <span className="text-[9px] font-black text-[#84cc16] uppercase">SATISFACTORY</span>
             </div>
-            <div className="flex justify-between items-center mt-2.5 pt-1.5 border-t border-zinc-900">
+            <div className="flex justify-between items-center mt-2.5 pt-1.5 border-t border-white/[0.04]">
               <span className="text-[7px] text-zinc-500">Updated 2m ago</span>
               <MiniSparkline values={[82, 79, 81, 75, 77, 76]} color="#84cc16" />
             </div>
           </div>
 
-          {/* Floating Widget Card 2: Wind Velocity (Bottom Center) */}
+          {/* Floating Widget Card 2: Wind Velocity with Evading Wind Physics & Flowing Air Streams (Bottom Center) */}
           <div
             ref={windCardRef}
-            onMouseEnter={() => setActiveCard(2)}
-            onMouseLeave={() => setActiveCard(null)}
-            className="absolute bottom-[10%] left-[25%] -translate-x-1/2 bg-[#08080b]/90 border border-zinc-850 rounded-2xl p-3.5 w-[145px] text-left z-30 cursor-pointer shadow-xl hover:border-[#4ade80]/40"
+            onMouseEnter={() => {
+              setActiveCard(2)
+              setWindTrails(true)
+            }}
+            onMouseLeave={() => {
+              setActiveCard(null)
+            }}
+            className={`absolute bottom-[10%] left-[25%] -translate-x-1/2 bg-[#08080a] border rounded-2xl p-3.5 w-[145px] text-left z-30 cursor-pointer transition-colors duration-300 shadow-2xl ${
+              activeCard === 2 || windTrails
+                ? 'border-[#4ade80]/50 shadow-[0_0_25px_rgba(74,222,128,0.25)]' 
+                : 'border-white/[0.05]'
+            }`}
           >
+            {/* Animated Air Streams / Wind Trails flowing behind the escaping card */}
+            {windTrails && (
+              <div className="absolute -top-4 -left-6 -right-6 pointer-events-none opacity-80">
+                <svg viewBox="0 0 160 30" className="w-full h-8 overflow-visible">
+                  <path 
+                    d="M 5,12 Q 35,4 70,14 T 145,8" 
+                    fill="none" 
+                    stroke="rgba(74,222,128,0.6)" 
+                    strokeWidth="1.8" 
+                    strokeDasharray="12 6"
+                    className="animate-[windStream_1.2s_linear_infinite]"
+                  />
+                  <path 
+                    d="M 15,22 Q 45,16 90,24 T 155,18" 
+                    fill="none" 
+                    stroke="rgba(34,197,94,0.4)" 
+                    strokeWidth="1.5" 
+                    strokeDasharray="8 4"
+                    className="animate-[windStream_0.9s_linear_infinite]"
+                  />
+                </svg>
+              </div>
+            )}
+
             <div className="text-[8px] font-bold text-zinc-400 uppercase tracking-wider flex items-center justify-between">
               <span className="flex items-center">
-                <Wind size={11} className="mr-1 text-[#4ade80]" /> WIND VELOCITY
+                <Wind size={12} className={`mr-1 text-[#4ade80] ${windTrails ? 'animate-bounce' : ''}`} /> WIND VELOCITY
               </span>
+              {windTrails && (
+                <span className="text-[7px] text-[#4ade80] font-mono font-bold animate-pulse">GUST</span>
+              )}
             </div>
             <div className="text-xl font-extrabold text-white mt-1 flex items-baseline">
               <span>9</span> 
@@ -519,12 +615,39 @@ export default function LandingPage({ onEnterDashboard }) {
               setActiveCard(null)
               setFireActive(false)
             }}
-            className="absolute top-[10%] right-[3%] sm:right-[5%] bg-[#08080b]/90 border border-zinc-850 rounded-2xl p-4 w-[160px] text-left transition-all duration-300 z-30 cursor-pointer shadow-xl hover:border-orange-500/50"
+            className={`absolute top-[10%] right-[3%] sm:right-[5%] bg-[#08080a] border rounded-2xl p-4 w-[160px] text-left transition-all duration-300 z-30 cursor-pointer shadow-2xl ${
+              fireActive 
+                ? 'border-orange-500/80 shadow-[0_0_30px_rgba(249,115,22,0.4)]' 
+                : 'border-white/[0.05]'
+            }`}
           >
+            {/* Rising Animated Ember Sparks Particle Layer */}
+            {fireActive && embers.map(ember => (
+              <div
+                key={ember.id}
+                className="absolute rounded-full pointer-events-none animate-[emberRise_1.2s_ease-out_forwards]"
+                style={{
+                  left: `${ember.left}%`,
+                  bottom: '10px',
+                  width: `${ember.size}px`,
+                  height: `${ember.size}px`,
+                  backgroundColor: Math.random() > 0.4 ? '#fbbf24' : '#f97316',
+                  boxShadow: '0 0 8px #ea580c, 0 0 12px #facc15',
+                  '--ember-drift': `${ember.drift}px`,
+                  animationDuration: `${ember.duration}s`
+                }}
+              />
+            ))}
+
             <div className="text-[8px] font-bold text-zinc-400 uppercase tracking-wider flex items-center justify-between">
               <span className="flex items-center text-orange-400">
                 <Flame size={13} className="mr-1 text-orange-500" /> ACTIVE FIRES
               </span>
+              {fireActive && (
+                <span className="text-[7px] bg-orange-500/20 text-amber-300 border border-orange-400/40 px-1.5 py-0.5 rounded font-black uppercase">
+                  IGNITED
+                </span>
+              )}
             </div>
 
             <div className="flex items-baseline space-x-1.5 mt-1">
@@ -534,7 +657,7 @@ export default function LandingPage({ onEnterDashboard }) {
               <span className="text-[8px] font-black uppercase text-orange-400">DETECTED</span>
             </div>
 
-            <div className="flex justify-between items-center mt-2.5 pt-1.5 border-t border-zinc-900">
+            <div className="flex justify-between items-center mt-2.5 pt-1.5 border-t border-white/[0.04]">
               <span className="text-[7px] text-zinc-400">Last 24 hrs</span>
               <MiniSparkline values={[1, 3, 2, 4, 3, 3]} color="#f97316" />
             </div>
@@ -549,7 +672,7 @@ export default function LandingPage({ onEnterDashboard }) {
         <div className="grid grid-cols-1 md:grid-cols-5 gap-3.5">
 
           {/* Card 1: Satellite-Powered */}
-          <div className="bg-[#09090b]/90 border border-zinc-850 p-4 rounded-2xl space-y-2 hover:border-[#4ade80]/30 transition-all duration-200">
+          <div className="bg-[#08080a] border border-white/[0.04] p-4 rounded-2xl space-y-2 hover:border-[#4ade80]/30 transition-all duration-200 shadow-xl">
             <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center text-[#4ade80]">
               <Satellite size={15} />
             </div>
@@ -560,7 +683,7 @@ export default function LandingPage({ onEnterDashboard }) {
           </div>
 
           {/* Card 2: AI Intelligence */}
-          <div className="bg-[#09090b]/90 border border-zinc-850 p-4 rounded-2xl space-y-2 hover:border-purple-500/30 transition-all duration-200">
+          <div className="bg-[#08080a] border border-white/[0.04] p-4 rounded-2xl space-y-2 hover:border-purple-500/30 transition-all duration-200 shadow-xl">
             <div className="w-8 h-8 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400">
               <Cpu size={15} />
             </div>
@@ -571,7 +694,7 @@ export default function LandingPage({ onEnterDashboard }) {
           </div>
 
           {/* Card 3: Hyperlocal Insights */}
-          <div className="bg-[#09090b]/90 border border-zinc-850 p-4 rounded-2xl space-y-2 hover:border-[#4ade80]/30 transition-all duration-200">
+          <div className="bg-[#08080a] border border-white/[0.04] p-4 rounded-2xl space-y-2 hover:border-[#4ade80]/30 transition-all duration-200 shadow-xl">
             <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center text-[#4ade80]">
               <Compass size={15} />
             </div>
@@ -582,7 +705,7 @@ export default function LandingPage({ onEnterDashboard }) {
           </div>
 
           {/* Card 4: Actionable Alerts */}
-          <div className="bg-[#09090b]/90 border border-zinc-850 p-4 rounded-2xl space-y-2 hover:border-amber-500/30 transition-all duration-200">
+          <div className="bg-[#08080a] border border-white/[0.04] p-4 rounded-2xl space-y-2 hover:border-amber-500/30 transition-all duration-200 shadow-xl">
             <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400">
               <Bell size={15} />
             </div>
@@ -593,7 +716,7 @@ export default function LandingPage({ onEnterDashboard }) {
           </div>
 
           {/* Card 5: Data You Can Trust */}
-          <div className="bg-[#09090b]/90 border border-zinc-850 p-4 rounded-2xl space-y-2 hover:border-blue-500/30 transition-all duration-200">
+          <div className="bg-[#08080a] border border-white/[0.04] p-4 rounded-2xl space-y-2 hover:border-blue-500/30 transition-all duration-200 shadow-xl">
             <div className="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400">
               <Database size={15} />
             </div>
@@ -608,7 +731,7 @@ export default function LandingPage({ onEnterDashboard }) {
 
       {/* 4. BOTTOM CTAs BANNER */}
       <footer className="max-w-7xl mx-auto w-full px-6 py-6 z-10 relative">
-        <div className="bg-[#08080a] border border-zinc-850 p-5 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-4 shadow-2xl">
+        <div className="bg-[#08080a] border border-white/[0.04] p-5 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-4 shadow-2xl">
           <div className="text-left space-y-1.5">
             <div className="text-[9px] text-[#4ade80] font-black uppercase tracking-widest flex items-center">
               <span className="w-2 h-2 bg-[#4ade80] rounded-full mr-2 shadow-[0_0_8px_#4ade80]"></span> TOGETHER FOR CLEANER AIR
@@ -626,7 +749,7 @@ export default function LandingPage({ onEnterDashboard }) {
         </div>
       </footer>
 
-      {/* Embedded CSS rules for orbit scanning & laser */}
+      {/* Embedded CSS rules for orbit scanning, wind streams & ember particles */}
       <style>{`
         @keyframes scan {
           0% { transform: translateY(0); opacity: 0.1; }
@@ -642,6 +765,19 @@ export default function LandingPage({ onEnterDashboard }) {
           0% { stroke-dashoffset: 36; opacity: 0.2; }
           50% { opacity: 0.9; }
           100% { stroke-dashoffset: 0; opacity: 0.1; }
+        }
+        @keyframes emberRise {
+          0% {
+            transform: translate(0, 0) scale(1);
+            opacity: 1;
+          }
+          50% {
+            opacity: 0.8;
+          }
+          100% {
+            transform: translate(var(--ember-drift, 10px), -60px) scale(0.3);
+            opacity: 0;
+          }
         }
       `}</style>
     </div>
