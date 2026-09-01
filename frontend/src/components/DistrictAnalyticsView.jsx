@@ -28,7 +28,7 @@ const getAqiCategory = (aqi) => {
 export default function DistrictAnalyticsView() {
   const { selectedDate, mapData, fetchMapData, theme } = useStore()
   const [analytics, setAnalytics] = useState([])
-  const [chartType, setChartType] = useState('aqi') // 'aqi', 'pm', 'composed'
+  const [chartType, setChartType] = useState('aqi')
   const [selectedSort, setSelectedSort] = useState('desc')
 
   useEffect(() => {
@@ -75,35 +75,34 @@ export default function DistrictAnalyticsView() {
   if (!mapData || analytics.length === 0) {
     return (
       <div className="flex items-center justify-center h-[50vh]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4b6bf5]"></div>
-        <span className="ml-3 text-slate-300 font-medium">Aggregating district boundary telemetry...</span>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#5442ed]"></div>
+        <span className="ml-3 text-zinc-400 font-medium">Aggregating district boundary telemetry...</span>
       </div>
     )
   }
 
-  // Top/Bottom districts sorted by AQI
   const worstDistrict = [...analytics].sort((a, b) => b['Average AQI'] - a['Average AQI'])[0]
   const bestDistrict = [...analytics].sort((a, b) => a['Average AQI'] - b['Average AQI'])[0]
   const avgRegionalAqi = Math.round(analytics.reduce((acc, d) => acc + d['Average AQI'], 0) / analytics.length)
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fadeIn">
       {/* Header Banner */}
-      <div className="glass-panel rounded-2xl p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="glass-panel p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-lg font-extrabold text-white flex items-center tracking-tight">
-            <BarChart3 size={20} className="text-[#4b6bf5] mr-2.5" /> Regional District Comparative Analytics
+          <h2 className="text-lg font-extrabold flex items-center tracking-tight">
+            <BarChart3 size={20} className="text-[#5442ed] mr-2.5" /> Regional District Comparative Analytics
           </h2>
-          <p className="text-xs text-slate-300 font-medium mt-1">
+          <p className="text-xs text-zinc-400 font-medium mt-1">
             Comparative air quality rankings, particulate loading, and CPCB regulatory compliance across all active monitoring zones
           </p>
         </div>
 
-        <div className="flex items-center space-x-2 bg-[#060608] border border-white/[0.08] rounded-xl p-1">
+        <div className="flex items-center space-x-2 vayu-subcard p-1">
           <button
             onClick={() => setChartType('aqi')}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-              chartType === 'aqi' ? 'bg-[#4b6bf5] text-white shadow-sm' : 'text-zinc-400 hover:text-white'
+              chartType === 'aqi' ? 'bg-[#5442ed] text-white shadow-sm' : 'text-zinc-400 hover:text-white'
             }`}
           >
             AQI Rankings
@@ -111,7 +110,7 @@ export default function DistrictAnalyticsView() {
           <button
             onClick={() => setChartType('pm')}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-              chartType === 'pm' ? 'bg-[#4b6bf5] text-white shadow-sm' : 'text-zinc-400 hover:text-white'
+              chartType === 'pm' ? 'bg-[#5442ed] text-white shadow-sm' : 'text-zinc-400 hover:text-white'
             }`}
           >
             PM2.5 vs PM10
@@ -119,7 +118,7 @@ export default function DistrictAnalyticsView() {
           <button
             onClick={() => setChartType('composed')}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-              chartType === 'composed' ? 'bg-[#4b6bf5] text-white shadow-sm' : 'text-zinc-400 hover:text-white'
+              chartType === 'composed' ? 'bg-[#5442ed] text-white shadow-sm' : 'text-zinc-400 hover:text-white'
             }`}
           >
             Multi-Metric Trend
@@ -130,79 +129,79 @@ export default function DistrictAnalyticsView() {
       {/* Top 3 Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Most Polluted District Card */}
-        <div className="glass-panel rounded-2xl p-5 border-red-500/30 bg-[#0c0c10] flex flex-col justify-between">
+        <div className="glass-panel p-5 border-l-4 border-l-red-500 flex flex-col justify-between h-[140px]">
           <div className="flex justify-between items-start">
-            <span className="text-[10px] bg-red-500/20 text-red-400 border border-red-500/30 font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center">
+            <span className="text-[10px] bg-red-500/15 text-red-500 border border-red-500/30 font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center">
               <AlertTriangle size={11} className="mr-1 animate-pulse" /> Critical Hotspot
             </span>
             <div className="text-right">
-              <span className="text-2xl font-extrabold text-red-400">{worstDistrict['Average AQI']}</span>
-              <span className="text-[9px] text-slate-400 block font-medium">AQI Index</span>
+              <span className="text-2xl font-black text-red-500 font-mono">{worstDistrict['Average AQI']}</span>
+              <span className="text-[9px] text-zinc-400 block font-medium">AQI Index</span>
             </div>
           </div>
-          <div className="mt-3">
-            <h3 className="text-base font-extrabold text-white tracking-tight">{worstDistrict.name}</h3>
-            <div className="flex items-center space-x-3 text-xs text-slate-300 mt-1 font-medium">
-              <span>PM2.5: <b className="text-yellow-400">{worstDistrict['PM2.5']}</b> µg/m³</span>
+          <div className="mt-2">
+            <h3 className="text-base font-black tracking-tight">{worstDistrict.name}</h3>
+            <div className="flex items-center space-x-3 text-xs text-zinc-400 mt-0.5 font-medium">
+              <span>PM2.5: <b className="text-amber-500 font-bold">{worstDistrict['PM2.5']}</b> µg/m³</span>
               <span>•</span>
-              <span>PM10: <b className="text-orange-400">{worstDistrict['PM10']}</b> µg/m³</span>
+              <span>PM10: <b className="text-orange-500 font-bold">{worstDistrict['PM10']}</b> µg/m³</span>
             </div>
           </div>
         </div>
 
         {/* Cleanest District Card */}
-        <div className="glass-panel rounded-2xl p-5 border-emerald-500/30 bg-gradient-to-br from-emerald-950/30 via-slate-900/60 to-slate-900/90 flex flex-col justify-between">
+        <div className="glass-panel p-5 border-l-4 border-l-emerald-500 flex flex-col justify-between h-[140px]">
           <div className="flex justify-between items-start">
-            <span className="text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center">
+            <span className="text-[10px] bg-emerald-500/15 text-emerald-500 border border-emerald-500/30 font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center">
               <ShieldCheck size={11} className="mr-1" /> Cleanest Zone
             </span>
             <div className="text-right">
-              <span className="text-2xl font-extrabold text-emerald-400">{bestDistrict['Average AQI']}</span>
-              <span className="text-[9px] text-slate-400 block font-medium">AQI Index</span>
+              <span className="text-2xl font-black text-emerald-500 font-mono">{bestDistrict['Average AQI']}</span>
+              <span className="text-[9px] text-zinc-400 block font-medium">AQI Index</span>
             </div>
           </div>
-          <div className="mt-3">
-            <h3 className="text-base font-extrabold text-white tracking-tight">{bestDistrict.name}</h3>
-            <div className="flex items-center space-x-3 text-xs text-slate-300 mt-1 font-medium">
-              <span>PM2.5: <b className="text-emerald-400">{bestDistrict['PM2.5']}</b> µg/m³</span>
+          <div className="mt-2">
+            <h3 className="text-base font-black tracking-tight">{bestDistrict.name}</h3>
+            <div className="flex items-center space-x-3 text-xs text-zinc-400 mt-0.5 font-medium">
+              <span>PM2.5: <b className="text-emerald-500 font-bold">{bestDistrict['PM2.5']}</b> µg/m³</span>
               <span>•</span>
-              <span>PM10: <b className="text-lime-400">{bestDistrict['PM10']}</b> µg/m³</span>
+              <span>PM10: <b className="text-lime-500 font-bold">{bestDistrict['PM10']}</b> µg/m³</span>
             </div>
           </div>
         </div>
 
         {/* Regional Mean Overview Card */}
-        <div className="glass-panel rounded-2xl p-5 border-blue-500/30 bg-gradient-to-br from-blue-950/30 via-slate-900/60 to-slate-900/90 flex flex-col justify-between">
+        <div className="glass-panel p-5 border-l-4 border-l-sky-500 flex flex-col justify-between h-[140px]">
           <div className="flex justify-between items-start">
-            <span className="text-[10px] bg-blue-500/20 text-blue-400 border border-blue-500/30 font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center">
+            <span className="text-[10px] bg-sky-500/15 text-sky-500 border border-sky-500/30 font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center">
               <Activity size={11} className="mr-1" /> Regional Mean
             </span>
             <div className="text-right">
-              <span className="text-2xl font-extrabold text-blue-400">{avgRegionalAqi}</span>
-              <span className="text-[9px] text-slate-400 block font-medium">Mean AQI</span>
+              <span className="text-2xl font-black text-sky-500 font-mono">{avgRegionalAqi}</span>
+              <span className="text-[9px] text-zinc-400 block font-medium">Mean AQI</span>
             </div>
           </div>
-          <div className="mt-3">
-            <h3 className="text-base font-extrabold text-white tracking-tight">Delhi-NCR & Punjab Basin</h3>
-            <div className="flex items-center space-x-2 text-xs text-slate-300 mt-1 font-medium">
-              <span>Coverage: <b className="text-white">{analytics.length} Districts</b></span>
+          <div className="mt-2">
+            <h3 className="text-base font-black tracking-tight">Delhi-NCR & Punjab Basin</h3>
+            <div className="flex items-center space-x-2 text-xs text-zinc-400 mt-0.5 font-medium">
+              <span>Coverage: <b>{analytics.length} Districts</b></span>
               <span>•</span>
-              <span className="text-blue-300 font-semibold">{getAqiCategory(avgRegionalAqi)}</span>
+              <span className="text-indigo-400 font-semibold">{getAqiCategory(avgRegionalAqi)}</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Main Interactive Chart Box */}
-      <div className="glass-panel rounded-2xl p-6 flex flex-col h-[460px]">
+      <div className="glass-panel p-6 flex flex-col h-[460px]">
         <div className="flex justify-between items-center mb-4">
           <div>
-            <h3 className="text-sm font-extrabold text-white uppercase tracking-wider">
+            <h3 className="text-sm font-extrabold uppercase tracking-wider">
               {chartType === 'aqi' && "District AQI Comparison & Severity Gradient"}
               {chartType === 'pm' && "Particulate Matter Loading (PM2.5 vs PM10)"}
               {chartType === 'composed' && "Cross-District Multi-Pollutant Spectrum"}
             </h3>
-            <span className="text-xs text-slate-400 font-medium mt-0.5 block">
+            <span className="text-xs text-zinc-400 font-medium mt-0.5 block">
               Hover over bars to inspect individual pollutant concentrations and safe limits
             </span>
           </div>
@@ -210,7 +209,7 @@ export default function DistrictAnalyticsView() {
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setSelectedSort(selectedSort === 'desc' ? 'asc' : 'desc')}
-              className="text-xs bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 font-semibold px-3 py-1.5 rounded-lg transition-all"
+              className="text-xs vayu-subcard hover:border-indigo-500/40 font-semibold px-3 py-1.5 rounded-lg transition-all"
             >
               Sort: {selectedSort === 'desc' ? 'Highest First ⬇' : 'Lowest First ⬆'}
             </button>
@@ -221,24 +220,24 @@ export default function DistrictAnalyticsView() {
           <ResponsiveContainer width="100%" height="100%">
             {chartType === 'aqi' ? (
               <BarChart data={analytics} margin={{ top: 10, right: 20, left: 0, bottom: 25 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? '#1e293b' : '#e2e8f0'} vertical={false} />
                 <XAxis 
                   dataKey="name" 
-                  stroke="#94a3b8" 
+                  stroke={theme === 'dark' ? '#94a3b8' : '#64748b'} 
                   fontSize={11} 
                   fontWeight={600}
                   interval={0}
                   angle={-25}
                   textAnchor="end"
                 />
-                <YAxis stroke="#94a3b8" fontSize={11} domain={[0, 'auto']} />
+                <YAxis stroke={theme === 'dark' ? '#94a3b8' : '#64748b'} fontSize={11} domain={[0, 'auto']} />
                 <Tooltip 
                   contentStyle={{ 
-                    backgroundColor: '#090d16', 
-                    borderColor: '#334155', 
-                    color: '#ffffff', 
+                    backgroundColor: theme === 'dark' ? '#090d16' : '#ffffff', 
+                    borderColor: theme === 'dark' ? '#334155' : '#cbd5e1', 
+                    color: theme === 'dark' ? '#ffffff' : '#0f172a', 
                     borderRadius: '12px',
-                    boxShadow: '0 10px 25px -5px rgba(0,0,0,0.5)',
+                    boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)',
                     fontSize: '12px',
                     fontWeight: 'bold'
                   }} 
@@ -251,54 +250,54 @@ export default function DistrictAnalyticsView() {
               </BarChart>
             ) : chartType === 'pm' ? (
               <BarChart data={analytics} margin={{ top: 10, right: 20, left: 0, bottom: 25 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? '#1e293b' : '#e2e8f0'} vertical={false} />
                 <XAxis 
                   dataKey="name" 
-                  stroke="#94a3b8" 
+                  stroke={theme === 'dark' ? '#94a3b8' : '#64748b'} 
                   fontSize={11} 
                   fontWeight={600}
                   interval={0}
                   angle={-25}
                   textAnchor="end"
                 />
-                <YAxis stroke="#94a3b8" fontSize={11} />
+                <YAxis stroke={theme === 'dark' ? '#94a3b8' : '#64748b'} fontSize={11} />
                 <Tooltip 
                   contentStyle={{ 
-                    backgroundColor: '#090d16', 
-                    borderColor: '#334155', 
-                    color: '#ffffff', 
+                    backgroundColor: theme === 'dark' ? '#090d16' : '#ffffff', 
+                    borderColor: theme === 'dark' ? '#334155' : '#cbd5e1', 
+                    color: theme === 'dark' ? '#ffffff' : '#0f172a', 
                     borderRadius: '12px',
                     fontSize: '12px'
                   }} 
                 />
-                <Legend wrapperStyle={{ paddingTop: '10px', fontSize: '12px', color: '#cbd5e1' }} />
+                <Legend wrapperStyle={{ paddingTop: '10px', fontSize: '12px' }} />
                 <Bar dataKey="PM2.5" fill="#eab308" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="PM10" fill="#f97316" radius={[4, 4, 0, 0]} />
               </BarChart>
             ) : (
               <ComposedChart data={analytics} margin={{ top: 10, right: 20, left: 0, bottom: 25 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? '#1e293b' : '#e2e8f0'} vertical={false} />
                 <XAxis 
                   dataKey="name" 
-                  stroke="#94a3b8" 
+                  stroke={theme === 'dark' ? '#94a3b8' : '#64748b'} 
                   fontSize={11} 
                   fontWeight={600}
                   interval={0}
                   angle={-25}
                   textAnchor="end"
                 />
-                <YAxis stroke="#94a3b8" fontSize={11} />
+                <YAxis stroke={theme === 'dark' ? '#94a3b8' : '#64748b'} fontSize={11} />
                 <Tooltip 
                   contentStyle={{ 
-                    backgroundColor: '#090d16', 
-                    borderColor: '#334155', 
-                    color: '#ffffff', 
+                    backgroundColor: theme === 'dark' ? '#090d16' : '#ffffff', 
+                    borderColor: theme === 'dark' ? '#334155' : '#cbd5e1', 
+                    color: theme === 'dark' ? '#ffffff' : '#0f172a', 
                     borderRadius: '12px',
                     fontSize: '12px'
                   }} 
                 />
-                <Legend wrapperStyle={{ paddingTop: '10px', fontSize: '12px', color: '#cbd5e1' }} />
-                <Bar dataKey="Average AQI" fill="#4b6bf5" radius={[4, 4, 0, 0]} />
+                <Legend wrapperStyle={{ paddingTop: '10px', fontSize: '12px' }} />
+                <Bar dataKey="Average AQI" fill="#5442ed" radius={[4, 4, 0, 0]} />
                 <Line type="monotone" dataKey="PM2.5" stroke="#eab308" strokeWidth={2.5} dot={{ r: 4, fill: '#eab308' }} />
                 <Line type="monotone" dataKey="NO2" stroke="#10b981" strokeWidth={2} dot={{ r: 3, fill: '#10b981' }} />
               </ComposedChart>
@@ -308,14 +307,14 @@ export default function DistrictAnalyticsView() {
       </div>
 
       {/* District Detail Table Matrix */}
-      <div className="glass-panel rounded-2xl p-6">
-        <h3 className="text-sm font-extrabold text-white uppercase tracking-wider mb-4 flex items-center">
-          <Layers size={16} className="text-[#4b6bf5] mr-2" /> Complete District Air Quality Scorecard
+      <div className="glass-panel p-6">
+        <h3 className="text-sm font-extrabold uppercase tracking-wider mb-4 flex items-center">
+          <Layers size={16} className="text-[#5442ed] mr-2" /> Complete District Air Quality Scorecard
         </h3>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="border-b border-slate-800 text-slate-400 font-bold uppercase tracking-wider text-[10px]">
+              <tr className="border-b border-[var(--panel-border)] text-zinc-400 font-bold uppercase tracking-wider text-[10px]">
                 <th className="py-3 px-3">Rank</th>
                 <th className="py-3 px-3">District</th>
                 <th className="py-3 px-3">State</th>
@@ -326,12 +325,12 @@ export default function DistrictAnalyticsView() {
                 <th className="py-3 px-3">NO₂ (µg/m³)</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60 font-medium">
+            <tbody className="divide-y divide-[var(--panel-border)] font-medium">
               {analytics.map((row, idx) => (
-                <tr key={row.name} className="hover:bg-slate-900/40 transition-colors">
-                  <td className="py-3 px-3 text-slate-400 font-bold font-mono">#{idx + 1}</td>
-                  <td className="py-3 px-3 text-white font-bold">{row.name}</td>
-                  <td className="py-3 px-3 text-slate-300">{row.state}</td>
+                <tr key={row.name} className="hover:bg-zinc-500/5 transition-colors">
+                  <td className="py-3 px-3 text-zinc-400 font-bold font-mono">#{idx + 1}</td>
+                  <td className="py-3 px-3 font-bold">{row.name}</td>
+                  <td className="py-3 px-3 text-zinc-400">{row.state}</td>
                   <td className="py-3 px-3">
                     <span 
                       className="font-extrabold text-sm px-2 py-0.5 rounded-md"
@@ -352,9 +351,9 @@ export default function DistrictAnalyticsView() {
                       {row.Category}
                     </span>
                   </td>
-                  <td className="py-3 px-3 font-mono text-yellow-400 font-bold">{row['PM2.5']}</td>
-                  <td className="py-3 px-3 font-mono text-orange-400 font-bold">{row['PM10']}</td>
-                  <td className="py-3 px-3 font-mono text-emerald-400 font-bold">{row['NO2']}</td>
+                  <td className="py-3 px-3 font-mono text-amber-500 font-bold">{row['PM2.5']}</td>
+                  <td className="py-3 px-3 font-mono text-orange-500 font-bold">{row['PM10']}</td>
+                  <td className="py-3 px-3 font-mono text-emerald-500 font-bold">{row['NO2']}</td>
                 </tr>
               ))}
             </tbody>

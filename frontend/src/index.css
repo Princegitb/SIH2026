@@ -15,6 +15,8 @@
   --panel-border: rgba(255, 255, 255, 0.08);
   --card-sub-bg: #080c18;
   --navbar-bg: #090e1b;
+  --input-bg: #080c18;
+  --input-border: rgba(255, 255, 255, 0.1);
   --accent-purple: #5442ed;
   --accent-purple-hover: #6554fa;
 }
@@ -22,11 +24,13 @@
 html.light {
   --bg-color: #f6f8fb;
   --text-color: #0f172a;
-  --text-muted: #64748b;
+  --text-muted: #475569;
   --panel-bg: #ffffff;
   --panel-border: #e2e8f0;
   --card-sub-bg: #f8fafc;
   --navbar-bg: #ffffff;
+  --input-bg: #ffffff;
+  --input-border: #cbd5e1;
   --accent-purple: #5442ed;
   --accent-purple-hover: #4333d6;
 }
@@ -58,8 +62,8 @@ html, body, #root, .app-workspace {
 
 /* Top Horizontal Navbar */
 .vayu-navbar {
-  background-color: var(--navbar-bg);
-  border-bottom: 1px solid var(--panel-border);
+  background-color: var(--navbar-bg) !important;
+  border-bottom: 1px solid var(--panel-border) !important;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
 }
@@ -86,6 +90,19 @@ html, body, #root, .app-workspace {
   color: var(--text-color) !important;
 }
 
+/* Form inputs and dropdowns */
+select, input[type="text"], input[type="search"] {
+  background-color: var(--input-bg) !important;
+  border: 1px solid var(--input-border) !important;
+  color: var(--text-color) !important;
+  border-radius: 12px;
+}
+
+select option {
+  background-color: var(--panel-bg) !important;
+  color: var(--text-color) !important;
+}
+
 /* Active Nav Pill Button */
 .vayu-nav-pill-active {
   background-color: var(--accent-purple) !important;
@@ -95,17 +112,52 @@ html, body, #root, .app-workspace {
 }
 
 .vayu-nav-pill-inactive {
-  color: #8899b5;
+  color: var(--text-muted) !important;
   transition: all 0.15s ease;
 }
 
-html.light .vayu-nav-pill-inactive {
-  color: #475569;
+.vayu-nav-pill-inactive:hover {
+  color: var(--text-color) !important;
+  background-color: rgba(140, 150, 180, 0.12);
 }
 
-.vayu-nav-pill-inactive:hover {
-  color: var(--text-color);
-  background-color: rgba(140, 150, 180, 0.1);
+/* Typography Overrides for Clean Light/Dark Theme Switching */
+html.light h1, html.light h2, html.light h3, html.light h4, html.light strong {
+  color: #0f172a !important;
+}
+
+html.dark h1, html.dark h2, html.dark h3, html.dark h4, html.dark strong {
+  color: #ffffff !important;
+}
+
+html.light p, html.light .text-zinc-400, html.light .text-slate-400, html.light .text-zinc-300, html.light .text-slate-300 {
+  color: #475569 !important;
+}
+
+html.dark p, html.dark .text-zinc-400, html.dark .text-slate-400, html.dark .text-zinc-300, html.dark .text-slate-300 {
+  color: #8c9db5 !important;
+}
+
+/* Light mode specific element fixes */
+html.light .bg-slate-900\/60,
+html.light .bg-slate-900,
+html.light .bg-zinc-950,
+html.light .bg-\[\#08080a\],
+html.light .bg-\[\#060608\],
+html.light .bg-\[\#0c0c10\],
+html.light .bg-\[\#090d16\] {
+  background-color: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+html.light .border-slate-800,
+html.light .border-slate-800\/80,
+html.light .border-slate-800\/40,
+html.light .border-white\/\[0\.08\],
+html.light .border-white\/\[0\.06\],
+html.light .border-white\/\[0\.04\] {
+  border-color: #e2e8f0 !important;
 }
 
 /* Leaflet Container Theme Overrides */
@@ -149,6 +201,35 @@ html.dark .theme-map-dark-tiles {
 .leaflet-bar a:hover {
   background-color: var(--accent-purple) !important;
   color: #ffffff !important;
+}
+
+/* Table Light & Dark Mode Enhancements */
+table tr {
+  border-bottom: 1px solid var(--panel-border) !important;
+}
+
+html.light table th {
+  color: #64748b !important;
+}
+
+html.dark table th {
+  color: #94a3b8 !important;
+}
+
+html.light table td {
+  color: #1e293b !important;
+}
+
+html.dark table td {
+  color: #e2e8f0 !important;
+}
+
+html.light table tbody tr:hover {
+  background-color: #f8fafc !important;
+}
+
+html.dark table tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.03) !important;
 }
 
 /* Print Specific Rules for PDF Dossier */
