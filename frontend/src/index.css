@@ -52,12 +52,16 @@ html.light {
 }
 
 /* Base Body Styles */
-html, body, #root, .app-workspace {
-  background-color: var(--bg-color) !important;
-  color: var(--text-color) !important;
+html, body, #root {
   font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif;
   letter-spacing: -0.01em;
+}
+
+.app-workspace {
+  background-color: var(--bg-color) !important;
+  color: var(--text-color) !important;
   transition: background-color 0.2s ease, color 0.2s ease;
+  min-height: 100vh;
 }
 
 /* Top Horizontal Navbar */
@@ -68,7 +72,7 @@ html, body, #root, .app-workspace {
   -webkit-backdrop-filter: blur(16px);
 }
 
-/* Card & Panel Base */
+/* Card & Panel Base inside Workspace */
 .glass-panel, .vayu-card {
   background-color: var(--panel-bg) !important;
   border: 1px solid var(--panel-border) !important;
@@ -91,14 +95,14 @@ html, body, #root, .app-workspace {
 }
 
 /* Form inputs and dropdowns */
-select, input[type="text"], input[type="search"] {
+.app-workspace select, .app-workspace input[type="text"], .app-workspace input[type="search"] {
   background-color: var(--input-bg) !important;
   border: 1px solid var(--input-border) !important;
   color: var(--text-color) !important;
   border-radius: 12px;
 }
 
-select option {
+.app-workspace select option {
   background-color: var(--panel-bg) !important;
   color: var(--text-color) !important;
 }
@@ -121,43 +125,37 @@ select option {
   background-color: rgba(140, 150, 180, 0.12);
 }
 
-/* Typography Overrides for Clean Light/Dark Theme Switching */
-html.light h1, html.light h2, html.light h3, html.light h4, html.light strong {
+/* Scoped Typography Overrides for Dashboard Workspace */
+html.light .app-workspace h1, 
+html.light .app-workspace h2, 
+html.light .app-workspace h3, 
+html.light .app-workspace h4, 
+html.light .app-workspace strong {
   color: #0f172a !important;
 }
 
-html.dark h1, html.dark h2, html.dark h3, html.dark h4, html.dark strong {
+html.dark .app-workspace h1, 
+html.dark .app-workspace h2, 
+html.dark .app-workspace h3, 
+html.dark .app-workspace h4, 
+html.dark .app-workspace strong {
   color: #ffffff !important;
 }
 
-html.light p, html.light .text-zinc-400, html.light .text-slate-400, html.light .text-zinc-300, html.light .text-slate-300 {
+html.light .app-workspace p, 
+html.light .app-workspace .text-zinc-400, 
+html.light .app-workspace .text-slate-400, 
+html.light .app-workspace .text-zinc-300, 
+html.light .app-workspace .text-slate-300 {
   color: #475569 !important;
 }
 
-html.dark p, html.dark .text-zinc-400, html.dark .text-slate-400, html.dark .text-zinc-300, html.dark .text-slate-300 {
+html.dark .app-workspace p, 
+html.dark .app-workspace .text-zinc-400, 
+html.dark .app-workspace .text-slate-400, 
+html.dark .app-workspace .text-zinc-300, 
+html.dark .app-workspace .text-slate-300 {
   color: #8c9db5 !important;
-}
-
-/* Light mode specific element fixes */
-html.light .bg-slate-900\/60,
-html.light .bg-slate-900,
-html.light .bg-zinc-950,
-html.light .bg-\[\#08080a\],
-html.light .bg-\[\#060608\],
-html.light .bg-\[\#0c0c10\],
-html.light .bg-\[\#090d16\] {
-  background-color: #f8fafc !important;
-  border-color: #e2e8f0 !important;
-  color: #0f172a !important;
-}
-
-html.light .border-slate-800,
-html.light .border-slate-800\/80,
-html.light .border-slate-800\/40,
-html.light .border-white\/\[0\.08\],
-html.light .border-white\/\[0\.06\],
-html.light .border-white\/\[0\.04\] {
-  border-color: #e2e8f0 !important;
 }
 
 /* Leaflet Container Theme Overrides */
@@ -204,31 +202,31 @@ html.dark .theme-map-dark-tiles {
 }
 
 /* Table Light & Dark Mode Enhancements */
-table tr {
+.app-workspace table tr {
   border-bottom: 1px solid var(--panel-border) !important;
 }
 
-html.light table th {
+html.light .app-workspace table th {
   color: #64748b !important;
 }
 
-html.dark table th {
+html.dark .app-workspace table th {
   color: #94a3b8 !important;
 }
 
-html.light table td {
+html.light .app-workspace table td {
   color: #1e293b !important;
 }
 
-html.dark table td {
+html.dark .app-workspace table td {
   color: #e2e8f0 !important;
 }
 
-html.light table tbody tr:hover {
+html.light .app-workspace table tbody tr:hover {
   background-color: #f8fafc !important;
 }
 
-html.dark table tbody tr:hover {
+html.dark .app-workspace table tbody tr:hover {
   background-color: rgba(255, 255, 255, 0.03) !important;
 }
 

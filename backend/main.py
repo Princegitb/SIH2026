@@ -1011,11 +1011,15 @@ def search_villages(q: str = "", limit: int = 10):
     return {"results": results, "count": len(results)}
 
 @app.get("/api/simulate-policy")
+@app.get("/api/policy-simulator")
 def simulate_policy(
     district: str = "Ludhiana",
-    stubble_ban_pct: float = 80.0,
-    traffic_curb_pct: float = 0.0,
-    industry_curb_pct: float = 0.0,
+    stubble_ban_pct: float = None,
+    stubble_reduction_pct: float = None,
+    traffic_curb_pct: float = None,
+    traffic_reduction_pct: float = None,
+    industry_curb_pct: float = None,
+    industrial_reduction_pct: float = None,
     date: str = None
 ):
     """
@@ -1029,11 +1033,15 @@ def simulate_policy(
     if not date or date not in grid_df["date"].values:
         date = str(grid_df["date"].max())
         
+    s_ban = stubble_ban_pct if stubble_ban_pct is not None else (stubble_reduction_pct if stubble_reduction_pct is not None else 80.0)
+    t_curb = traffic_curb_pct if traffic_curb_pct is not None else (traffic_reduction_pct if traffic_reduction_pct is not None else 25.0)
+    i_curb = industry_curb_pct if industry_curb_pct is not None else (industrial_reduction_pct if industrial_reduction_pct is not None else 20.0)
+        
     sim_res = policy_simulator.simulate_policy_intervention(
         target_district=district,
-        stubble_ban_pct=stubble_ban_pct,
-        traffic_curb_pct=traffic_curb_pct,
-        industry_curb_pct=industry_curb_pct,
+        stubble_ban_pct=float(s_ban),
+        traffic_curb_pct=float(t_curb),
+        industry_curb_pct=float(i_curb),
         date_str=date,
         grid_df=grid_df,
         fires_df=fires_df

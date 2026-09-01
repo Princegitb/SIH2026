@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { ArrowRight, Satellite, Shield, Cpu, Database, Bell, BarChart3, Wind, Flame, Compass } from 'lucide-react'
+import { ArrowRight, Satellite, Shield, Cpu, Database, Bell, BarChart3, Wind, Flame, Compass, Sparkles } from 'lucide-react'
 
 // Simple SVG mini sparkline generator for floating widgets
 const MiniSparkline = ({ values, color }) => {
@@ -119,7 +119,6 @@ const CosmicSpaceEnvironment = () => {
 
       animId = requestAnimationFrame(render)
     }
-
     render()
 
     return () => {
@@ -130,37 +129,25 @@ const CosmicSpaceEnvironment = () => {
   }, [])
 
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-      {/* Deep Pure Pitch Black Canvas */}
-      <div className="absolute inset-0 bg-[#000000]"></div>
-      
-      {/* Cyber Lime Atmosphere Radial Glow */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_80%_40%,rgba(34,197,94,0.08),transparent_70%)]"></div>
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(74,222,128,0.05),transparent_60%)]"></div>
-
-      {/* Subtle Lime Starfield */}
-      {stars.map((star, idx) => (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
+      {stars.map((s, idx) => (
         <div
-          key={`star-${idx}`}
-          className="absolute rounded-full animate-star-twinkle"
+          key={idx}
+          className="absolute rounded-full animate-pulse"
           style={{
-            top: `${star.top}%`,
-            left: `${star.left}%`,
-            width: `${star.size}px`,
-            height: `${star.size}px`,
-            backgroundColor: star.color,
-            boxShadow: star.size > 2 ? `0 0 6px ${star.color}` : 'none',
-            '--twinkle-duration': star.dur,
-            '--twinkle-delay': star.del
+            top: `${s.top}%`,
+            left: `${s.left}%`,
+            width: `${s.size}px`,
+            height: `${s.size}px`,
+            backgroundColor: s.color,
+            opacity: s.opacity,
+            animationDuration: s.dur,
+            animationDelay: s.del,
+            boxShadow: `0 0 10px ${s.color}`
           }}
         />
       ))}
-
-      {/* Interactive Constellation Canvas */}
-      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none z-10" />
-
-      {/* Subtle Matrix Geospatial Radar Grid */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#22c55e05_1px,transparent_1px),linear-gradient(to_bottom,#22c55e05_1px,transparent_1px)] bg-[size:56px_56px]"></div>
     </div>
   )
 }
@@ -172,75 +159,13 @@ export default function LandingPage({ onEnterDashboard }) {
   const [embers, setEmbers] = useState([])
 
   const heroRef = useRef(null)
-  const windCardRef = useRef(null)
-  const fireCardRef = useRef(null)
   const earthRef = useRef(null)
   const ringsRef = useRef(null)
+  const fireCardRef = useRef(null)
+  const windCardRef = useRef(null)
+  const mouseCoords = useRef({ x: 0, y: 0, isInside: false, nx: 0, ny: 0 })
 
-  // Wind evasion physics state
-  const windPos = useRef({ x: 0, y: 0, targetX: 0, targetY: 0 })
-
-  // Mouse coords inside hero container
-  const mouseCoords = useRef({ x: -9999, y: -9999, isInside: false, nx: 0, ny: 0 })
-
-  // Continuous 60fps RAF loop for Wind physics evasion & Earth 3D Parallax
-  useEffect(() => {
-    let animId
-    const loop = () => {
-      // 1. Wind Box evasion physics
-      if (windCardRef.current && heroRef.current) {
-        const heroRect = heroRef.current.getBoundingClientRect()
-        const cardRect = windCardRef.current.getBoundingClientRect()
-        
-        const cardCenterX = cardRect.left + cardRect.width / 2
-        const cardCenterY = cardRect.top + cardRect.height / 2
-        
-        const mouseAbsX = heroRect.left + mouseCoords.current.x
-        const mouseAbsY = heroRect.top + mouseCoords.current.y
-        
-        const dx = mouseAbsX - cardCenterX
-        const dy = mouseAbsY - cardCenterY
-        const dist = Math.sqrt(dx * dx + dy * dy)
-        
-        if (mouseCoords.current.isInside && dist < 140 && dist > 0) {
-          // Push away from mouse cursor
-          const force = (140 - dist) / 140
-          const angle = Math.atan2(dy, dx)
-          windPos.current.targetX = -Math.cos(angle) * force * 50
-          windPos.current.targetY = -Math.sin(angle) * force * 40
-          setWindTrails(true)
-        } else {
-          // Return smoothly to rest origin
-          windPos.current.targetX = 0
-          windPos.current.targetY = 0
-          if (Math.abs(windPos.current.x) < 1.5 && Math.abs(windPos.current.y) < 1.5) {
-            setWindTrails(false)
-          }
-        }
-        
-        windPos.current.x += (windPos.current.targetX - windPos.current.x) * 0.12
-        windPos.current.y += (windPos.current.targetY - windPos.current.y) * 0.12
-        
-        windCardRef.current.style.transform = `translate(calc(-50% + ${windPos.current.x}px), ${windPos.current.y}px)`
-      }
-
-      // 2. Earth 3D Parallax tilt
-      if (earthRef.current && mouseCoords.current.isInside) {
-        const tiltX = -mouseCoords.current.ny * 12
-        const tiltY = mouseCoords.current.nx * 15
-        earthRef.current.style.transform = `rotateX(${tiltX}deg) rotateY(${tiltY}deg)`
-      } else if (earthRef.current) {
-        earthRef.current.style.transform = `rotateX(0deg) rotateY(0deg)`
-      }
-
-      animId = requestAnimationFrame(loop)
-    }
-
-    loop()
-    return () => cancelAnimationFrame(animId)
-  }, [])
-
-  // Ember generation when fire is active
+  // Rising animated fire embers
   useEffect(() => {
     if (!fireActive) {
       setEmbers([])
@@ -298,8 +223,8 @@ export default function LandingPage({ onEnterDashboard }) {
 
   return (
     <div
-      className="h-screen overflow-y-auto font-outfit overflow-x-hidden relative flex flex-col justify-between selection:bg-lime-500/30"
-      style={{ backgroundColor: '#000000', color: '#f4f4f5' }}
+      className="landing-page-root min-h-screen overflow-y-auto font-outfit overflow-x-hidden relative flex flex-col justify-between selection:bg-lime-500/30"
+      style={{ backgroundColor: '#000000', color: '#ffffff' }}
     >
       {/* Cyber Green Matrix Space Atmosphere Background */}
       <CosmicSpaceEnvironment />
@@ -309,7 +234,7 @@ export default function LandingPage({ onEnterDashboard }) {
         <div className="flex items-center space-x-3 group cursor-pointer">
           <span className="text-3xl transition-transform duration-500 group-hover:rotate-[360deg]">🛰️</span>
           <div>
-            <h1 className="text-base font-extrabold tracking-tight text-white flex items-center">
+            <h1 className="text-lg font-black tracking-tight text-white flex items-center">
               VayuShetra
             </h1>
             <span className="text-[9px] text-[#4ade80] font-black tracking-widest uppercase block mt-0.5">
@@ -320,7 +245,7 @@ export default function LandingPage({ onEnterDashboard }) {
 
         <button
           onClick={onEnterDashboard}
-          className="flex items-center space-x-2 bg-[#08080a] border border-white/[0.06] hover:border-white/[0.15] hover:bg-[#121216] text-xs font-bold px-5 py-2 rounded-full transition-all duration-300 shadow-md text-zinc-100 hover:text-white"
+          className="flex items-center space-x-2 bg-[#0c1222] border border-white/10 hover:border-emerald-500/50 hover:bg-[#131d38] text-xs font-bold px-5 py-2.5 rounded-full transition-all duration-300 shadow-lg text-white"
         >
           <span>Explore Dashboard</span>
           <ArrowRight size={13} />
@@ -334,21 +259,24 @@ export default function LandingPage({ onEnterDashboard }) {
         <div className="lg:col-span-6 space-y-6">
           
           {/* Cyber Neon Capsule Badge */}
-          <div className="inline-flex items-center space-x-2 bg-[#07130a] border border-[#22c55e]/30 px-3.5 py-1.5 rounded-full text-[10px] font-extrabold text-[#4ade80] uppercase tracking-wider shadow-[0_0_15px_rgba(34,197,94,0.15)]">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#4ade80] animate-ping"></span>
+          <div className="inline-flex items-center space-x-2 bg-[#052010] border border-[#22c55e]/40 px-3.5 py-1.5 rounded-full text-[10px] font-extrabold text-[#4ade80] uppercase tracking-wider shadow-[0_0_15px_rgba(34,197,94,0.25)]">
+            <span className="w-2 h-2 rounded-full bg-[#4ade80] animate-ping"></span>
             <span>REAL-TIME AIR INTELLIGENCE POWERED BY SATELLITE & CPCB</span>
           </div>
 
-          {/* Heading */}
-          <h2 className="text-4xl sm:text-6xl font-black tracking-tight leading-[1.1] text-white">
-            Breathe Better. <br />
-            <span className="text-[#4ade80] drop-shadow-[0_0_25px_rgba(74,222,128,0.35)]">
+          {/* Radiant Readable Heading */}
+          <h2 className="text-4xl sm:text-6xl font-black tracking-tight leading-[1.1]">
+            <span className="text-white drop-shadow-[0_2px_12px_rgba(255,255,255,0.25)]">
+              Breathe Better.
+            </span>
+            <br />
+            <span className="text-[#4ade80] drop-shadow-[0_0_30px_rgba(74,222,128,0.6)]">
               Live Smarter.
             </span>
           </h2>
 
           {/* Description Paragraph */}
-          <p className="text-sm sm:text-base text-zinc-400 max-w-xl leading-relaxed font-normal">
+          <p className="text-sm sm:text-base text-zinc-300 max-w-xl leading-relaxed font-normal">
             VayuShetra delivers real-time, hyperlocal air quality insights, fire & smoke detection, and wind intelligence using satellite data and AI models — for a cleaner, safer tomorrow.
           </p>
 
@@ -533,15 +461,15 @@ export default function LandingPage({ onEnterDashboard }) {
           <div
             onMouseEnter={() => setActiveCard(1)}
             onMouseLeave={() => setActiveCard(null)}
-            className="absolute top-[8%] left-[2%] bg-[#08080a] border border-white/[0.05] rounded-2xl p-4 w-[160px] text-left transition-all duration-300 z-30 cursor-pointer shadow-2xl hover:border-[#4ade80]/40"
+            className="absolute top-[8%] left-[2%] bg-[#0c1222]/95 border border-white/15 rounded-2xl p-4 w-[165px] text-left transition-all duration-300 z-30 cursor-pointer shadow-2xl backdrop-blur-xl hover:border-[#4ade80]/60 hover:scale-105"
           >
-            <div className="text-[8px] font-extrabold text-zinc-500 uppercase tracking-wider">AQI (DELHI NCR)</div>
+            <div className="text-[8px] font-extrabold text-zinc-400 uppercase tracking-wider">AQI (DELHI NCR)</div>
             <div className="flex items-baseline space-x-1.5 mt-1">
               <span className="text-2xl font-black text-[#84cc16]">76</span>
               <span className="text-[9px] font-black text-[#84cc16] uppercase">SATISFACTORY</span>
             </div>
-            <div className="flex justify-between items-center mt-2.5 pt-1.5 border-t border-white/[0.04]">
-              <span className="text-[7px] text-zinc-500">Updated 2m ago</span>
+            <div className="flex justify-between items-center mt-2.5 pt-1.5 border-t border-white/10">
+              <span className="text-[8px] text-zinc-400">Updated 2m ago</span>
               <MiniSparkline values={[82, 79, 81, 75, 77, 76]} color="#84cc16" />
             </div>
           </div>
@@ -556,10 +484,10 @@ export default function LandingPage({ onEnterDashboard }) {
             onMouseLeave={() => {
               setActiveCard(null)
             }}
-            className={`absolute bottom-[10%] left-[25%] -translate-x-1/2 bg-[#08080a] border rounded-2xl p-3.5 w-[145px] text-left z-30 cursor-pointer transition-colors duration-300 shadow-2xl ${
+            className={`absolute bottom-[10%] left-[25%] -translate-x-1/2 bg-[#0c1222]/95 border rounded-2xl p-3.5 w-[155px] text-left z-30 cursor-pointer transition-all duration-300 shadow-2xl backdrop-blur-xl ${
               activeCard === 2 || windTrails
-                ? 'border-[#4ade80]/50 shadow-[0_0_25px_rgba(74,222,128,0.25)]' 
-                : 'border-white/[0.05]'
+                ? 'border-[#4ade80] shadow-[0_0_30px_rgba(74,222,128,0.4)] scale-105' 
+                : 'border-white/15 hover:border-emerald-500/50'
             }`}
           >
             {/* Animated Air Streams / Wind Trails flowing behind the escaping card */}
@@ -587,7 +515,7 @@ export default function LandingPage({ onEnterDashboard }) {
             )}
 
             <div className="text-[8px] font-bold text-zinc-400 uppercase tracking-wider flex items-center justify-between">
-              <span className="flex items-center">
+              <span className="flex items-center text-zinc-300">
                 <Wind size={12} className={`mr-1 text-[#4ade80] ${windTrails ? 'animate-bounce' : ''}`} /> WIND VELOCITY
               </span>
               {windTrails && (
@@ -615,10 +543,10 @@ export default function LandingPage({ onEnterDashboard }) {
               setActiveCard(null)
               setFireActive(false)
             }}
-            className={`absolute top-[10%] right-[3%] sm:right-[5%] bg-[#08080a] border rounded-2xl p-4 w-[160px] text-left transition-all duration-300 z-30 cursor-pointer shadow-2xl ${
+            className={`absolute top-[10%] right-[3%] sm:right-[5%] bg-[#0c1222]/95 border rounded-2xl p-4 w-[165px] text-left transition-all duration-300 z-30 cursor-pointer shadow-2xl backdrop-blur-xl hover:scale-105 ${
               fireActive 
-                ? 'border-orange-500/80 shadow-[0_0_30px_rgba(249,115,22,0.4)]' 
-                : 'border-white/[0.05]'
+                ? 'border-orange-500 shadow-[0_0_35px_rgba(249,115,22,0.5)]' 
+                : 'border-white/15 hover:border-orange-500/50'
             }`}
           >
             {/* Rising Animated Ember Sparks Particle Layer */}
@@ -657,8 +585,8 @@ export default function LandingPage({ onEnterDashboard }) {
               <span className="text-[8px] font-black uppercase text-orange-400">DETECTED</span>
             </div>
 
-            <div className="flex justify-between items-center mt-2.5 pt-1.5 border-t border-white/[0.04]">
-              <span className="text-[7px] text-zinc-400">Last 24 hrs</span>
+            <div className="flex justify-between items-center mt-2.5 pt-1.5 border-t border-white/10">
+              <span className="text-[8px] text-zinc-400">Last 24 hrs</span>
               <MiniSparkline values={[1, 3, 2, 4, 3, 3]} color="#f97316" />
             </div>
           </div>
@@ -672,57 +600,57 @@ export default function LandingPage({ onEnterDashboard }) {
         <div className="grid grid-cols-1 md:grid-cols-5 gap-3.5">
 
           {/* Card 1: Satellite-Powered */}
-          <div className="bg-[#08080a] border border-white/[0.04] p-4 rounded-2xl space-y-2 hover:border-[#4ade80]/30 transition-all duration-200 shadow-xl">
-            <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center text-[#4ade80]">
-              <Satellite size={15} />
+          <div className="bg-[#0c1222]/90 border border-white/10 p-4 rounded-2xl space-y-2 hover:border-[#4ade80]/50 transition-all duration-200 shadow-xl backdrop-blur-md group">
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/15 flex items-center justify-center text-[#4ade80] group-hover:scale-110 transition-transform">
+              <Satellite size={16} />
             </div>
             <div>
               <h4 className="text-xs font-bold text-white tracking-wide">Satellite-Powered</h4>
-              <p className="text-[10px] text-zinc-400 leading-normal mt-1">Real-time data from Sentinel, MODIS, VIIRS & more.</p>
+              <p className="text-[11px] text-zinc-300 leading-normal mt-1">Real-time data from Sentinel, MODIS, VIIRS & more.</p>
             </div>
           </div>
 
           {/* Card 2: AI Intelligence */}
-          <div className="bg-[#08080a] border border-white/[0.04] p-4 rounded-2xl space-y-2 hover:border-purple-500/30 transition-all duration-200 shadow-xl">
-            <div className="w-8 h-8 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400">
-              <Cpu size={15} />
+          <div className="bg-[#0c1222]/90 border border-white/10 p-4 rounded-2xl space-y-2 hover:border-purple-500/50 transition-all duration-200 shadow-xl backdrop-blur-md group">
+            <div className="w-9 h-9 rounded-xl bg-purple-500/15 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+              <Cpu size={16} />
             </div>
             <div>
               <h4 className="text-xs font-bold text-white tracking-wide">AI Intelligence</h4>
-              <p className="text-[10px] text-zinc-400 leading-normal mt-1">Advanced models detect pollution trends, fires & air risks.</p>
+              <p className="text-[11px] text-zinc-300 leading-normal mt-1">Advanced models detect pollution trends, fires & air risks.</p>
             </div>
           </div>
 
           {/* Card 3: Hyperlocal Insights */}
-          <div className="bg-[#08080a] border border-white/[0.04] p-4 rounded-2xl space-y-2 hover:border-[#4ade80]/30 transition-all duration-200 shadow-xl">
-            <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center text-[#4ade80]">
-              <Compass size={15} />
+          <div className="bg-[#0c1222]/90 border border-white/10 p-4 rounded-2xl space-y-2 hover:border-[#4ade80]/50 transition-all duration-200 shadow-xl backdrop-blur-md group">
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/15 flex items-center justify-center text-[#4ade80] group-hover:scale-110 transition-transform">
+              <Compass size={16} />
             </div>
             <div>
               <h4 className="text-xs font-bold text-white tracking-wide">Hyperlocal Insights</h4>
-              <p className="text-[10px] text-zinc-400 leading-normal mt-1">District-level AQI, hotspot mapping & forecasts.</p>
+              <p className="text-[11px] text-zinc-300 leading-normal mt-1">District-level AQI, hotspot mapping & forecasts.</p>
             </div>
           </div>
 
           {/* Card 4: Actionable Alerts */}
-          <div className="bg-[#08080a] border border-white/[0.04] p-4 rounded-2xl space-y-2 hover:border-amber-500/30 transition-all duration-200 shadow-xl">
-            <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400">
-              <Bell size={15} />
+          <div className="bg-[#0c1222]/90 border border-white/10 p-4 rounded-2xl space-y-2 hover:border-amber-500/50 transition-all duration-200 shadow-xl backdrop-blur-md group">
+            <div className="w-9 h-9 rounded-xl bg-amber-500/15 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
+              <Bell size={16} />
             </div>
             <div>
               <h4 className="text-xs font-bold text-white tracking-wide">Actionable Alerts</h4>
-              <p className="text-[10px] text-zinc-400 leading-normal mt-1">Timely alerts on pollution, fires & hazardous levels.</p>
+              <p className="text-[11px] text-zinc-300 leading-normal mt-1">Timely alerts on pollution, fires & hazardous levels.</p>
             </div>
           </div>
 
           {/* Card 5: Data You Can Trust */}
-          <div className="bg-[#08080a] border border-white/[0.04] p-4 rounded-2xl space-y-2 hover:border-blue-500/30 transition-all duration-200 shadow-xl">
-            <div className="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400">
-              <Database size={15} />
+          <div className="bg-[#0c1222]/90 border border-white/10 p-4 rounded-2xl space-y-2 hover:border-blue-500/50 transition-all duration-200 shadow-xl backdrop-blur-md group">
+            <div className="w-9 h-9 rounded-xl bg-blue-500/15 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
+              <Database size={16} />
             </div>
             <div>
               <h4 className="text-xs font-bold text-white tracking-wide">Data You Can Trust</h4>
-              <p className="text-[10px] text-zinc-400 leading-normal mt-1">Backed by global datasets & government standards.</p>
+              <p className="text-[11px] text-zinc-300 leading-normal mt-1">Backed by global datasets & government standards.</p>
             </div>
           </div>
 
@@ -731,17 +659,17 @@ export default function LandingPage({ onEnterDashboard }) {
 
       {/* 4. BOTTOM CTAs BANNER */}
       <footer className="max-w-7xl mx-auto w-full px-6 py-6 z-10 relative">
-        <div className="bg-[#08080a] border border-white/[0.04] p-5 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-4 shadow-2xl">
+        <div className="bg-[#0c1222]/95 border border-white/15 p-5 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-4 shadow-2xl backdrop-blur-xl">
           <div className="text-left space-y-1.5">
             <div className="text-[9px] text-[#4ade80] font-black uppercase tracking-widest flex items-center">
               <span className="w-2 h-2 bg-[#4ade80] rounded-full mr-2 shadow-[0_0_8px_#4ade80]"></span> TOGETHER FOR CLEANER AIR
             </div>
             <h3 className="text-base font-extrabold text-white tracking-tight">Better Data. Better Decisions. Better Tomorrow.</h3>
-            <p className="text-[10px] text-zinc-400">Join us in building a healthier, sustainable future through intelligent air monitoring.</p>
+            <p className="text-[11px] text-zinc-300 font-medium">Join us in building a healthier, sustainable future through intelligent air monitoring.</p>
           </div>
           <button
             onClick={onEnterDashboard}
-            className="flex items-center space-x-2 bg-white hover:bg-zinc-200 text-black text-xs font-black px-6 py-3 rounded-xl transition-all duration-300 shadow-md whitespace-nowrap"
+            className="flex items-center space-x-2 bg-white hover:bg-zinc-100 text-black text-xs font-black px-6 py-3 rounded-xl transition-all duration-300 shadow-md whitespace-nowrap"
           >
             <span>Get Started</span>
             <ArrowRight size={13} className="stroke-[2.5]" />
