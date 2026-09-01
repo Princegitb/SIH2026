@@ -6,6 +6,8 @@ export const useStore = create((set, get) => ({
   selectedState: 'All',
   selectedDistrict: 'Ambala',
   
+  theme: localStorage.getItem('vayu_theme') || 'dark',
+  
   // Lists for Dropdowns
   dates: [],
   states: [],
@@ -20,6 +22,24 @@ export const useStore = create((set, get) => ({
   
   // Actions
   setActiveTab: (tab) => set({ activeTab: tab }),
+  
+  setTheme: (newTheme) => {
+    localStorage.setItem('vayu_theme', newTheme);
+    if (newTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+      document.documentElement.classList.remove('light');
+    } else {
+      document.documentElement.classList.add('light');
+      document.documentElement.classList.remove('dark');
+    }
+    set({ theme: newTheme });
+  },
+
+  toggleTheme: () => {
+    const current = get().theme;
+    const next = current === 'dark' ? 'light' : 'dark';
+    get().setTheme(next);
+  },
   
   setSelectedDate: (date) => {
     set({ selectedDate: date });

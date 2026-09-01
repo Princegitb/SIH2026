@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { useStore } from './store'
 import DashboardView from './components/DashboardView'
 import LiveMapView from './components/LiveMapView'
@@ -15,25 +15,9 @@ import PolicySimulatorView from './components/PolicySimulatorView'
 import LandingPage from './components/LandingPage'
 import { 
   LayoutDashboard, Map, Compass, Activity, Flame, Wind, 
-  Tag, BarChart3, FileSpreadsheet, BellRing, Database, HelpCircle,
-  Menu, X, Sun, Moon, Info, Calendar, Sliders
+  Tag, BarChart3, FileSpreadsheet, BellRing, Database,
+  Sun, Moon, Calendar, Sliders, ChevronDown, Download, Sparkles
 } from 'lucide-react'
-
-// Icon mapping for navigation links
-const navItems = [
-  { name: 'Dashboard', value: 'Dashboard', icon: LayoutDashboard },
-  { name: 'Live Map', value: 'Live Map', icon: Map },
-  { name: 'Policy Simulator', value: 'Policy Simulator', icon: Sliders },
-  { name: 'Wind Transport', value: 'Wind Transport', icon: Wind },
-  { name: 'AQI Forecast', value: 'AQI Forecast', icon: Compass },
-  { name: 'HCHO Hotspots', value: 'HCHO Hotspots', icon: Activity },
-  { name: 'Fire Detection', value: 'Fire Detection', icon: Flame },
-  { name: 'Source Attribution', value: 'Source Attribution', icon: Tag },
-  { name: 'District Analytics', value: 'District Analytics', icon: BarChart3 },
-  { name: 'Reports', value: 'Reports', icon: FileSpreadsheet },
-  { name: 'Alerts', value: 'Alerts', icon: BellRing },
-  { name: 'Data Explorer', value: 'Data Explorer', icon: Database },
-]
 
 export default function App() {
   const { 
@@ -42,34 +26,67 @@ export default function App() {
     selectedDate, 
     setSelectedDate, 
     dates, 
-    fetchMetadata
+    fetchMetadata,
+    theme,
+    toggleTheme,
+    setTheme
   } = useStore()
 
-  const [sidebarOpen, setSidebarOpen] = useState(true)
-  const [showDiagnostic, setShowDiagnostic] = useState(false)
-  const [diagnosticsData, setDiagnosticsData] = useState(null)
   const [enteredDashboard, setEnteredDashboard] = useState(false)
+  const [analyticsDropdownOpen, setAnalyticsDropdownOpen] = useState(false)
+  const [intelligenceDropdownOpen, setIntelligenceDropdownOpen] = useState(false)
+
+  const analyticsRef = useRef(null)
+  const intelligenceRef = useRef(null)
 
   useEffect(() => {
-    // Ensure dark mode is active
-    document.documentElement.classList.remove('light')
-    localStorage.setItem('theme', 'dark')
-    
+    // Sync initial theme
+    const savedTheme = localStorage.getItem('vayu_theme') || 'dark'
+    setTheme(savedTheme)
     fetchMetadata()
-    fetch('/api/diagnostics')
-      .then(res => res.json())
-      .then(data => setDiagnosticsData(data))
-      .catch(err => console.error("Could not load diagnostics:", err))
+  }, [])
+
+  // Close dropdowns on outside click
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (analyticsRef.current && !analyticsRef.current.contains(event.target)) {
+        setAnalyticsDropdownOpen(false)
+      }
+      if (intelligenceRef.current && !intelligenceRef.current.contains(event.target)) {
+        setIntelligenceDropdownOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
   if (!enteredDashboard) {
     return <LandingPage onEnterDashboard={() => setEnteredDashboard(true)} />
   }
 
+  // Analytics tab group items
+  const analyticsItems = [
+    { name: 'AQI Forecast', icon: Compass },
+    { name: 'HCHO Hotspots', icon: Activity },
+    { name: 'Fire Detection', icon: Flame },
+    { name: 'Wind Transport', icon: Wind },
+  ]
+
+  // Intelligence tab group items
+  const intelligenceItems = [
+    { name: 'Source Attribution', icon: Tag },
+    { name: 'District Analytics', icon: BarChart3 },
+    { name: 'Alerts', icon: BellRing },
+  ]
+
+  const isAnalyticsActive = analyticsItems.some(item => item.name === activeTab)
+  const isIntelligenceActive = intelligenceItems.some(item => item.name === activeTab)
+
   // Render active view
   const renderView = () => {
     switch (activeTab) {
-      case 'Dashboard': return <DashboardView />
+      case 'Dashboard':
+      case 'Overview': return <DashboardView />
       case 'Live Map': return <LiveMapView />
       case 'Policy Simulator': return <PolicySimulatorView />
       case 'AQI Forecast': return <ForecastView />
@@ -86,225 +103,230 @@ export default function App() {
   }
 
   return (
-    <div className="app-workspace flex h-screen overflow-hidden bg-[var(--bg-color)] text-[var(--text-color)] font-outfit select-none transition-colors duration-300">
-      {/* 1. LEFT SIDEBAR NAVIGATION */}
-      <aside className={`bg-[var(--sidebar-bg)] border-r border-[var(--panel-border)] flex flex-col justify-between p-4 flex-shrink-0 relative transition-all duration-300 ${sidebarOpen ? 'w-64' : 'w-18'}`}>
-        <div className="space-y-6">
-          {/* Header Row: Logo & Modern Inside-Sidebar Toggle Button */}
-          <div className="flex items-center justify-between px-1 overflow-hidden">
-            <div className="flex items-center space-x-2.5 overflow-hidden whitespace-nowrap group cursor-pointer">
-              <span className="text-2xl flex-shrink-0 transition-transform duration-300 group-hover:scale-110">🛰️</span>
-              {sidebarOpen && (
-                <div className="transition-opacity duration-300">
-                  <h1 className="text-sm font-extrabold text-white tracking-tight group-hover:text-indigo-400 transition-colors">VayuShetra</h1>
-                  <span className="text-[8px] text-zinc-400 font-bold tracking-wider uppercase mt-0.5 block">Satellite Intelligence</span>
-                </div>
-              )}
-            </div>
-            
-            <div className="flex items-center space-x-1.5 flex-shrink-0">
-              <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="p-1.5 rounded-lg bg-zinc-850 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors focus:outline-none"
-                title={sidebarOpen ? "Collapse Sidebar" : "Expand Sidebar"}
-              >
-                <Menu size={15} />
-              </button>
-            </div>
+    <div className="app-workspace min-h-screen flex flex-col font-outfit select-none">
+      
+      {/* 1. HORIZONTAL TOP NAVIGATION BAR */}
+      <header className="vayu-navbar sticky top-0 z-50 px-4 lg:px-6 py-2.5 flex items-center justify-between shadow-sm">
+        
+        {/* Left Brand Logo */}
+        <div 
+          onClick={() => setActiveTab('Dashboard')}
+          className="flex items-center space-x-2.5 cursor-pointer flex-shrink-0 group"
+        >
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#5442ed] to-[#7b6bfa] flex items-center justify-center text-white shadow-md shadow-indigo-500/25 group-hover:scale-105 transition-all">
+            <span className="text-base">🛰️</span>
           </div>
-
-          {/* Links list */}
-          <nav className="space-y-1 overflow-y-auto max-h-[calc(100vh-220px)] pr-1 relative">
-            {navItems.map((item) => {
-              const Icon = item.icon
-              const isActive = activeTab === item.value
-              return (
-                <button
-                  key={item.value}
-                  onClick={() => setActiveTab(item.value)}
-                  title={!sidebarOpen ? item.name : undefined}
-                  className={`w-full flex items-center rounded-xl text-xs font-semibold tracking-wide relative transition-all duration-200 transform ${
-                    sidebarOpen ? 'space-x-3 px-3 py-2.5 hover:translate-x-0.5' : 'justify-center p-2.5'
-                  } ${
-                    isActive 
-                      ? 'bg-zinc-800/80 text-white font-bold border border-zinc-700/80 shadow-[0_2px_12px_rgba(0,0,0,0.5)]' 
-                      : 'text-zinc-400 hover:bg-zinc-900/60 hover:text-zinc-200'
-                  }`}
-                >
-                  {/* Left indicator bar */}
-                  {isActive && sidebarOpen && (
-                    <div className="absolute left-0 top-2 bottom-2 w-1 rounded-r bg-indigo-500"></div>
-                  )}
-                  <Icon size={16} className={`flex-shrink-0 transition-transform duration-200 ${isActive ? 'scale-110 text-indigo-400' : 'group-hover:scale-105 text-zinc-400'}`} />
-                  {sidebarOpen && <span className="truncate transition-opacity duration-300">{item.name}</span>}
-                </button>
-              );
-            })}
-          </nav>
+          <div>
+            <h1 className="text-base font-black tracking-tight text-white dark:text-white flex items-center">
+              VayuShetra
+            </h1>
+          </div>
         </div>
 
-        {/* Dynamic Diagnostics Overlay Popup */}
-        {showDiagnostic && sidebarOpen && (
-          <div className="absolute bottom-18 left-4 right-4 glass-panel p-3.5 rounded-xl z-50 text-[10px] text-zinc-400 space-y-1.5 shadow-2xl border-emerald-500/20 bg-zinc-950/95 backdrop-blur-md">
-            <div className="flex justify-between items-center border-b border-zinc-800 pb-1.5">
-              <span className="font-bold text-emerald-400 uppercase tracking-wider flex items-center">
-                <Info size={11} className="mr-1" /> System Diagnostics
-              </span>
-              <button 
-                onClick={(e) => { e.stopPropagation(); setShowDiagnostic(false); }} 
-                className="text-zinc-500 hover:text-white text-xs font-bold focus:outline-none"
-              >
-                ×
-              </button>
-            </div>
-            <div className="space-y-1 font-medium">
-              <div className="flex justify-between">
-                <span>XGBoost Models:</span> 
-                <span className="text-white font-bold">{diagnosticsData?.models?.pollutant_xgboost_models || "6/6 Operational"}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Overall System Accuracy:</span> 
-                <span className="text-emerald-400 font-bold">{diagnosticsData?.models?.cross_validation_r2 ? `${(diagnosticsData.models.cross_validation_r2 * 100).toFixed(1)}%` : "89.2%"}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Meteorology Feed:</span> 
-                <span className="text-white font-bold">{diagnosticsData?.telemetry_feeds?.weather_stream || "Open-Meteo Active"}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Satellite Stream:</span> 
-                <span className="text-white font-bold">{diagnosticsData?.telemetry_feeds?.satellite_stream || "NASA FIRMS & S5P"}</span>
-              </div>
-              <div className="flex justify-between border-t border-zinc-800/60 pt-1 text-[9px] text-zinc-500">
-                <span>Synced UTC:</span>
-                <span>{diagnosticsData?.telemetry_feeds?.last_synced_at || "Live Telemetry"}</span>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Center Nav Links */}
+        <nav className="hidden md:flex items-center space-x-1 lg:space-x-1.5 text-xs font-semibold">
+          
+          {/* Overview */}
+          <button
+            onClick={() => setActiveTab('Dashboard')}
+            className={`px-3 py-1.5 rounded-xl flex items-center space-x-1.5 transition-all ${
+              activeTab === 'Dashboard' || activeTab === 'Overview'
+                ? 'vayu-nav-pill-active'
+                : 'vayu-nav-pill-inactive'
+            }`}
+          >
+            <LayoutDashboard size={13} />
+            <span>Overview</span>
+          </button>
 
-        {/* Bottom Card: Data Updated (Interactive diagnostic toggler) */}
-        <div 
-          onClick={() => sidebarOpen && setShowDiagnostic(!showDiagnostic)}
-          className={`border rounded-xl text-[10px] space-y-1 text-zinc-400 transition-all duration-300 select-none bg-zinc-900/40 border-zinc-800/80 ${
-            sidebarOpen 
-              ? 'p-3 cursor-pointer hover:bg-zinc-850 hover:border-zinc-700/60' 
-              : 'p-1.5 flex flex-col items-center'
-          }`}
-          title={sidebarOpen ? "Click to view diagnostics" : "Grid Engine Active"}
-        >
-          <div className="flex items-center space-x-2 text-zinc-400">
-            <div className={`w-2 h-2 rounded-full shadow-[0_0_8px] flex-shrink-0 animate-pulse ${
-              selectedDate?.startsWith("2026") ? "bg-emerald-400 shadow-emerald-400" : "bg-indigo-400 shadow-indigo-400"
-            }`}></div>
-            {sidebarOpen && (
-              <span className="font-bold">
-                {selectedDate?.startsWith("2026") ? "Live Telemetry Feed" : "Historical Stubble Baseline"}
-              </span>
+          {/* Live Map */}
+          <button
+            onClick={() => setActiveTab('Live Map')}
+            className={`px-3 py-1.5 rounded-xl flex items-center space-x-1.5 transition-all ${
+              activeTab === 'Live Map'
+                ? 'vayu-nav-pill-active'
+                : 'vayu-nav-pill-inactive'
+            }`}
+          >
+            <Map size={13} />
+            <span>Live Map</span>
+          </button>
+
+          {/* Analytics Dropdown */}
+          <div className="relative" ref={analyticsRef}>
+            <button
+              onClick={() => setAnalyticsDropdownOpen(!analyticsDropdownOpen)}
+              className={`px-3 py-1.5 rounded-xl flex items-center space-x-1.5 transition-all ${
+                isAnalyticsActive
+                  ? 'vayu-nav-pill-active'
+                  : 'vayu-nav-pill-inactive'
+              }`}
+            >
+              <Activity size={13} />
+              <span>{isAnalyticsActive ? activeTab : 'Analytics'}</span>
+              <ChevronDown size={12} className={`transition-transform ${analyticsDropdownOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {analyticsDropdownOpen && (
+              <div className="absolute top-full left-0 mt-1.5 w-44 rounded-2xl vayu-card shadow-2xl p-1.5 z-50 space-y-0.5 animate-fadeIn">
+                {analyticsItems.map(item => {
+                  const Icon = item.icon
+                  const isSelected = activeTab === item.name
+                  return (
+                    <button
+                      key={item.name}
+                      onClick={() => {
+                        setActiveTab(item.name)
+                        setAnalyticsDropdownOpen(false)
+                      }}
+                      className={`w-full flex items-center space-x-2 px-3 py-2 rounded-xl text-xs font-semibold transition-all text-left ${
+                        isSelected 
+                          ? 'bg-[#5442ed] text-white shadow-sm font-bold' 
+                          : 'hover:bg-zinc-800/40 dark:hover:bg-zinc-800/60 text-zinc-300'
+                      }`}
+                    >
+                      <Icon size={13} />
+                      <span>{item.name}</span>
+                    </button>
+                  )
+                })}
+              </div>
             )}
           </div>
-          {sidebarOpen && (
-            <>
-              <div className="font-bold text-zinc-200">
-                {selectedDate?.startsWith("2026") ? "Satellite Stream Active" : "30-Day Sequence Loaded"}
+
+          {/* Intelligence Dropdown */}
+          <div className="relative" ref={intelligenceRef}>
+            <button
+              onClick={() => setIntelligenceDropdownOpen(!intelligenceDropdownOpen)}
+              className={`px-3 py-1.5 rounded-xl flex items-center space-x-1.5 transition-all ${
+                isIntelligenceActive
+                  ? 'vayu-nav-pill-active'
+                  : 'vayu-nav-pill-inactive'
+              }`}
+            >
+              <Sparkles size={13} />
+              <span>{isIntelligenceActive ? activeTab : 'Intelligence'}</span>
+              <ChevronDown size={12} className={`transition-transform ${intelligenceDropdownOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {intelligenceDropdownOpen && (
+              <div className="absolute top-full left-0 mt-1.5 w-48 rounded-2xl vayu-card shadow-2xl p-1.5 z-50 space-y-0.5 animate-fadeIn">
+                {intelligenceItems.map(item => {
+                  const Icon = item.icon
+                  const isSelected = activeTab === item.name
+                  return (
+                    <button
+                      key={item.name}
+                      onClick={() => {
+                        setActiveTab(item.name)
+                        setIntelligenceDropdownOpen(false)
+                      }}
+                      className={`w-full flex items-center space-x-2 px-3 py-2 rounded-xl text-xs font-semibold transition-all text-left ${
+                        isSelected 
+                          ? 'bg-[#5442ed] text-white shadow-sm font-bold' 
+                          : 'hover:bg-zinc-800/40 dark:hover:bg-zinc-800/60 text-zinc-300'
+                      }`}
+                    >
+                      <Icon size={13} />
+                      <span>{item.name}</span>
+                    </button>
+                  )
+                })}
               </div>
-              <div className="text-[9px] text-zinc-500 flex justify-between items-center">
-                <span>{diagnosticsData?.database?.grid_cells_total || 21180} Data Records</span>
-                <span className="text-indigo-400 font-bold hover:underline">Diagnostics →</span>
-              </div>
-            </>
-          )}
+            )}
+          </div>
+
+          {/* Policy Simulator */}
+          <button
+            onClick={() => setActiveTab('Policy Simulator')}
+            className={`px-3 py-1.5 rounded-xl flex items-center space-x-1.5 transition-all ${
+              activeTab === 'Policy Simulator'
+                ? 'vayu-nav-pill-active'
+                : 'vayu-nav-pill-inactive'
+            }`}
+          >
+            <Sliders size={13} />
+            <span>Policy Simulator</span>
+          </button>
+
+          {/* Data Explorer */}
+          <button
+            onClick={() => setActiveTab('Data Explorer')}
+            className={`px-3 py-1.5 rounded-xl flex items-center space-x-1.5 transition-all ${
+              activeTab === 'Data Explorer'
+                ? 'vayu-nav-pill-active'
+                : 'vayu-nav-pill-inactive'
+            }`}
+          >
+            <Database size={13} />
+            <span>Data Explorer</span>
+          </button>
+
+          {/* Reports */}
+          <button
+            onClick={() => setActiveTab('Reports')}
+            className={`px-3 py-1.5 rounded-xl flex items-center space-x-1.5 transition-all ${
+              activeTab === 'Reports'
+                ? 'vayu-nav-pill-active'
+                : 'vayu-nav-pill-inactive'
+            }`}
+          >
+            <FileSpreadsheet size={13} />
+            <span>Reports</span>
+          </button>
+        </nav>
+
+        {/* Right Controls */}
+        <div className="flex items-center space-x-2.5 flex-shrink-0">
+          
+          {/* Date Selector Pill */}
+          <div className="relative flex items-center">
+            <Calendar size={13} className="absolute left-3 text-zinc-400 pointer-events-none" />
+            <select
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="vayu-subcard pl-8 pr-3 py-1.5 text-xs font-semibold outline-none cursor-pointer hover:border-indigo-500/40 transition-all min-w-[135px]"
+            >
+              {dates && dates.length > 0 ? (
+                dates.map(d => (
+                  <option key={d} value={d} className="bg-[#090e1b] text-white">
+                    {d}
+                  </option>
+                ))
+              ) : (
+                <option value={selectedDate} className="bg-[#090e1b] text-white">
+                  {selectedDate || "2026-09-01"}
+                </option>
+              )}
+            </select>
+          </div>
+
+          {/* Theme Toggle Sun / Moon Button */}
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-xl vayu-subcard hover:border-indigo-500/40 text-zinc-400 hover:text-white transition-all"
+            title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
+          >
+            {theme === 'dark' ? <Sun size={14} className="text-amber-400" /> : <Moon size={14} className="text-indigo-400" />}
+          </button>
+
+          {/* Export Report Pill Button */}
+          <button
+            onClick={() => alert('NCAP Compliance & Executive Diagnostic Report prepared for export!')}
+            className="px-4 py-1.5 rounded-xl text-xs font-bold bg-[#5442ed] hover:bg-[#6554fa] text-white flex items-center space-x-1.5 shadow-md shadow-indigo-500/25 transition-all active:scale-95"
+          >
+            <Download size={13} />
+            <span>Export Report</span>
+          </button>
         </div>
-      </aside>
 
-      {/* 2. MAIN BODY PANEL */}
-      <main className="flex-1 flex flex-col overflow-hidden relative">
-        
-        {/* Global Header Row */}
-        {activeTab === 'Dashboard' && (
-          <header className="px-6 pt-5 pb-2 flex justify-between items-start flex-shrink-0 bg-transparent">
-            <div>
-              <h2 className="text-xl font-extrabold text-white tracking-tight">VayuShetra</h2>
-              <div className="flex items-center space-x-2 text-xs text-zinc-400 mt-1 font-medium">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
-                <span>India's Atmospheric Intelligence Platform • Geospatial Grid</span>
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-2.5">
-              {/* Quick Filter: Jump to Live Today */}
-              <button
-                onClick={() => {
-                  if (dates && dates.length > 0) {
-                    setSelectedDate(dates[dates.length - 1])
-                  }
-                }}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
-                  dates && dates.length > 0 && selectedDate === dates[dates.length - 1]
-                    ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/35 shadow-sm shadow-emerald-500/10'
-                    : 'bg-[#0c0c0f] text-zinc-400 border-zinc-800 hover:text-white hover:border-zinc-700'
-                }`}
-                title="Jump to today's real-time live telemetry"
-              >
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span>Live Today</span>
-              </button>
+      </header>
 
-              {/* Date Filter Dropdown */}
-              <div className="relative flex items-center">
-                <Calendar size={13} className="absolute left-3 text-zinc-400 pointer-events-none" />
-                <select
-                  value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                  className="bg-[#0c0c0f] border border-zinc-800 hover:border-zinc-700 rounded-xl pl-8 pr-3 py-1.5 text-xs text-zinc-200 outline-none focus:border-zinc-500 cursor-pointer shadow-sm font-semibold min-w-[145px]"
-                >
-                  {dates && dates.length > 0 ? (
-                    dates.map(d => (
-                      <option key={d} value={d} className="bg-[#0c0c0f] text-zinc-200">
-                        {d}
-                      </option>
-                    ))
-                  ) : (
-                    <option value={selectedDate} className="bg-[#0c0c0f] text-zinc-200">
-                      {selectedDate || "2026-08-23"}
-                    </option>
-                  )}
-                </select>
-              </div>
-
-              {/* Export Report Button */}
-              <button 
-                onClick={() => alert('NCAP Compliance report prepared for export!')}
-                className="bg-white hover:bg-zinc-200 text-black text-xs font-bold px-4 py-1.5 rounded-xl transition-all shadow-sm"
-              >
-                Export Report 📥
-              </button>
-            </div>
-          </header>
-        )}
-
-        {/* Dynamic page view rendering */}
-        <section className="flex-1 overflow-y-auto px-6 py-4">
-          {renderView()}
-        </section>
-
-        {/* Footer */}
-        <footer className="px-6 py-3 border-t border-zinc-800/80 flex justify-between items-center text-[10px] text-zinc-500 flex-shrink-0 bg-[#050507] shadow-sm">
-          <div className="flex space-x-4">
-            <span><b>Data Sources:</b></span>
-            <span>📡 Sentinel-5P</span>
-            <span>📡 MODIS</span>
-            <span>📡 VIIRS</span>
-            <span>📡 ERA5</span>
-            <span>📡 CPCB</span>
-            <span>☁️ Google Earth Engine</span>
-          </div>
-          <div className="flex items-center space-x-1.5">
-            <span>VayuShetra Platform v1.0.0</span>
-            <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full"></span>
-            <span>Online</span>
-          </div>
-        </footer>
+      {/* 2. MAIN APPLICATION CONTENT VIEW */}
+      <main className="flex-1 px-4 lg:px-8 py-5 overflow-y-auto max-w-[1800px] w-full mx-auto">
+        {renderView()}
       </main>
+
     </div>
   )
 }
