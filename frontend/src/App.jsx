@@ -117,7 +117,7 @@ export default function App() {
             <span className="text-base">🛰️</span>
           </div>
           <div>
-            <h1 className="text-base font-black tracking-tight text-white dark:text-white flex items-center">
+            <h1 className="text-base font-black tracking-tight text-slate-900 dark:text-white flex items-center">
               VayuShetra
             </h1>
           </div>
@@ -168,7 +168,7 @@ export default function App() {
             </button>
 
             {analyticsDropdownOpen && (
-              <div className="absolute top-full left-0 mt-1.5 w-44 rounded-2xl vayu-card shadow-2xl p-1.5 z-50 space-y-0.5 animate-fadeIn">
+              <div className="absolute top-full left-0 mt-1.5 w-48 rounded-2xl vayu-card shadow-2xl p-1.5 z-50 space-y-0.5 animate-fadeIn">
                 {analyticsItems.map(item => {
                   const Icon = item.icon
                   const isSelected = activeTab === item.name
@@ -182,7 +182,7 @@ export default function App() {
                       className={`w-full flex items-center space-x-2 px-3 py-2 rounded-xl text-xs font-semibold transition-all text-left ${
                         isSelected 
                           ? 'bg-[#5442ed] text-white shadow-sm font-bold' 
-                          : 'hover:bg-zinc-800/40 dark:hover:bg-zinc-800/60 text-zinc-300'
+                          : 'hover:bg-slate-100 dark:hover:bg-zinc-800/60 text-slate-700 dark:text-zinc-300'
                       }`}
                     >
                       <Icon size={13} />
@@ -210,7 +210,7 @@ export default function App() {
             </button>
 
             {intelligenceDropdownOpen && (
-              <div className="absolute top-full left-0 mt-1.5 w-48 rounded-2xl vayu-card shadow-2xl p-1.5 z-50 space-y-0.5 animate-fadeIn">
+              <div className="absolute top-full left-0 mt-1.5 w-52 rounded-2xl vayu-card shadow-2xl p-1.5 z-50 space-y-0.5 animate-fadeIn">
                 {intelligenceItems.map(item => {
                   const Icon = item.icon
                   const isSelected = activeTab === item.name
@@ -224,7 +224,7 @@ export default function App() {
                       className={`w-full flex items-center space-x-2 px-3 py-2 rounded-xl text-xs font-semibold transition-all text-left ${
                         isSelected 
                           ? 'bg-[#5442ed] text-white shadow-sm font-bold' 
-                          : 'hover:bg-zinc-800/40 dark:hover:bg-zinc-800/60 text-zinc-300'
+                          : 'hover:bg-slate-100 dark:hover:bg-zinc-800/60 text-slate-700 dark:text-zinc-300'
                       }`}
                     >
                       <Icon size={13} />
@@ -281,7 +281,7 @@ export default function App() {
           
           {/* Date Selector Pill */}
           <div className="relative flex items-center">
-            <Calendar size={13} className="absolute left-3 text-zinc-400 pointer-events-none" />
+            <Calendar size={13} className="absolute left-3 text-slate-400 dark:text-zinc-400 pointer-events-none" />
             <select
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
@@ -289,12 +289,12 @@ export default function App() {
             >
               {dates && dates.length > 0 ? (
                 dates.map(d => (
-                  <option key={d} value={d} className="bg-[#090e1b] text-white">
+                  <option key={d} value={d} className="bg-white dark:bg-[#090e1b] text-slate-900 dark:text-white">
                     {d}
                   </option>
                 ))
               ) : (
-                <option value={selectedDate} className="bg-[#090e1b] text-white">
+                <option value={selectedDate} className="bg-white dark:bg-[#090e1b] text-slate-900 dark:text-white">
                   {selectedDate || "2026-09-01"}
                 </option>
               )}
@@ -304,19 +304,19 @@ export default function App() {
           {/* Theme Toggle Sun / Moon Button */}
           <button
             onClick={toggleTheme}
-            className="p-2 rounded-xl vayu-subcard hover:border-indigo-500/40 text-zinc-400 hover:text-white transition-all"
+            className="p-2 rounded-xl vayu-subcard hover:border-indigo-500/40 text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white transition-all shadow-sm"
             title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
           >
-            {theme === 'dark' ? <Sun size={14} className="text-amber-400" /> : <Moon size={14} className="text-indigo-400" />}
+            {theme === 'dark' ? <Sun size={14} className="text-amber-400" /> : <Moon size={14} className="text-indigo-600" />}
           </button>
 
           {/* Export Report Pill Button */}
           <button
-            onClick={() => alert('NCAP Compliance & Executive Diagnostic Report prepared for export!')}
+            onClick={() => setActiveTab('Reports')}
             className="px-4 py-1.5 rounded-xl text-xs font-bold bg-[#5442ed] hover:bg-[#6554fa] text-white flex items-center space-x-1.5 shadow-md shadow-indigo-500/25 transition-all active:scale-95"
           >
             <Download size={13} />
-            <span>Export Report</span>
+            <span>Dossier Reports</span>
           </button>
         </div>
 

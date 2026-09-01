@@ -156,6 +156,7 @@ export default function LandingPage({ onEnterDashboard }) {
   const [activeCard, setActiveCard] = useState(null)
   const [fireActive, setFireActive] = useState(false)
   const [windTrails, setWindTrails] = useState(false)
+  const [windTransform, setWindTransform] = useState({ x: 0, y: 0 })
   const [embers, setEmbers] = useState([])
 
   const heroRef = useRef(null)
@@ -187,7 +188,7 @@ export default function LandingPage({ onEnterDashboard }) {
     return () => clearInterval(emberInterval)
   }, [fireActive])
 
-  // Mouse Movement Handler for 3D Earth Parallax Tilt & Fire Hover
+  // Mouse Movement Handler with Evading Wind Physics & Fire Eruption
   const handleHeroMouseMove = (e) => {
     if (!heroRef.current) return
     const rect = heroRef.current.getBoundingClientRect()
@@ -201,6 +202,7 @@ export default function LandingPage({ onEnterDashboard }) {
       ny: (y / rect.height) * 2 - 1
     }
 
+    // 1. Fire Card Hover & Flame Eruption Trigger
     if (fireCardRef.current) {
       const fireRect = fireCardRef.current.getBoundingClientRect()
       const fireCenterX = fireRect.left + fireRect.width / 2 - rect.left
@@ -214,11 +216,36 @@ export default function LandingPage({ onEnterDashboard }) {
         setFireActive(false)
       }
     }
+
+    // 2. Interactive Wind Card Evasion Physics (Wind box darts smoothly away from cursor)
+    if (windCardRef.current) {
+      const windRect = windCardRef.current.getBoundingClientRect()
+      const windCenterX = windRect.left + windRect.width / 2 - rect.left
+      const windCenterY = windRect.top + windRect.height / 2 - rect.top
+      const wdx = x - windCenterX
+      const wdy = y - windCenterY
+      const wdist = Math.sqrt(wdx * wdx + wdy * wdy)
+
+      if (wdist < 130) {
+        // Compute repel force away from cursor
+        const angle = Math.atan2(wdy, wdx)
+        const repelForce = (130 - wdist) * 0.45
+        const evadeX = -Math.cos(angle) * repelForce
+        const evadeY = -Math.sin(angle) * repelForce
+        setWindTransform({ x: evadeX, y: evadeY })
+        setWindTrails(true)
+      } else {
+        setWindTransform({ x: 0, y: 0 })
+        if (activeCard !== 2) setWindTrails(false)
+      }
+    }
   }
 
   const handleHeroMouseLeave = () => {
     mouseCoords.current = { x: -9999, y: -9999, isInside: false, nx: 0, ny: 0 }
     if (activeCard !== 3) setFireActive(false)
+    setWindTransform({ x: 0, y: 0 })
+    if (activeCard !== 2) setWindTrails(false)
   }
 
   return (
@@ -245,7 +272,7 @@ export default function LandingPage({ onEnterDashboard }) {
 
         <button
           onClick={onEnterDashboard}
-          className="flex items-center space-x-2 bg-[#0c1222] border border-white/10 hover:border-emerald-500/50 hover:bg-[#131d38] text-xs font-bold px-5 py-2.5 rounded-full transition-all duration-300 shadow-lg text-white"
+          className="flex items-center space-x-2 bg-[#0c1222] border border-white/15 hover:border-emerald-500/50 hover:bg-[#131d38] text-xs font-bold px-5 py-2.5 rounded-full transition-all duration-300 shadow-lg text-white"
         >
           <span>Explore Dashboard</span>
           <ArrowRight size={13} />
@@ -484,29 +511,33 @@ export default function LandingPage({ onEnterDashboard }) {
             onMouseLeave={() => {
               setActiveCard(null)
             }}
-            className={`absolute bottom-[10%] left-[25%] -translate-x-1/2 bg-[#0c1222]/95 border rounded-2xl p-3.5 w-[155px] text-left z-30 cursor-pointer transition-all duration-300 shadow-2xl backdrop-blur-xl ${
-              activeCard === 2 || windTrails
+            style={{
+              transform: `translate(calc(-50% + ${windTransform.x}px), ${windTransform.y}px)`,
+              transition: 'transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, box-shadow 0.3s ease'
+            }}
+            className={`absolute bottom-[10%] left-[25%] bg-[#0c1222]/95 border rounded-2xl p-3.5 w-[155px] text-left z-30 cursor-pointer shadow-2xl backdrop-blur-xl ${
+              activeCard === 2 || windTrails || windTransform.x !== 0
                 ? 'border-[#4ade80] shadow-[0_0_30px_rgba(74,222,128,0.4)] scale-105' 
                 : 'border-white/15 hover:border-emerald-500/50'
             }`}
           >
             {/* Animated Air Streams / Wind Trails flowing behind the escaping card */}
-            {windTrails && (
+            {(windTrails || windTransform.x !== 0) && (
               <div className="absolute -top-4 -left-6 -right-6 pointer-events-none opacity-80">
                 <svg viewBox="0 0 160 30" className="w-full h-8 overflow-visible">
                   <path 
                     d="M 5,12 Q 35,4 70,14 T 145,8" 
                     fill="none" 
-                    stroke="rgba(74,222,128,0.6)" 
-                    strokeWidth="1.8" 
+                    stroke="rgba(74,222,128,0.7)" 
+                    strokeWidth="2" 
                     strokeDasharray="12 6"
                     className="animate-[windStream_1.2s_linear_infinite]"
                   />
                   <path 
                     d="M 15,22 Q 45,16 90,24 T 155,18" 
                     fill="none" 
-                    stroke="rgba(34,197,94,0.4)" 
-                    strokeWidth="1.5" 
+                    stroke="rgba(34,197,94,0.5)" 
+                    strokeWidth="1.6" 
                     strokeDasharray="8 4"
                     className="animate-[windStream_0.9s_linear_infinite]"
                   />
@@ -516,9 +547,9 @@ export default function LandingPage({ onEnterDashboard }) {
 
             <div className="text-[8px] font-bold text-zinc-400 uppercase tracking-wider flex items-center justify-between">
               <span className="flex items-center text-zinc-300">
-                <Wind size={12} className={`mr-1 text-[#4ade80] ${windTrails ? 'animate-bounce' : ''}`} /> WIND VELOCITY
+                <Wind size={12} className={`mr-1 text-[#4ade80] ${(windTrails || windTransform.x !== 0) ? 'animate-bounce' : ''}`} /> WIND VELOCITY
               </span>
-              {windTrails && (
+              {(windTrails || windTransform.x !== 0) && (
                 <span className="text-[7px] text-[#4ade80] font-mono font-bold animate-pulse">GUST</span>
               )}
             </div>

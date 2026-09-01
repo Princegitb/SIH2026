@@ -16,39 +16,45 @@
   --card-sub-bg: #080c18;
   --navbar-bg: #090e1b;
   --input-bg: #080c18;
-  --input-border: rgba(255, 255, 255, 0.1);
+  --input-border: rgba(255, 255, 255, 0.12);
   --accent-purple: #5442ed;
   --accent-purple-hover: #6554fa;
+  --btn-inactive-bg: #080c18;
+  --btn-inactive-border: rgba(255, 255, 255, 0.08);
+  --btn-inactive-text: #8c9db5;
 }
 
 html.light {
-  --bg-color: #f6f8fb;
+  --bg-color: #f1f5f9;
   --text-color: #0f172a;
   --text-muted: #475569;
   --panel-bg: #ffffff;
-  --panel-border: #e2e8f0;
+  --panel-border: #cbd5e1;
   --card-sub-bg: #f8fafc;
   --navbar-bg: #ffffff;
   --input-bg: #ffffff;
   --input-border: #cbd5e1;
   --accent-purple: #5442ed;
   --accent-purple-hover: #4333d6;
+  --btn-inactive-bg: #ffffff;
+  --btn-inactive-border: #cbd5e1;
+  --btn-inactive-text: #334155;
 }
 
 /* Custom Scrollbars */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(140, 150, 180, 0.25);
+  background: rgba(140, 150, 180, 0.3);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(140, 150, 180, 0.4);
+  background: rgba(140, 150, 180, 0.5);
 }
 
 /* Base Body Styles */
@@ -72,18 +78,29 @@ html, body, #root {
   -webkit-backdrop-filter: blur(16px);
 }
 
+html.light .vayu-navbar {
+  box-shadow: 0 2px 10px -2px rgba(15, 23, 42, 0.06);
+}
+
 /* Card & Panel Base inside Workspace */
 .glass-panel, .vayu-card {
   background-color: var(--panel-bg) !important;
   border: 1px solid var(--panel-border) !important;
   border-radius: 18px;
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.06);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   color: var(--text-color) !important;
 }
 
+html.light .glass-panel, html.light .vayu-card {
+  box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.06), 0 2px 4px -1px rgba(15, 23, 42, 0.04);
+}
+
+html.dark .glass-panel, html.dark .vayu-card {
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.3);
+}
+
 .glass-panel:hover, .vayu-card:hover {
-  border-color: rgba(99, 102, 241, 0.35) !important;
+  border-color: rgba(99, 102, 241, 0.45) !important;
 }
 
 /* Sub-card container */
@@ -92,6 +109,10 @@ html, body, #root {
   border: 1px solid var(--panel-border) !important;
   border-radius: 14px;
   color: var(--text-color) !important;
+}
+
+html.light .vayu-subcard {
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
 }
 
 /* Form inputs and dropdowns */
@@ -122,7 +143,7 @@ html, body, #root {
 
 .vayu-nav-pill-inactive:hover {
   color: var(--text-color) !important;
-  background-color: rgba(140, 150, 180, 0.12);
+  background-color: rgba(140, 150, 180, 0.14);
 }
 
 /* Scoped Typography Overrides for Dashboard Workspace */
@@ -145,16 +166,16 @@ html.dark .app-workspace strong {
 html.light .app-workspace p, 
 html.light .app-workspace .text-zinc-400, 
 html.light .app-workspace .text-slate-400, 
-html.light .app-workspace .text-zinc-300, 
-html.light .app-workspace .text-slate-300 {
+html.light .app-workspace .text-zinc-500, 
+html.light .app-workspace .text-slate-500 {
   color: #475569 !important;
 }
 
 html.dark .app-workspace p, 
 html.dark .app-workspace .text-zinc-400, 
 html.dark .app-workspace .text-slate-400, 
-html.dark .app-workspace .text-zinc-300, 
-html.dark .app-workspace .text-slate-300 {
+html.dark .app-workspace .text-zinc-500, 
+html.dark .app-workspace .text-slate-500 {
   color: #8c9db5 !important;
 }
 
@@ -207,15 +228,17 @@ html.dark .theme-map-dark-tiles {
 }
 
 html.light .app-workspace table th {
-  color: #64748b !important;
+  color: #475569 !important;
+  background-color: #f8fafc;
 }
 
 html.dark .app-workspace table th {
   color: #94a3b8 !important;
+  background-color: #080c18;
 }
 
 html.light .app-workspace table td {
-  color: #1e293b !important;
+  color: #0f172a !important;
 }
 
 html.dark .app-workspace table td {
@@ -223,11 +246,11 @@ html.dark .app-workspace table td {
 }
 
 html.light .app-workspace table tbody tr:hover {
-  background-color: #f8fafc !important;
+  background-color: #f1f5f9 !important;
 }
 
 html.dark .app-workspace table tbody tr:hover {
-  background-color: rgba(255, 255, 255, 0.03) !important;
+  background-color: rgba(255, 255, 255, 0.04) !important;
 }
 
 /* Print Specific Rules for PDF Dossier */
