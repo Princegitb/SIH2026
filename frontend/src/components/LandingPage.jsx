@@ -249,14 +249,14 @@ export default function LandingPage({ onEnterDashboard }) {
 
   return (
     <div
-      className="landing-page-root h-screen overflow-hidden font-outfit relative flex flex-col justify-between selection:bg-lime-500/30"
+      className="landing-page-root min-h-screen overflow-y-auto overflow-x-hidden font-outfit relative flex flex-col justify-between selection:bg-lime-500/30"
       style={{ backgroundColor: '#000000', color: '#ffffff' }}
     >
       {/* Cyber Green Matrix Space Atmosphere Background */}
       <CosmicSpaceEnvironment />
 
       {/* 1. HEADER ROW */}
-      <header className="max-w-7xl mx-auto w-full px-6 py-3.5 flex justify-between items-center z-10 relative flex-shrink-0">
+      <header className="max-w-7xl mx-auto w-full px-6 py-4 flex justify-between items-center z-10 relative flex-shrink-0">
         <div className="flex items-center space-x-2.5 group cursor-pointer">
           <span className="text-2xl transition-transform duration-500 group-hover:rotate-[360deg]">🛰️</span>
           <div>
@@ -278,8 +278,8 @@ export default function LandingPage({ onEnterDashboard }) {
         </button>
       </header>
 
-      {/* 2. HERO GRID SECTION (FLEX GROW TO FILL EXACT VIEWPORT) */}
-      <main className="max-w-7xl mx-auto w-full px-6 py-2 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center flex-1 z-10 relative">
+      {/* 2. HERO GRID SECTION */}
+      <main className="max-w-7xl mx-auto w-full px-6 py-4 lg:py-6 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center flex-1 z-10 relative">
 
         {/* Left Side: Pitch and Call to Actions (Span 6) */}
         <div className="lg:col-span-6 space-y-4">
@@ -323,7 +323,7 @@ export default function LandingPage({ onEnterDashboard }) {
           ref={heroRef}
           onMouseMove={handleHeroMouseMove}
           onMouseLeave={handleHeroMouseLeave}
-          className="lg:col-span-6 relative flex items-center justify-center min-h-[320px] lg:min-h-[360px] select-none perspective-[1000px]"
+          className="lg:col-span-6 relative flex items-center justify-center min-h-[340px] lg:min-h-[380px] select-none perspective-[1000px]"
         >
 
           {/* Concentric Neon Green Radar Rings */}
@@ -561,7 +561,7 @@ export default function LandingPage({ onEnterDashboard }) {
       </main>
 
       {/* 3. VALUE PROPOSITIONS FEATURE ROW (5 SECTIONS) */}
-      <section className="max-w-7xl mx-auto w-full px-6 py-2 z-10 relative flex-shrink-0">
+      <section className="max-w-7xl mx-auto w-full px-6 py-3 z-10 relative flex-shrink-0">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-2.5">
 
           {/* Card 1: Satellite-Powered */}
@@ -623,8 +623,8 @@ export default function LandingPage({ onEnterDashboard }) {
       </section>
 
       {/* 4. BOTTOM CTAs BANNER */}
-      <footer className="max-w-7xl mx-auto w-full px-6 py-2.5 z-10 relative flex-shrink-0">
-        <div className="bg-[#0c1222]/95 border border-white/15 p-3 px-5 rounded-xl flex flex-col sm:flex-row justify-between items-center gap-3 shadow-xl backdrop-blur-xl">
+      <footer className="max-w-7xl mx-auto w-full px-6 py-3 z-10 relative flex-shrink-0">
+        <div className="bg-[#0c1222]/95 border border-white/15 p-3.5 px-5 rounded-xl flex flex-col sm:flex-row justify-between items-center gap-3 shadow-xl backdrop-blur-xl">
           <div className="text-left space-y-0.5">
             <div className="text-[8px] text-[#4ade80] font-black uppercase tracking-widest flex items-center">
               <span className="w-1.5 h-1.5 bg-[#4ade80] rounded-full mr-1.5 shadow-[0_0_8px_#4ade80]"></span> TOGETHER FOR CLEANER AIR
@@ -633,7 +633,7 @@ export default function LandingPage({ onEnterDashboard }) {
           </div>
           <button
             onClick={onEnterDashboard}
-            className="flex items-center space-x-2 bg-white hover:bg-zinc-100 text-black text-xs font-black px-5 py-2 rounded-lg transition-all duration-300 shadow-md whitespace-nowrap"
+            className="flex items-center space-x-2 bg-white hover:bg-zinc-100 text-black text-xs font-black px-5 py-2.5 rounded-lg transition-all duration-300 shadow-md whitespace-nowrap"
           >
             <span>Get Started</span>
             <ArrowRight size={12} className="stroke-[2.5]" />
