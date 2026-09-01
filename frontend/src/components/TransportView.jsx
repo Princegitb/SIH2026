@@ -22,7 +22,7 @@ function ChangeView({ center, zoom }) {
 }
 
 export default function TransportView() {
-  const { selectedDate } = useStore()
+  const { selectedDate, theme } = useStore()
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState('corridor') // 'corridor', 'pathway', 'scientific'
@@ -62,8 +62,8 @@ export default function TransportView() {
   if (loading || !data) {
     return (
       <div className="flex items-center justify-center h-[50vh]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4b6bf5]"></div>
-        <span className="ml-3 text-slate-300 font-medium">Computing Lagrangian wind transport & smoke plume paths...</span>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#5442ed]"></div>
+        <span className="ml-3 text-zinc-400 font-medium">Computing Lagrangian wind transport & smoke plume paths...</span>
       </div>
     )
   }
@@ -119,30 +119,30 @@ export default function TransportView() {
   const activeTrajectorySlice = checkpoints.slice(0, activeCheckpointIndex + 1).map(c => [c.lat, c.lon])
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fadeIn">
       {/* 1. Header Banner with View Tabs & Real-Time Dynamic Corridor Status */}
-      <div className="glass-panel rounded-2xl p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="glass-panel p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <div className="flex items-center space-x-2">
-            <span className={`w-2.5 h-2.5 rounded-full ${isClean ? 'bg-emerald-400' : isDissipating ? 'bg-amber-400' : 'bg-red-500 animate-ping'}`}></span>
-            <span className={`text-[10px] font-extrabold uppercase tracking-widest ${isClean ? 'text-emerald-400' : isDissipating ? 'text-amber-400' : 'text-red-400'}`}>
+            <span className={`w-2.5 h-2.5 rounded-full ${isClean ? 'bg-emerald-500' : isDissipating ? 'bg-amber-500' : 'bg-red-500 animate-ping'}`}></span>
+            <span className={`text-[10px] font-extrabold uppercase tracking-widest ${isClean ? 'text-emerald-500' : isDissipating ? 'text-amber-500' : 'text-red-500'}`}>
               {physics.status_label || "Lagrangian Smoke Dispersion Model"}
             </span>
           </div>
-          <h2 className="text-xl font-black text-white flex items-center tracking-tight mt-1">
-            <Wind size={22} className="text-[#4b6bf5] mr-2.5" /> Wind Transport & Smoke Tracking
+          <h2 className="text-xl font-black flex items-center tracking-tight mt-1">
+            <Wind size={22} className="text-[#5442ed] mr-2.5" /> Wind Transport & Smoke Tracking
           </h2>
-          <p className="text-xs text-slate-300 font-medium mt-1">
+          <p className="text-xs text-zinc-400 font-medium mt-1">
             {physics.status_description || "Real-time advection tracking: From Punjab & Haryana farm fires downwind to Delhi-NCR receptors over 48 hours."}
           </p>
         </div>
 
         {/* View Mode Switcher */}
-        <div className="flex items-center space-x-1.5 bg-[#09090c] border border-zinc-800 rounded-xl p-1 text-xs font-bold shadow-sm">
+        <div className="flex items-center space-x-1.5 vayu-subcard p-1 text-xs font-bold">
           <button
             onClick={() => setActiveTab('corridor')}
             className={`px-3.5 py-1.5 rounded-lg transition-all flex items-center space-x-1.5 ${
-              activeTab === 'corridor' ? 'bg-indigo-600 text-white shadow-md font-bold' : 'text-zinc-400 hover:text-zinc-200'
+              activeTab === 'corridor' ? 'bg-[#5442ed] text-white shadow-sm font-bold' : 'text-zinc-400 hover:text-white'
             }`}
           >
             <Navigation size={13} />
@@ -151,7 +151,7 @@ export default function TransportView() {
           <button
             onClick={() => setActiveTab('pathway')}
             className={`px-3.5 py-1.5 rounded-lg transition-all flex items-center space-x-1.5 ${
-              activeTab === 'pathway' ? 'bg-indigo-600 text-white shadow-md font-bold' : 'text-zinc-400 hover:text-zinc-200'
+              activeTab === 'pathway' ? 'bg-[#5442ed] text-white shadow-sm font-bold' : 'text-zinc-400 hover:text-white'
             }`}
           >
             <Clock size={13} />
@@ -160,7 +160,7 @@ export default function TransportView() {
           <button
             onClick={() => setActiveTab('scientific')}
             className={`px-3.5 py-1.5 rounded-lg transition-all flex items-center space-x-1.5 ${
-              activeTab === 'scientific' ? 'bg-indigo-600 text-white shadow-md font-bold' : 'text-zinc-400 hover:text-zinc-200'
+              activeTab === 'scientific' ? 'bg-[#5442ed] text-white shadow-sm font-bold' : 'text-zinc-400 hover:text-white'
             }`}
           >
             <Activity size={13} />
@@ -169,183 +169,182 @@ export default function TransportView() {
         </div>
       </div>
 
-      {/* 2. Top 4 Transport Physics Telemetry Cards (Dynamically Scaled) */}
+      {/* 2. Top 4 Transport Physics Telemetry Cards (Theme-Adaptive) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Wind Corridor Vector */}
-        <div className="glass-panel rounded-2xl p-4 border-blue-500/30 bg-gradient-to-br from-blue-950/30 via-slate-900/60 to-slate-900/90 flex flex-col justify-between">
+        <div className="glass-panel p-4 border-l-4 border-l-sky-500 flex flex-col justify-between h-[135px]">
           <div className="flex justify-between items-start">
-            <span className="text-[10px] bg-blue-500/20 text-blue-400 border border-blue-500/30 font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center">
+            <span className="text-[10px] bg-sky-500/15 text-sky-500 border border-sky-500/30 font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center">
               <Compass size={11} className="mr-1" /> Wind Vector
             </span>
-            <ArrowUpRight size={16} className="text-blue-400" />
+            <ArrowUpRight size={16} className="text-sky-500" />
           </div>
           <div className="mt-2">
-            <h3 className="text-lg font-extrabold text-white tracking-tight">
+            <h3 className="text-lg font-black tracking-tight">
               {data.wind_speed_kmh || 13.2} km/h • {data.wind_direction || "NW Corridor"}
             </h3>
-            <span className="text-[11px] text-slate-300 font-medium block mt-0.5">
+            <span className="text-[11px] text-zinc-400 font-medium block mt-0.5">
               {isClean ? "Clean atmospheric air flow" : "Blowing towards Delhi-NCR"}
             </span>
           </div>
         </div>
 
         {/* Card 2: Smoke Source Region & Fire Count */}
-        <div className={`glass-panel rounded-2xl p-4 flex flex-col justify-between ${
-          isClean 
-            ? 'border-emerald-500/30 bg-gradient-to-br from-emerald-950/30 via-slate-900/60 to-slate-900/90' 
-            : isDissipating 
-            ? 'border-amber-500/30 bg-gradient-to-br from-amber-950/30 via-slate-900/60 to-slate-900/90'
-            : 'border-orange-500/30 bg-gradient-to-br from-orange-950/30 via-slate-900/60 to-slate-900/90'
+        <div className={`glass-panel p-4 flex flex-col justify-between h-[135px] border-l-4 ${
+          isClean ? 'border-l-emerald-500' : isDissipating ? 'border-l-amber-500' : 'border-l-orange-500'
         }`}>
           <div className="flex justify-between items-start">
             <span className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center border ${
               isClean 
-                ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' 
-                : 'bg-orange-500/20 text-orange-400 border-orange-500/30'
+                ? 'bg-emerald-500/15 text-emerald-500 border-emerald-500/30' 
+                : 'bg-orange-500/15 text-orange-500 border-orange-500/30'
             }`}>
               <Flame size={11} className="mr-1" /> Farm Fires ({physics.fire_count})
             </span>
-            <span className="text-[10px] text-orange-400 font-mono font-bold">
+            <span className="text-[10px] text-orange-500 font-mono font-bold">
               {physics.total_frp_mw > 0 ? `FRP: ${physics.total_frp_mw} MW` : "0 MW (Clean)"}
             </span>
           </div>
           <div className="mt-2">
-            <h3 className="text-lg font-extrabold text-white tracking-tight">
+            <h3 className="text-lg font-black tracking-tight">
               {isClean ? "Zero Active Fires (Clean)" : isDissipating ? "Low Fire Activity" : "Sangrur & Tarn Taran (Punjab)"}
             </h3>
-            <span className="text-[11px] text-slate-300 font-medium block mt-0.5">
+            <span className="text-[11px] text-zinc-400 font-medium block mt-0.5">
               {isClean ? "No biomass emissions detected" : isDissipating ? "Low smoke release / Rapid dilution" : "High-intensity biomass burning cluster"}
             </span>
           </div>
         </div>
 
         {/* Card 3: Delhi Arrival Time / Status */}
-        <div className="glass-panel rounded-2xl p-4 border-amber-500/30 bg-gradient-to-br from-amber-950/30 via-slate-900/60 to-slate-900/90 flex flex-col justify-between">
+        <div className="glass-panel p-4 border-l-4 border-l-amber-500 flex flex-col justify-between h-[135px]">
           <div className="flex justify-between items-start">
-            <span className="text-[10px] bg-amber-500/20 text-amber-400 border border-amber-500/30 font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center">
+            <span className="text-[10px] bg-amber-500/15 text-amber-500 border border-amber-500/30 font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center">
               <Clock size={11} className="mr-1" /> Delhi Plume ETA
             </span>
-            <span className="text-[10px] text-amber-400 font-mono font-bold">{isClean ? "0 km Influx" : "310 km Transit"}</span>
+            <span className="text-[10px] text-amber-500 font-mono font-bold">{isClean ? "0 km Influx" : "310 km Transit"}</span>
           </div>
           <div className="mt-2">
-            <h3 className="text-lg font-extrabold text-white tracking-tight">
+            <h3 className="text-lg font-black tracking-tight">
               {isClean ? "N/A (Clean Baseline)" : isDissipating ? "Vanished in Transit" : "36 – 48 Hours (Day 2 Peak)"}
             </h3>
-            <span className="text-[11px] text-slate-300 font-medium block mt-0.5">
+            <span className="text-[11px] text-zinc-400 font-medium block mt-0.5">
               {isClean ? "Pure urban background AQI" : isDissipating ? "Dispersed before reaching NCR" : "Maximum PM2.5 arrival window"}
             </span>
           </div>
         </div>
 
         {/* Card 4: Atmospheric Inversion Ceiling */}
-        <div className={`glass-panel rounded-2xl p-4 flex flex-col justify-between ${
-          physics.is_inversion_trap 
-            ? 'border-red-500/30 bg-gradient-to-br from-red-950/30 via-slate-900/60 to-slate-900/90' 
-            : 'border-emerald-500/30 bg-gradient-to-br from-emerald-950/30 via-slate-900/60 to-slate-900/90'
+        <div className={`glass-panel p-4 flex flex-col justify-between h-[135px] border-l-4 ${
+          physics.is_inversion_trap ? 'border-l-red-500' : 'border-l-emerald-500'
         }`}>
           <div className="flex justify-between items-start">
             <span className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center border ${
               physics.is_inversion_trap 
-                ? 'bg-red-500/20 text-red-400 border-red-500/30' 
-                : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                ? 'bg-red-500/15 text-red-500 border-red-500/30' 
+                : 'bg-emerald-500/15 text-emerald-500 border-emerald-500/30'
             }`}>
-              <Layers size={11} className="mr-1" /> {physics.is_inversion_trap ? "Inversion Ceiling" : "High Dispersion"}
+              {physics.is_inversion_trap ? "INVERSION SMOG TRAP" : "HIGH DISPERSION"}
             </span>
-            <span className="text-[10px] text-cyan-300 font-mono font-bold">VI: {physics.ventilation_index_m2s} m²/s</span>
+            <span className="text-[10px] text-zinc-400 font-mono">VI: {physics.ventilation_index_m2s} m²/s</span>
           </div>
           <div className="mt-2">
-            <h3 className="text-lg font-extrabold text-white tracking-tight">
-              BLH: {physics.boundary_layer_height_m}m {physics.is_inversion_trap ? "(Smog Trap)" : "(Clean Mixing)"}
+            <h3 className="text-lg font-black tracking-tight">
+              BLH: {physics.boundary_layer_height_m}m {physics.is_inversion_trap ? "(Trapped)" : "(Clean Mixing)"}
             </h3>
-            <span className="text-[11px] text-slate-300 font-medium block mt-0.5">
-              {physics.is_inversion_trap ? "Cold air traps smoke at ground level" : "Good vertical ventilation & dispersion"}
+            <span className="text-[11px] text-zinc-400 font-medium block mt-0.5">
+              {physics.is_inversion_trap ? "Smoke trapped below cold boundary lid" : "Good vertical ventilation & dispersion"}
             </span>
           </div>
         </div>
       </div>
 
-      {/* 3. MAIN CONTENT: TAB 1 (SMOKE CORRIDOR MAP & FLOW) */}
+      {/* 3. TAB 1: SMOKE CORRIDOR MAP & 48H TIME-SLIDER SIMULATION */}
       {activeTab === 'corridor' && (
         <div className="grid grid-cols-12 gap-5">
-          {/* Left: Interactive Leaflet Smoke Trajectory Map (Span 8) */}
-          <div className="col-span-12 lg:col-span-8 glass-panel rounded-2xl p-4 flex flex-col h-[520px] relative overflow-hidden">
-            {/* Map Header with Timeline Player Controls */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3 z-10">
+          {/* Left: Map & Interactive Step Playbar (Span 8) */}
+          <div className="col-span-12 lg:col-span-8 glass-panel p-5 flex flex-col h-[520px]">
+            {/* Header with Step Time Controls */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-3">
               <div>
-                <h3 className="text-sm font-extrabold text-white flex items-center">
-                  <Navigation size={15} className="text-[#38bdf8] mr-1.5" />
+                <h3 className="text-sm font-extrabold flex items-center">
+                  <Navigation size={15} className="text-[#5442ed] mr-1.5" />
                   Regional Smoke Transport Corridor Map
                 </h3>
-                <span className="text-[11px] text-slate-400">
-                  Tracking smoke parcel: <b className="text-cyan-300">{currentCheckpoint.name}</b> at <b className="text-orange-400">Hour {selectedHour}</b>
+                <span className="text-xs text-zinc-400 font-medium">
+                  Tracking smoke parcel: <strong className="text-[#5442ed]">{currentCheckpoint.name}</strong> at <strong className="text-orange-500">Hour {selectedHour}</strong>
                 </span>
               </div>
 
-              {/* Timeline Player Bar */}
-              <div className="flex items-center space-x-2 bg-slate-950/80 border border-slate-800 px-3 py-1.5 rounded-xl text-xs">
+              {/* 48h Time Playbar */}
+              <div className="flex items-center space-x-1.5 vayu-subcard p-1">
                 <button
                   onClick={() => setIsPlaying(!isPlaying)}
-                  className="p-1 rounded-lg bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30 transition-all"
-                  title={isPlaying ? "Pause Timeline" : "Play Timeline Animation"}
+                  className="p-1.5 rounded-lg bg-[#5442ed] text-white hover:bg-[#6554fa] transition-all"
+                  title={isPlaying ? "Pause Timeline" : "Play 48h Simulation"}
                 >
-                  {isPlaying ? <Pause size={13} /> : <Play size={13} />}
+                  {isPlaying ? <Pause size={12} /> : <Play size={12} />}
                 </button>
-                <div className="flex items-center space-x-1">
-                  {[0, 12, 24, 36, 48].map(h => (
-                    <button
-                      key={h}
-                      onClick={() => setSelectedHour(h)}
-                      className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all ${
-                        selectedHour === h 
-                          ? 'bg-orange-500 text-white shadow-sm' 
-                          : 'text-slate-400 hover:text-slate-200'
-                      }`}
-                    >
-                      {h}h
-                    </button>
-                  ))}
-                </div>
+                {[0, 12, 24, 36, 48].map((h) => (
+                  <button
+                    key={h}
+                    onClick={() => {
+                      setSelectedHour(h)
+                      setIsPlaying(false)
+                    }}
+                    className={`px-2 py-1 rounded-md text-[10px] font-bold font-mono transition-all ${
+                      selectedHour === h
+                        ? 'bg-orange-500 text-white shadow-sm'
+                        : 'text-zinc-400 hover:text-white'
+                    }`}
+                  >
+                    {h}h
+                  </button>
+                ))}
               </div>
             </div>
 
-            {/* Leaflet Map Container */}
-            <div className="flex-1 w-full rounded-xl overflow-hidden relative border border-slate-800/80 z-0">
+            {/* Map Container (Leaflet with Watermark-free OpenStreetMap) */}
+            <div className="flex-1 rounded-xl overflow-hidden border border-[var(--panel-border)] relative z-10">
               <MapContainer
                 center={[29.6, 76.5]}
-                zoom={7}
-                scrollWheelZoom={false}
-                style={{ width: '100%', height: '100%', backgroundColor: '#060a14' }}
+                zoom={7.2}
+                className="w-full h-full"
+                zoomControl={true}
+                key={`${selectedHour}-${theme}`}
               >
                 <ChangeView center={[currentCheckpoint.lat, currentCheckpoint.lon]} zoom={7.2} />
                 <TileLayer
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  className="theme-map-dark-tiles"
+                  className={theme === 'dark' ? 'theme-map-dark-tiles' : ''}
                   attribution="&copy; OpenStreetMap contributors"
                 />
 
-                {/* 1. Full Projected Trajectory Guide Line (Dotted Gray) */}
+                {/* Full Projected Trajectory Guide Line */}
                 <Polyline
                   positions={trajectoryCoords}
-                  color="#64748b"
-                  weight={3}
-                  dashArray="6, 8"
-                  opacity={0.4}
+                  pathOptions={{
+                    color: theme === 'dark' ? '#94a3b8' : '#cbd5e1',
+                    weight: 2.5,
+                    dashArray: '5, 8',
+                    opacity: 0.6
+                  }}
                 />
 
-                {/* 2. Active Animated Smoke Advection Path */}
+                {/* Active Advection Smoke Plume Segment */}
                 <Polyline
                   positions={activeTrajectorySlice}
-                  color={isClean ? "#10b981" : isDissipating ? "#eab308" : "#f97316"}
-                  weight={5}
-                  opacity={0.9}
+                  pathOptions={{
+                    color: isClean ? '#10b981' : isDissipating ? '#f59e0b' : '#ef4444',
+                    weight: 5,
+                    opacity: 0.85
+                  }}
                 />
 
-                {/* 3. Checkpoint Location Nodes */}
+                {/* Checkpoint Circles */}
                 {checkpoints.map((cp, idx) => {
+                  const isCurrent = parseInt(cp.hour) === selectedHour
                   const isOrigin = idx === 0
                   const isDestination = idx === checkpoints.length - 1
-                  const isCurrent = idx === activeCheckpointIndex
-
                   const nodeColor = isClean 
                     ? '#10b981' 
                     : isOrigin 
@@ -356,7 +355,6 @@ export default function TransportView() {
 
                   return (
                     <React.Fragment key={cp.name}>
-                      {/* Outer Pulse Ring for Current Active Hour */}
                       {isCurrent && (
                         <Circle
                           center={[cp.lat, cp.lon]}
@@ -382,16 +380,16 @@ export default function TransportView() {
                         }}
                       >
                         <Popup className="custom-leaflet-popup">
-                          <div className="bg-[#090d16] text-white p-2.5 rounded-xl border border-slate-700 min-w-[190px]">
-                            <div className="flex justify-between items-center text-[10px] font-extrabold uppercase border-b border-slate-800 pb-1 mb-1.5">
-                              <span className={isClean ? "text-emerald-400" : "text-orange-400"}>Hour {cp.hour} Checkpoint</span>
-                              <span className="text-cyan-300">{cp.altitude}</span>
+                          <div className="p-2.5 rounded-xl min-w-[190px]">
+                            <div className="flex justify-between items-center text-[10px] font-extrabold uppercase border-b border-[var(--panel-border)] pb-1 mb-1.5">
+                              <span className={isClean ? "text-emerald-500" : "text-orange-500"}>Hour {cp.hour} Checkpoint</span>
+                              <span className="text-cyan-500 font-bold">{cp.altitude}</span>
                             </div>
-                            <h4 className="text-xs font-black text-white">{cp.name}</h4>
-                            <p className="text-[10px] text-slate-300 mt-1">{cp.stage}</p>
-                            <div className="mt-2 pt-1.5 border-t border-slate-800/80 flex justify-between items-center text-[10px]">
-                              <span className="text-slate-400">PM2.5 Influx:</span>
-                              <span className={`font-extrabold font-mono ${isClean ? 'text-emerald-400' : 'text-red-400'}`}>{cp.pm25_influx}</span>
+                            <h4 className="text-xs font-black">{cp.name}</h4>
+                            <p className="text-[10px] text-zinc-400 mt-1">{cp.stage}</p>
+                            <div className="mt-2 pt-1.5 border-t border-[var(--panel-border)] flex justify-between items-center text-[10px]">
+                              <span className="text-zinc-400">PM2.5 Influx:</span>
+                              <span className={`font-extrabold font-mono ${isClean ? 'text-emerald-500' : 'text-red-500'}`}>{cp.pm25_influx}</span>
                             </div>
                           </div>
                         </Popup>
@@ -402,39 +400,28 @@ export default function TransportView() {
               </MapContainer>
 
               {/* In-Map Floating Corridor Legend */}
-              <div className="absolute bottom-3 left-3 bg-[#090d16]/90 border border-slate-800 p-2.5 rounded-xl text-[10px] backdrop-blur-md z-[1000] space-y-1 select-none pointer-events-none">
-                <div className="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">
+              <div className="absolute bottom-3 left-3 vayu-subcard p-2.5 text-[10px] backdrop-blur-md z-[1000] space-y-1 select-none pointer-events-none shadow-lg">
+                <div className="text-[9px] font-extrabold uppercase tracking-wider text-zinc-400">
                   {isClean ? "Status: Clean Wind Corridor" : isDissipating ? "Status: Dissipating Plume" : "Status: Active Stubble Transport"}
                 </div>
                 {isClean ? (
                   <div className="flex items-center space-x-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
-                    <span className="text-slate-200">Zero Farm Fires (Clean Baseline)</span>
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                    <span>Zero Farm Fires (Clean Baseline)</span>
                   </div>
-                ) : isDissipating ? (
-                  <>
-                    <div className="flex items-center space-x-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-                      <span className="text-slate-200">Low Fire Activity (Diluting)</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
-                      <span className="text-slate-200">Dispersed before Delhi</span>
-                    </div>
-                  </>
                 ) : (
                   <>
                     <div className="flex items-center space-x-2">
                       <span className="w-2.5 h-2.5 rounded-full bg-red-500"></span>
-                      <span className="text-slate-200">Punjab Stubble Fires (Origin 0h)</span>
+                      <span>Punjab Stubble Fires (Origin 0h)</span>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-sky-400"></span>
-                      <span className="text-slate-200">Haryana Transit (12h - 36h)</span>
+                      <span className="w-2.5 h-2.5 rounded-full bg-sky-500"></span>
+                      <span>Haryana Transit (12h - 36h)</span>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-                      <span className="text-slate-200">Delhi Inversion Trap (48h Peak)</span>
+                      <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                      <span>Delhi Inversion Trap (48h Peak)</span>
                     </div>
                   </>
                 )}
@@ -442,37 +429,37 @@ export default function TransportView() {
             </div>
           </div>
 
-          {/* Right: Downwind Receptor Cities Impact Matrix (Span 4) */}
-          <div className="col-span-12 lg:col-span-4 glass-panel rounded-2xl p-5 flex flex-col justify-between h-[520px]">
+          {/* Right: Downwind Receptor Cities Impact Matrix (Theme-Adaptive) */}
+          <div className="col-span-12 lg:col-span-4 glass-panel p-5 flex flex-col justify-between h-[520px]">
             <div>
-              <div className="flex justify-between items-center border-b border-slate-800 pb-2.5">
-                <h3 className="text-sm font-extrabold text-white flex items-center">
-                  <AlertTriangle size={15} className="text-orange-400 mr-1.5" />
+              <div className="flex justify-between items-center border-b border-[var(--panel-border)] pb-2.5">
+                <h3 className="text-sm font-extrabold flex items-center">
+                  <AlertTriangle size={15} className="text-orange-500 mr-1.5" />
                   Downwind City Impact Matrix
                 </h3>
-                <span className="text-[9px] font-mono text-cyan-300 bg-cyan-950/60 border border-cyan-500/30 px-2 py-0.5 rounded">
+                <span className="text-[9px] font-mono text-[#5442ed] bg-indigo-500/10 border border-indigo-500/30 px-2 py-0.5 rounded font-bold">
                   48h Window
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400 mt-1.5">
+              <p className="text-[11px] text-zinc-400 mt-1.5">
                 Estimated smoke inflow and expected PM2.5 spike along the active wind vector:
               </p>
 
               {/* City Cards List */}
               <div className="space-y-2.5 mt-3 overflow-y-auto max-h-[380px] pr-1">
-                {cityImpacts.map((city, idx) => (
+                {cityImpacts.map((city) => (
                   <div 
                     key={city.city} 
-                    className="p-3 rounded-xl bg-slate-950/70 border border-slate-800/80 hover:border-slate-700 transition-all"
+                    className="p-3 rounded-xl vayu-subcard transition-all hover:border-indigo-500/40"
                   >
                     <div className="flex justify-between items-start">
                       <div>
-                        <h4 className="text-xs font-bold text-white flex items-center">
-                          <MapPin size={11} className="text-slate-400 mr-1" />
+                        <h4 className="text-xs font-bold flex items-center">
+                          <MapPin size={11} className="text-zinc-400 mr-1" />
                           {city.city}
                         </h4>
-                        <span className="text-[10px] text-slate-400 font-medium mt-0.5 block">
-                          ETA: <b className="text-cyan-300">{city.eta_hours}</b>
+                        <span className="text-[10px] text-zinc-400 font-medium mt-0.5 block">
+                          ETA: <b className="text-[#5442ed]">{city.eta_hours}</b>
                         </span>
                       </div>
                       <div className="text-right">
@@ -486,19 +473,19 @@ export default function TransportView() {
                         >
                           {city.status}
                         </span>
-                        <div className="text-xs font-extrabold text-white mt-1">
-                          PM2.5: <span className="text-orange-400 font-mono">~{city.expected_pm25} µg/m³</span>
+                        <div className="text-xs font-extrabold mt-1">
+                          PM2.5: <span className="text-orange-500 font-mono">~{city.expected_pm25} µg/m³</span>
                         </div>
                       </div>
                     </div>
 
                     {/* Progress Bar: Smoke Share % */}
                     <div className="mt-2">
-                      <div className="flex justify-between text-[9px] text-slate-400 mb-1">
+                      <div className="flex justify-between text-[9px] text-zinc-400 mb-1">
                         <span>Biomass Smoke Share:</span>
-                        <span className="font-extrabold text-orange-400">+{city.smoke_share_pct}% of total AQI</span>
+                        <span className="font-extrabold text-orange-500">+{city.smoke_share_pct}% of total AQI</span>
                       </div>
-                      <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                      <div className="w-full h-1.5 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
                         <div 
                           className="h-full bg-gradient-to-r from-yellow-500 via-orange-500 to-red-500 rounded-full transition-all duration-500"
                           style={{ width: `${city.smoke_share_pct}%` }}
@@ -515,193 +502,123 @@ export default function TransportView() {
 
       {/* 4. TAB 2: STEP-BY-STEP 48-HOUR TRANSIT PATHWAY */}
       {activeTab === 'pathway' && (
-        <div className="glass-panel rounded-2xl p-6 space-y-6">
+        <div className="glass-panel p-6 space-y-6">
           <div>
-            <h3 className="text-base font-extrabold text-white flex items-center">
-              <Clock size={18} className="text-orange-400 mr-2" />
+            <h3 className="text-base font-extrabold flex items-center">
+              <Clock size={18} className="text-orange-500 mr-2" />
               Detailed 48-Hour Kinematic Transport Sequence
             </h3>
-            <p className="text-xs text-slate-400 mt-1">
+            <p className="text-xs text-zinc-400 mt-1">
               Physics breakdown of how stubble smoke lofting, lateral Gaussian dispersion, and boundary layer trapping progress from farm to city:
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            {checkpoints.map((cp, idx) => (
+            {checkpoints.map((cp) => (
               <div 
                 key={cp.hour}
                 className={`rounded-2xl p-4 border flex flex-col justify-between space-y-3 transition-all ${
                   selectedHour === parseInt(cp.hour)
-                    ? 'bg-orange-950/30 border-orange-500/50 shadow-lg'
-                    : 'bg-slate-900/60 border-slate-800/80 hover:border-slate-700'
+                    ? 'bg-orange-500/10 border-orange-500/50 shadow-md'
+                    : 'vayu-subcard hover:border-indigo-500/40'
                 }`}
               >
                 <div className="flex justify-between items-center">
-                  <span className="text-[10px] font-mono font-extrabold px-2 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30">
+                  <span className="text-[10px] font-mono font-extrabold px-2 py-0.5 rounded bg-orange-500/15 text-orange-500 border border-orange-500/30">
                     Hour {cp.hour}
                   </span>
-                  <span className="text-[10px] font-mono text-cyan-300">{cp.altitude.split(' ')[0]}</span>
+                  <span className="text-[10px] font-mono text-cyan-500 font-bold">{cp.altitude.split(' ')[0]}</span>
                 </div>
 
                 <div>
-                  <h4 className="text-sm font-extrabold text-white">{cp.name}</h4>
-                  <p className="text-[11px] text-slate-300 mt-1 font-medium leading-snug">
+                  <h4 className="text-sm font-extrabold">{cp.name}</h4>
+                  <p className="text-[11px] text-zinc-400 mt-1 font-medium leading-snug">
                     {cp.stage}
                   </p>
                 </div>
 
-                <div className="pt-2 border-t border-slate-800 flex justify-between items-center text-[10px]">
-                  <span className="text-slate-400">Atmosphere Layer:</span>
-                  <span className="text-cyan-300 font-extrabold">{cp.altitude.includes('Briggs') ? 'Upper PBL' : cp.altitude.includes('Mid') ? 'Mid PBL' : 'Surface'}</span>
+                <div className="pt-2 border-t border-[var(--panel-border)] flex justify-between items-center text-[10px]">
+                  <span className="text-zinc-400">Layer Influx:</span>
+                  <span className={`font-mono font-bold ${isClean ? 'text-emerald-500' : 'text-red-500'}`}>{cp.pm25_influx}</span>
                 </div>
               </div>
             ))}
           </div>
-
-          {/* Physics Summary Callout Box */}
-          <div className="bg-slate-950/80 border border-blue-500/30 p-4 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
-            <div className="space-y-1">
-              <div className="text-[10px] text-blue-400 font-extrabold uppercase tracking-widest flex items-center">
-                <ShieldAlert size={12} className="mr-1.5" /> Atmospheric Mechanics Summary
-              </div>
-              <p className="text-xs text-slate-200 font-medium">
-                High FRP farm fires inject smoke above surface friction into the <b>1,150m boundary layer</b>. With prevailing <b>13 km/h NW winds</b>, the smoke plume traverses the <b>310 km corridor</b> in exactly <b>36 to 48 hours</b>, where nighttime radiative cooling traps the smoke under a <b>420m inversion ceiling</b> over Delhi.
-              </p>
-            </div>
-            <button
-              onClick={() => setActiveTab('corridor')}
-              className="flex items-center space-x-1.5 bg-[#4b6bf5] hover:bg-[#3b56cf] text-white text-xs font-extrabold px-4 py-2 rounded-xl transition-all whitespace-nowrap"
-            >
-              <span>View On Live Map</span>
-              <ArrowRight size={13} />
-            </button>
-          </div>
         </div>
       )}
 
-      {/* 5. TAB 3: SCIENTIFIC CAUSAL PROOF & CORRELATION */}
+      {/* 5. TAB 3: SCIENTIFIC PROOF (LAG-CORRELATION & GAUSSIAN PLUME) */}
       {activeTab === 'scientific' && (
-        <div className="grid grid-cols-12 gap-5">
-          {/* Left Chart (Span 8) */}
-          <div className="col-span-12 lg:col-span-8 glass-panel rounded-2xl p-6 flex flex-col h-[460px]">
-            <div className="flex justify-between items-center mb-4">
-              <div>
-                <h3 className="text-sm font-extrabold text-white uppercase tracking-wider">
-                  {chartMode === 'bars' ? "48-Hour Stubble Impact vs Weather Control" : "Smoke Plume Advection & Decay Curve"}
-                </h3>
-                <span className="text-xs text-slate-400 font-medium mt-0.5 block">
-                  Controlling for Boundary Layer Height (BLH) & Rain to isolate farm fire causality
-                </span>
-              </div>
-
-              <div className="flex items-center space-x-1.5 bg-[#09090c] border border-zinc-800 p-1 rounded-xl text-xs font-bold shadow-sm">
-                <button
-                  onClick={() => setChartMode('bars')}
-                  className={`px-3 py-1 rounded-lg transition-all ${
-                    chartMode === 'bars' ? 'bg-indigo-600 text-white shadow-sm font-bold' : 'text-zinc-400 hover:text-zinc-200'
-                  }`}
-                >
-                  Correlation Bars
-                </button>
-                <button
-                  onClick={() => setChartMode('decay')}
-                  className={`px-3 py-1 rounded-lg transition-all ${
-                    chartMode === 'decay' ? 'bg-indigo-600 text-white shadow-sm font-bold' : 'text-zinc-400 hover:text-zinc-200'
-                  }`}
-                >
-                  Decay Area
-                </button>
-              </div>
+        <div className="glass-panel p-6 space-y-6">
+          <div className="flex justify-between items-center border-b border-[var(--panel-border)] pb-3">
+            <div>
+              <h3 className="text-base font-extrabold flex items-center">
+                <Activity size={18} className="text-[#5442ed] mr-2" />
+                Lagrangian Stubble-to-Smog Mathematical Verification
+              </h3>
+              <p className="text-xs text-zinc-400 mt-0.5">
+                Proof that farm fire emissions show peak correlation with Delhi-NCR PM2.5 after a 24h–48h meteorological transit lag:
+              </p>
             </div>
 
-            <div className="flex-1 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                {chartMode === 'bars' ? (
-                  <BarChart data={chartData} margin={{ top: 10, right: 20, left: -15, bottom: 10 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-                    <XAxis dataKey="name" stroke="#94a3b8" fontSize={11} fontWeight={600} />
-                    <YAxis stroke="#94a3b8" fontSize={11} domain={[0, 'auto']} />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: '#090d16', 
-                        borderColor: '#334155', 
-                        color: '#ffffff', 
-                        borderRadius: '12px',
-                        fontSize: '12px',
-                        fontWeight: 'bold'
-                      }} 
-                    />
-                    <Legend wrapperStyle={{ paddingTop: '10px', fontSize: '12px', color: '#cbd5e1' }} />
-                    <Bar dataKey="Direct Fire Link" fill="#38bdf8" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="Weather-Adjusted Stubble Impact" fill="#f97316" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                ) : (
-                  <AreaChart data={chartData} margin={{ top: 10, right: 20, left: -15, bottom: 10 }}>
-                    <defs>
-                      <linearGradient id="colorRaw" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#38bdf8" stopOpacity={0.4}/>
-                        <stop offset="95%" stopColor="#38bdf8" stopOpacity={0.0}/>
-                      </linearGradient>
-                      <linearGradient id="colorPartial" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#f97316" stopOpacity={0.5}/>
-                        <stop offset="95%" stopColor="#f97316" stopOpacity={0.0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-                    <XAxis dataKey="name" stroke="#94a3b8" fontSize={11} fontWeight={600} />
-                    <YAxis stroke="#94a3b8" fontSize={11} />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: '#090d16', 
-                        borderColor: '#334155', 
-                        color: '#ffffff', 
-                        borderRadius: '12px',
-                        fontSize: '12px'
-                      }} 
-                    />
-                    <Legend wrapperStyle={{ paddingTop: '10px', fontSize: '12px', color: '#cbd5e1' }} />
-                    <Area type="monotone" dataKey="Direct Fire Link" stroke="#38bdf8" strokeWidth={2.5} fillOpacity={1} fill="url(#colorRaw)" />
-                    <Area type="monotone" dataKey="Weather-Adjusted Stubble Impact" stroke="#f97316" strokeWidth={3} fillOpacity={1} fill="url(#colorPartial)" />
-                  </AreaChart>
-                )}
-              </ResponsiveContainer>
+            <div className="flex items-center space-x-2 vayu-subcard p-1">
+              <button
+                onClick={() => setChartMode('bars')}
+                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                  chartMode === 'bars' ? 'bg-[#5442ed] text-white shadow-sm' : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                Correlation Bars
+              </button>
+              <button
+                onClick={() => setChartMode('decay')}
+                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                  chartMode === 'decay' ? 'bg-[#5442ed] text-white shadow-sm' : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                Decay Trajectory Area
+              </button>
             </div>
           </div>
 
-          {/* Right Causal Proof Cards (Span 4) */}
-          <div className="col-span-12 lg:col-span-4 flex flex-col justify-between h-[460px] gap-3">
-            <div className="glass-panel rounded-xl p-3.5 border-l-4 border-l-[#38bdf8] bg-slate-900/60 flex-1 flex flex-col justify-center">
-              <div className="flex items-center space-x-2 text-xs font-extrabold text-white">
-                <Activity size={15} className="text-[#38bdf8]" />
-                <span>Direct Fire Link (Peak at 48h)</span>
-              </div>
-              <p className="text-[11px] text-slate-300 font-medium mt-1.5 leading-relaxed">
-                Statistical correlation peaks at <b className="text-[#38bdf8]">Day 2 (48 hours)</b>, proving farm fires have an exact 2-day travel time to reach Delhi.
-              </p>
-            </div>
-
-            <div className="glass-panel rounded-xl p-3.5 border-l-4 border-l-[#f97316] bg-slate-900/60 flex-1 flex flex-col justify-center">
-              <div className="flex items-center space-x-2 text-xs font-extrabold text-white">
-                <Layers size={15} className="text-[#f97316]" />
-                <span>Partial Correlation Control</span>
-              </div>
-              <p className="text-[11px] text-slate-300 font-medium mt-1.5 leading-relaxed">
-                By regressing out Boundary Layer Height and Rain, we scientifically prove that stubble smoke alone accounts for <b className="text-[#f97316]">over 65%</b> of the post-fire AQI surge.
-              </p>
-            </div>
-
-            <div className="glass-panel rounded-xl p-3.5 border-l-4 border-l-emerald-400 bg-emerald-950/20 border border-emerald-500/20 flex-1 flex flex-col justify-center">
-              <div className="flex items-center justify-between text-xs font-extrabold text-white">
-                <span className="text-emerald-400 font-bold flex items-center">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>
-                  Actionable 48h Warning Window
-                </span>
-                <span className="text-[10px] text-emerald-400/80 font-mono font-bold">99% Confidence</span>
-              </div>
-              <p className="text-[11px] text-slate-300 font-medium mt-1 leading-relaxed">
-                Enables State Pollution Control Boards to enforce GRAP restrictions <b className="text-emerald-300">1 to 2 days before</b> the toxic plume engulfs the capital.
-              </p>
-            </div>
+          <div className="h-[320px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              {chartMode === 'bars' ? (
+                <BarChart data={chartData} margin={{ top: 10, right: 20, left: 0, bottom: 20 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? '#1e293b' : '#e2e8f0'} vertical={false} />
+                  <XAxis dataKey="name" stroke={theme === 'dark' ? '#94a3b8' : '#64748b'} fontSize={11} fontWeight={600} />
+                  <YAxis stroke={theme === 'dark' ? '#94a3b8' : '#64748b'} fontSize={11} domain={[0, 1]} />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: theme === 'dark' ? '#090d16' : '#ffffff', 
+                      borderColor: theme === 'dark' ? '#334155' : '#cbd5e1', 
+                      color: theme === 'dark' ? '#ffffff' : '#0f172a', 
+                      borderRadius: '12px',
+                      fontSize: '12px'
+                    }} 
+                  />
+                  <Legend wrapperStyle={{ paddingTop: '10px', fontSize: '12px' }} />
+                  <Bar dataKey="Direct Fire Link" fill="#f97316" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="Weather-Adjusted Stubble Impact" fill="#5442ed" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              ) : (
+                <AreaChart data={chartData} margin={{ top: 10, right: 20, left: 0, bottom: 20 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? '#1e293b' : '#e2e8f0'} vertical={false} />
+                  <XAxis dataKey="name" stroke={theme === 'dark' ? '#94a3b8' : '#64748b'} fontSize={11} fontWeight={600} />
+                  <YAxis stroke={theme === 'dark' ? '#94a3b8' : '#64748b'} fontSize={11} domain={[0, 1]} />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: theme === 'dark' ? '#090d16' : '#ffffff', 
+                      borderColor: theme === 'dark' ? '#334155' : '#cbd5e1', 
+                      color: theme === 'dark' ? '#ffffff' : '#0f172a', 
+                      borderRadius: '12px',
+                      fontSize: '12px'
+                    }} 
+                  />
+                  <Area type="monotone" dataKey="Weather-Adjusted Stubble Impact" stroke="#5442ed" fill="rgba(84, 66, 237, 0.2)" strokeWidth={3} />
+                </AreaChart>
+              )}
+            </ResponsiveContainer>
           </div>
         </div>
       )}

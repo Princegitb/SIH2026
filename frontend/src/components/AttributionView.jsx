@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react'
 import { useStore } from '../store'
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  PieChart, Pie, Cell, RadialBarChart, RadialBar
+  PieChart, Pie, Cell
 } from 'recharts'
 import { ShieldAlert, Flame, Car, Factory, Filter, CheckCircle2, Info } from 'lucide-react'
 
 export default function AttributionView() {
-  const { selectedDate, selectedState } = useStore()
+  const { selectedDate, selectedState, theme } = useStore()
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(false)
   const [viewMode, setViewMode] = useState('stacked') // 'stacked', 'pie'
@@ -30,8 +30,8 @@ export default function AttributionView() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-[50vh]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4b6bf5]"></div>
-        <span className="ml-3 text-slate-300 font-medium">Parsing Sentinel-5P columnar chemistry ratios...</span>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#5442ed]"></div>
+        <span className="ml-3 text-zinc-400 font-medium">Parsing Sentinel-5P columnar chemistry ratios...</span>
       </div>
     )
   }
@@ -56,23 +56,23 @@ export default function AttributionView() {
   ]
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fadeIn">
       {/* Header Banner */}
-      <div className="glass-panel rounded-2xl p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="glass-panel p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-lg font-extrabold text-white flex items-center tracking-tight">
+          <h2 className="text-lg font-extrabold flex items-center tracking-tight">
             Pollution Source Attribution
           </h2>
-          <p className="text-xs text-slate-300 font-medium mt-1">
+          <p className="text-xs text-zinc-400 font-medium mt-1">
             Identifying where pollution comes from by analyzing chemical satellite data (Farm Fires, Vehicles, or Factories).
           </p>
         </div>
 
-        <div className="flex items-center space-x-2 bg-[#060608] border border-white/[0.08] rounded-xl p-1">
+        <div className="flex items-center space-x-2 vayu-subcard p-1">
           <button
             onClick={() => setViewMode('stacked')}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-              viewMode === 'stacked' ? 'bg-[#4b6bf5] text-white shadow-sm' : 'text-zinc-400 hover:text-white'
+              viewMode === 'stacked' ? 'bg-[#5442ed] text-white shadow-sm' : 'text-zinc-400 hover:text-white'
             }`}
           >
             District Stacked Bars
@@ -80,7 +80,7 @@ export default function AttributionView() {
           <button
             onClick={() => setViewMode('pie')}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-              viewMode === 'pie' ? 'bg-[#4b6bf5] text-white shadow-sm' : 'text-zinc-400 hover:text-white'
+              viewMode === 'pie' ? 'bg-[#5442ed] text-white shadow-sm' : 'text-zinc-400 hover:text-white'
             }`}
           >
             Regional Share Donut
@@ -91,10 +91,10 @@ export default function AttributionView() {
       {/* Main Grid */}
       <div className="grid grid-cols-12 gap-5">
         {/* Left Visual: Stacked or Pie Chart (Span 8) */}
-        <div className="col-span-12 lg:col-span-8 glass-panel rounded-2xl p-6 flex flex-col h-[460px]">
+        <div className="col-span-12 lg:col-span-8 glass-panel p-6 flex flex-col h-[460px]">
           <div className="flex justify-between items-center mb-4">
             <div>
-              <h3 className="text-sm font-extrabold text-white uppercase tracking-wider">
+              <h3 className="text-sm font-extrabold uppercase tracking-wider">
                 {viewMode === 'stacked' ? "District Pollution Sources (%)" : "Overall Regional Source Share"}
               </h3>
               <span className="text-xs text-zinc-400 font-medium mt-0.5 block">
@@ -109,29 +109,29 @@ export default function AttributionView() {
             <ResponsiveContainer width="100%" height="100%">
               {viewMode === 'stacked' ? (
                 <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 25 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? '#1e293b' : '#e2e8f0'} vertical={false} />
                   <XAxis 
                     dataKey="name" 
-                    stroke="#94a3b8" 
+                    stroke={theme === 'dark' ? '#94a3b8' : '#64748b'} 
                     fontSize={11} 
                     fontWeight={600}
                     interval={0}
                     angle={-25}
                     textAnchor="end"
                   />
-                  <YAxis stroke="#94a3b8" fontSize={11} domain={[0, 100]} />
+                  <YAxis stroke={theme === 'dark' ? '#94a3b8' : '#64748b'} fontSize={11} domain={[0, 100]} />
                   <Tooltip 
                     contentStyle={{ 
-                      backgroundColor: '#060608', 
-                      borderColor: 'rgba(255,255,255,0.1)', 
-                      color: '#ffffff', 
+                      backgroundColor: theme === 'dark' ? '#090d16' : '#ffffff', 
+                      borderColor: theme === 'dark' ? '#334155' : '#cbd5e1', 
+                      color: theme === 'dark' ? '#ffffff' : '#0f172a', 
                       borderRadius: '12px',
                       fontSize: '12px',
                       fontWeight: 'bold'
                     }} 
                     formatter={(value) => [`${value}%`]}
                   />
-                  <Legend wrapperStyle={{ paddingTop: '10px', fontSize: '12px', color: '#cbd5e1' }} />
+                  <Legend wrapperStyle={{ paddingTop: '10px', fontSize: '12px' }} />
                   <Bar dataKey="Vehicular Exhaust" stackId="a" fill="#38bdf8" radius={[0, 0, 0, 0]} />
                   <Bar dataKey="Industrial Stacks" stackId="a" fill="#a855f7" radius={[0, 0, 0, 0]} />
                   <Bar dataKey="Biomass Burning" stackId="a" fill="#f97316" radius={[4, 4, 0, 0]} />
@@ -140,16 +140,16 @@ export default function AttributionView() {
                 <PieChart>
                   <Tooltip 
                     contentStyle={{ 
-                      backgroundColor: '#060608', 
-                      borderColor: 'rgba(255,255,255,0.1)', 
-                      color: '#ffffff', 
+                      backgroundColor: theme === 'dark' ? '#090d16' : '#ffffff', 
+                      borderColor: theme === 'dark' ? '#334155' : '#cbd5e1', 
+                      color: theme === 'dark' ? '#ffffff' : '#0f172a', 
                       borderRadius: '12px',
                       fontSize: '12px',
                       fontWeight: 'bold'
                     }} 
                     formatter={(value) => [`${value}%`]}
                   />
-                  <Legend wrapperStyle={{ paddingTop: '20px', fontSize: '13px', color: '#cbd5e1' }} />
+                  <Legend wrapperStyle={{ paddingTop: '20px', fontSize: '13px' }} />
                   <Pie
                     data={pieData}
                     cx="50%"
@@ -174,45 +174,45 @@ export default function AttributionView() {
         <div className="col-span-12 lg:col-span-4 flex flex-col justify-between h-[460px] gap-3">
           
           {/* Card 1: Biomass */}
-          <div className="glass-panel rounded-2xl p-4 border-l-4 border-l-[#f97316] bg-[#0c0c10] border border-white/[0.08] flex-1 flex flex-col justify-center">
-            <div className="flex items-center space-x-2 text-xs font-extrabold text-white">
-              <Flame size={15} className="text-[#f97316]" />
+          <div className="glass-panel p-4 border-l-4 border-l-[#f97316] flex-1 flex flex-col justify-center">
+            <div className="flex items-center space-x-2 text-xs font-extrabold text-[#f97316]">
+              <Flame size={15} />
               <span>Biomass & Farm Fires</span>
             </div>
-            <p className="text-[11px] text-zinc-300 font-medium mt-1 leading-relaxed">
+            <p className="text-[11px] text-zinc-400 font-medium mt-1 leading-relaxed">
               Detected from Formaldehyde (HCHO) satellite data. Stubble burning and wood smoke release high organic gases into the air.
             </p>
           </div>
 
           {/* Card 2: Vehicular */}
-          <div className="glass-panel rounded-2xl p-4 border-l-4 border-l-[#38bdf8] bg-[#0c0c10] border border-white/[0.08] flex-1 flex flex-col justify-center">
-            <div className="flex items-center space-x-2 text-xs font-extrabold text-white">
-              <Car size={15} className="text-[#38bdf8]" />
+          <div className="glass-panel p-4 border-l-4 border-l-[#38bdf8] flex-1 flex flex-col justify-center">
+            <div className="flex items-center space-x-2 text-xs font-extrabold text-[#38bdf8]">
+              <Car size={15} />
               <span>Vehicular & Traffic Exhaust</span>
             </div>
-            <p className="text-[11px] text-zinc-300 font-medium mt-1 leading-relaxed">
+            <p className="text-[11px] text-zinc-400 font-medium mt-1 leading-relaxed">
               Identified by high Nitrogen Dioxide (NO₂) and Carbon Monoxide (CO). Common in city traffic and busy highway corridors.
             </p>
           </div>
 
           {/* Card 3: Industrial */}
-          <div className="glass-panel rounded-2xl p-4 border-l-4 border-l-[#a855f7] bg-[#0c0c10] border border-white/[0.08] flex-1 flex flex-col justify-center">
-            <div className="flex items-center space-x-2 text-xs font-extrabold text-white">
-              <Factory size={15} className="text-[#a855f7]" />
+          <div className="glass-panel p-4 border-l-4 border-l-[#a855f7] flex-1 flex flex-col justify-center">
+            <div className="flex items-center space-x-2 text-xs font-extrabold text-[#a855f7]">
+              <Factory size={15} />
               <span>Factories & Power Plants</span>
             </div>
-            <p className="text-[11px] text-zinc-300 font-medium mt-1 leading-relaxed">
+            <p className="text-[11px] text-zinc-400 font-medium mt-1 leading-relaxed">
               Identified by Sulfur Dioxide (SO₂) emissions from coal power plants, heavy industrial boilers, and brick kilns.
             </p>
           </div>
 
           {/* Diagnostic Note */}
-          <div className="glass-panel rounded-2xl p-4 border-l-4 border-l-purple-400 bg-[#0c0c10] border border-purple-500/30 flex-1 flex flex-col justify-center">
-            <div className="flex items-center space-x-2 text-xs font-extrabold text-white">
-              <ShieldAlert size={15} className="text-purple-400" />
+          <div className="glass-panel p-4 border-l-4 border-l-purple-500 flex-1 flex flex-col justify-center">
+            <div className="flex items-center space-x-2 text-xs font-extrabold text-purple-500">
+              <ShieldAlert size={15} />
               <span>Detection Standard</span>
             </div>
-            <p className="text-[11px] text-zinc-300 font-medium mt-1 leading-relaxed">
+            <p className="text-[11px] text-zinc-400 font-medium mt-1 leading-relaxed">
               When satellite HCHO gas rises significantly above background levels, it directly confirms open farm fire smoke.
             </p>
           </div>
