@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { useStore } from '../store'
-import { MapContainer, TileLayer, CircleMarker, Circle, Popup, Polyline } from 'react-leaflet'
+import { MapContainer, TileLayer, CircleMarker, Circle, Popup } from 'react-leaflet'
 import { 
   Activity, Wind, Flame, CloudSnow, Sparkles, MapPin, 
-  TrendingUp, TrendingDown, ArrowUpRight, Compass, ShieldAlert
+  Compass, ShieldAlert, Radio
 } from 'lucide-react'
 
 // CPCB color & category helpers
@@ -14,34 +14,6 @@ const getCpcbColorAndLabel = (aqi) => {
   if (aqi <= 300) return { color: "#f97316", label: "Poor", dotColor: "bg-orange-400" }
   if (aqi <= 400) return { color: "#ef4444", label: "Very Poor", dotColor: "bg-red-400" }
   return { color: "#7f1d1d", label: "Severe", dotColor: "bg-purple-500" }
-}
-
-const getCellColorAndLabel = (cell, layer) => {
-  if (layer === 'AQI') {
-    return getCpcbColorAndLabel(cell.aqi)
-  }
-  if (layer === 'PM2.5') {
-    const val = cell.pm25
-    if (val <= 30) return { color: "#10b981", label: "Good" }
-    if (val <= 60) return { color: "#84cc16", label: "Satisfactory" }
-    if (val <= 90) return { color: "#eab308", label: "Moderate" }
-    if (val <= 120) return { color: "#f97316", label: "Poor" }
-    if (val <= 250) return { color: "#ef4444", label: "Very Poor" }
-    return { color: "#7f1d1d", label: "Severe" }
-  }
-  if (layer === 'HCHO') {
-    const val = cell.hcho || cell.hcho_column || 1.0
-    if (val <= 3.0) return { color: "#10b981", label: "Low" }
-    if (val <= 5.0) return { color: "#84cc16", label: "Satisfactory" }
-    if (val <= 7.0) return { color: "#eab308", label: "Moderate" }
-    if (val <= 10.0) return { color: "#f97316", label: "High" }
-    if (val <= 14.0) return { color: "#ef4444", label: "Very High" }
-    return { color: "#7f1d1d", label: "Severe" }
-  }
-  if (layer === 'Fires') {
-    return { color: "#f97316", label: "Thermal Hotspot" }
-  }
-  return { color: "#10b981", label: "Good" }
 }
 
 // Helper to aggregate grid cells into district centers
@@ -94,8 +66,6 @@ export default function DashboardView() {
     theme
   } = useStore()
 
-  const [selectedLayer, setSelectedLayer] = useState('AQI')
-
   useEffect(() => {
     fetchDashboard()
     fetchMapData()
@@ -125,7 +95,7 @@ export default function DashboardView() {
         <div className="flex items-center">
           <div className="w-1.5 h-6 bg-[#5442ed] rounded-full mr-3"></div>
           <div>
-            <h1 className="text-xl font-black text-white dark:text-white tracking-tight">
+            <h1 className="text-xl font-black tracking-tight text-white dark:text-white light:text-slate-900">
               Atmospheric Overview
             </h1>
             <p className="text-xs text-zinc-400 font-medium">
@@ -243,37 +213,22 @@ export default function DashboardView() {
         {/* Left Column (8 cols): Atmospheric Map Card */}
         <div className="col-span-12 lg:col-span-8 glass-panel rounded-2xl p-5 flex flex-col h-[520px]">
           
-          {/* Header with Layer Switcher Pills */}
+          {/* Header (Clean title without redundant layer toggle buttons) */}
           <div className="flex justify-between items-center mb-3">
             <div className="flex items-center space-x-2">
               <MapPin size={16} className="text-[#5442ed]" />
-              <h3 className="text-sm font-extrabold text-white dark:text-white tracking-tight">
+              <h3 className="text-sm font-extrabold tracking-tight">
                 Atmospheric Map
               </h3>
             </div>
 
-            {/* Layer Pill Toggles */}
-            <div className="flex items-center bg-[#060913] border border-white/[0.08] rounded-xl p-1 text-xs">
-              {['AQI', 'PM2.5', 'HCHO', 'Fires'].map(layer => {
-                const isActive = selectedLayer === layer
-                return (
-                  <button
-                    key={layer}
-                    onClick={() => setSelectedLayer(layer)}
-                    className={`px-3 py-1 rounded-lg font-bold transition-all ${
-                      isActive 
-                        ? 'bg-[#5442ed] text-white shadow-sm' 
-                        : 'text-zinc-400 hover:text-white'
-                    }`}
-                  >
-                    {layer}
-                  </button>
-                )
-              })}
+            <div className="flex items-center space-x-2 text-[11px] font-bold text-zinc-400">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>Live 10km Inversion Grid</span>
             </div>
           </div>
 
-          {/* Leaflet Map Body */}
+          {/* Leaflet Map Body (100% Watermark Free Tile Layer) */}
           <div className="flex-1 rounded-xl overflow-hidden border border-white/[0.08] relative z-10">
             {mapData && (
               <MapContainer 
@@ -284,24 +239,18 @@ export default function DashboardView() {
                 key={`${theme}`}
               >
                 <TileLayer
-                  url={theme === 'light'
-                    ? "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-                    : "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-                  }
-                  className="theme-map-tile-layer"
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  className={theme === 'dark' ? 'theme-map-dark-tiles' : ''}
+                  attribution="&copy; OpenStreetMap contributors"
                   key={theme}
                 />
                 
                 {/* District markers */}
                 {districtMarkers.map((marker) => {
-                  let val = marker.aqi
-                  let colorInfo = getCellColorAndLabel(marker, selectedLayer)
-                  
-                  if (selectedLayer === 'PM2.5') val = marker.pm25
-                  else if (selectedLayer === 'HCHO') val = marker.hcho
+                  let colorInfo = getCpcbColorAndLabel(marker.aqi)
 
                   return (
-                    <React.Fragment key={`district-${marker.district}-${selectedLayer}`}>
+                    <React.Fragment key={`district-${marker.district}`}>
                       <Circle
                         center={[marker.latitude, marker.longitude]}
                         radius={15000}
@@ -309,7 +258,7 @@ export default function DashboardView() {
                           color: colorInfo.color,
                           weight: 1,
                           fillColor: colorInfo.color,
-                          fillOpacity: 0.15
+                          fillOpacity: 0.18
                         }}
                       />
                       <CircleMarker
@@ -327,7 +276,7 @@ export default function DashboardView() {
                       >
                         <Popup>
                           <div className="text-xs space-y-1 p-1">
-                            <div className="font-extrabold text-white border-b border-white/[0.1] pb-1">
+                            <div className="font-extrabold border-b border-white/[0.1] pb-1">
                               {marker.district} ({marker.state})
                             </div>
                             <div className="font-bold text-sm mt-1" style={{ color: colorInfo.color }}>
@@ -348,10 +297,10 @@ export default function DashboardView() {
                   <CircleMarker
                     key={`fire-${idx}`}
                     center={[fire.latitude, fire.longitude]}
-                    radius={5}
+                    radius={6}
                     pathOptions={{
                       fillColor: '#f97316',
-                      fillOpacity: 0.9,
+                      fillOpacity: 0.95,
                       color: '#ffedd5',
                       weight: 1.5
                     }}
@@ -367,12 +316,12 @@ export default function DashboardView() {
           <div>
             <div className="flex items-center space-x-2 mb-4">
               <ShieldAlert size={16} className="text-[#5442ed]" />
-              <h3 className="text-sm font-extrabold text-white tracking-tight">
+              <h3 className="text-sm font-extrabold tracking-tight">
                 Top Affected Regions
               </h3>
             </div>
 
-            {/* Region List Table */}
+            {/* Region List Table (Theme Adaptive Subcards) */}
             <div className="space-y-2 overflow-y-auto max-h-[420px] pr-1">
               {sortedRegions.slice(0, 7).map((region, idx) => {
                 const badge = getCpcbColorAndLabel(region.aqi)
@@ -383,21 +332,21 @@ export default function DashboardView() {
                     onClick={() => setSelectedDistrict(region.district)}
                     className={`flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all ${
                       isSelected 
-                        ? 'bg-[#5442ed]/20 border border-[#5442ed]/50 text-white' 
-                        : 'bg-[#060913] border border-white/[0.05] hover:border-white/[0.15] text-zinc-300'
+                        ? 'bg-[#5442ed]/20 border border-[#5442ed]/60 text-white' 
+                        : 'vayu-subcard hover:border-indigo-500/40'
                     }`}
                   >
                     <div className="flex items-center space-x-3">
-                      <span className="text-xs font-mono font-bold text-zinc-500">
+                      <span className="text-xs font-mono font-bold text-zinc-400">
                         {String(idx + 1).padStart(2, '0')}
                       </span>
-                      <span className="text-xs font-extrabold text-white">
+                      <span className="text-xs font-extrabold">
                         {region.district}
                       </span>
                     </div>
 
                     <div className="flex items-center space-x-2 font-mono">
-                      <span className="text-xs font-extrabold text-white">
+                      <span className="text-xs font-extrabold">
                         {region.aqi}
                       </span>
                       <span 
@@ -413,7 +362,7 @@ export default function DashboardView() {
             </div>
           </div>
 
-          <div className="text-[10px] text-zinc-500 font-semibold text-center border-t border-white/[0.06] pt-2">
+          <div className="text-[10px] text-zinc-400 font-semibold text-center border-t border-[var(--panel-border)] pt-2">
             Click any region to load district parameters
           </div>
         </div>

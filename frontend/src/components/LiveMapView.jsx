@@ -244,11 +244,9 @@ export default function LiveMapView() {
             key={`${theme}`}
           >
             <TileLayer
-              url={theme === 'light'
-                ? "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-                : "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-              }
-              className="theme-map-tile-layer"
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              className={theme === 'dark' ? 'theme-map-dark-tiles' : ''}
+              attribution="&copy; OpenStreetMap contributors"
               key={theme}
             />
 

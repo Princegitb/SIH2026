@@ -318,8 +318,9 @@ export default function TransportView() {
               >
                 <ChangeView center={[currentCheckpoint.lat, currentCheckpoint.lon]} zoom={7.2} />
                 <TileLayer
-                  url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-                  attribution='&copy; CartoDB & OpenStreetMap'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  className="theme-map-dark-tiles"
+                  attribution="&copy; OpenStreetMap contributors"
                 />
 
                 {/* 1. Full Projected Trajectory Guide Line (Dotted Gray) */}
