@@ -99,11 +99,11 @@ export default function DistrictAnalyticsView() {
           </p>
         </div>
 
-        <div className="flex items-center space-x-2 bg-[#090d16]/80 border border-slate-800 rounded-xl p-1">
+        <div className="flex items-center space-x-2 bg-[#060608] border border-white/[0.08] rounded-xl p-1">
           <button
             onClick={() => setChartType('aqi')}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-              chartType === 'aqi' ? 'bg-[#4b6bf5] text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'
+              chartType === 'aqi' ? 'bg-[#4b6bf5] text-white shadow-sm' : 'text-zinc-400 hover:text-white'
             }`}
           >
             AQI Rankings
@@ -111,7 +111,7 @@ export default function DistrictAnalyticsView() {
           <button
             onClick={() => setChartType('pm')}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-              chartType === 'pm' ? 'bg-[#4b6bf5] text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'
+              chartType === 'pm' ? 'bg-[#4b6bf5] text-white shadow-sm' : 'text-zinc-400 hover:text-white'
             }`}
           >
             PM2.5 vs PM10
@@ -119,7 +119,7 @@ export default function DistrictAnalyticsView() {
           <button
             onClick={() => setChartType('composed')}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-              chartType === 'composed' ? 'bg-[#4b6bf5] text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'
+              chartType === 'composed' ? 'bg-[#4b6bf5] text-white shadow-sm' : 'text-zinc-400 hover:text-white'
             }`}
           >
             Multi-Metric Trend
@@ -130,7 +130,7 @@ export default function DistrictAnalyticsView() {
       {/* Top 3 Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Most Polluted District Card */}
-        <div className="glass-panel rounded-2xl p-5 border-red-500/30 bg-gradient-to-br from-red-950/30 via-slate-900/60 to-slate-900/90 flex flex-col justify-between">
+        <div className="glass-panel rounded-2xl p-5 border-red-500/30 bg-[#0c0c10] flex flex-col justify-between">
           <div className="flex justify-between items-start">
             <span className="text-[10px] bg-red-500/20 text-red-400 border border-red-500/30 font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center">
               <AlertTriangle size={11} className="mr-1 animate-pulse" /> Critical Hotspot

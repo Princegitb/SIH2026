@@ -63,21 +63,21 @@ export default function ReportsView() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="glass-panel rounded-xl p-5">
-        <h2 className="text-base font-bold text-slate-200 flex items-center">
+      <div className="glass-panel rounded-2xl p-5">
+        <h2 className="text-base font-extrabold text-white flex items-center tracking-tight">
           <Award size={18} className="text-emerald-400 mr-2" /> National Clean Air Programme (NCAP) Compliance Panel
         </h2>
-        <p className="text-xs text-slate-500 font-medium">Target status tracking against official environmental quality thresholds</p>
+        <p className="text-xs text-zinc-400 font-medium mt-0.5">Target status tracking against official environmental quality thresholds</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Compliance metrics card */}
-        <div className="glass-panel rounded-xl p-6 flex flex-col justify-between h-[250px]">
+        <div className="glass-panel rounded-2xl p-6 flex flex-col justify-between h-[250px]">
           <div className="flex justify-between items-start">
             <div>
               <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Compliance Status</span>
-              <h3 className="text-base font-bold text-slate-200 mt-2">Rolling 30-Day Average</h3>
-              <p className="text-xs text-slate-500">{selectedDistrict} District</p>
+              <h3 className="text-base font-extrabold text-white mt-2 tracking-tight">Rolling 30-Day Average</h3>
+              <p className="text-xs text-zinc-400 font-medium">{selectedDistrict} District</p>
             </div>
             {data.is_compliant ? (
               <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs font-bold px-3 py-1 rounded">
@@ -91,11 +91,11 @@ export default function ReportsView() {
           </div>
 
           <div className="my-4 flex items-baseline space-x-2">
-            <span className="text-5xl font-extrabold text-slate-100">{data.rolling_average}</span>
-            <span className="text-sm font-semibold text-slate-500">/ {data.target} Target AQI</span>
+            <span className="text-5xl font-black text-white">{data.rolling_average}</span>
+            <span className="text-sm font-semibold text-zinc-400">/ {data.target} Target AQI</span>
           </div>
 
-          <div className="border-t border-slate-800/60 pt-3 text-xs text-slate-400">
+          <div className="border-t border-white/[0.06] pt-3 text-xs text-zinc-300">
             {data.is_compliant ? (
               <span>District is compliant by <span className="font-bold text-emerald-400">{margin} AQI points</span>.</span>
             ) : (
@@ -105,17 +105,17 @@ export default function ReportsView() {
         </div>
 
         {/* Exporter actions card */}
-        <div className="glass-panel rounded-xl p-6 flex flex-col justify-between h-[250px]">
+        <div className="glass-panel rounded-2xl p-6 flex flex-col justify-between h-[250px]">
           <div className="space-y-3">
-            <h3 className="text-base font-bold text-slate-200">Compliance Exporter Tool</h3>
-            <p className="text-xs text-slate-400">
+            <h3 className="text-base font-extrabold text-white tracking-tight">Compliance Exporter Tool</h3>
+            <p className="text-xs text-zinc-300 leading-relaxed font-medium">
               Download complete high-resolution spatial grid predictions, meteorological layers, and Sentinel-5P column density calculations in tabular format.
             </p>
           </div>
 
           <button 
             onClick={downloadCSVReport}
-            className="w-full bg-[#4b6bf5] hover:bg-[#3b56cf] text-white text-xs font-bold py-3 rounded-lg flex items-center justify-center transition-colors shadow-md border-transparent focus:outline-none"
+            className="w-full bg-[#0c0c10] border border-white/[0.1] hover:border-white/[0.3] text-white hover:bg-zinc-800 text-xs font-bold py-3 rounded-xl flex items-center justify-center transition-all shadow-md focus:outline-none"
           >
             <FileDown size={14} className="mr-2" /> Export 30-Day compliance CSV Report
           </button>

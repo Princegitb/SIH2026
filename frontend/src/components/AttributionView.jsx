@@ -68,11 +68,11 @@ export default function AttributionView() {
           </p>
         </div>
 
-        <div className="flex items-center space-x-2 bg-[#090d16]/80 border border-slate-800 rounded-xl p-1">
+        <div className="flex items-center space-x-2 bg-[#060608] border border-white/[0.08] rounded-xl p-1">
           <button
             onClick={() => setViewMode('stacked')}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-              viewMode === 'stacked' ? 'bg-[#4b6bf5] text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'
+              viewMode === 'stacked' ? 'bg-[#4b6bf5] text-white shadow-sm' : 'text-zinc-400 hover:text-white'
             }`}
           >
             District Stacked Bars
@@ -80,7 +80,7 @@ export default function AttributionView() {
           <button
             onClick={() => setViewMode('pie')}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-              viewMode === 'pie' ? 'bg-[#4b6bf5] text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'
+              viewMode === 'pie' ? 'bg-[#4b6bf5] text-white shadow-sm' : 'text-zinc-400 hover:text-white'
             }`}
           >
             Regional Share Donut
@@ -97,7 +97,7 @@ export default function AttributionView() {
               <h3 className="text-sm font-extrabold text-white uppercase tracking-wider">
                 {viewMode === 'stacked' ? "District Pollution Sources (%)" : "Overall Regional Source Share"}
               </h3>
-              <span className="text-xs text-slate-400 font-medium mt-0.5 block">
+              <span className="text-xs text-zinc-400 font-medium mt-0.5 block">
                 {viewMode === 'stacked' 
                   ? "Percentage breakdown of Farm Fires, Vehicles, and Factories across each district"
                   : "Average pollution source share across the entire region"}
@@ -122,8 +122,8 @@ export default function AttributionView() {
                   <YAxis stroke="#94a3b8" fontSize={11} domain={[0, 100]} />
                   <Tooltip 
                     contentStyle={{ 
-                      backgroundColor: '#090d16', 
-                      borderColor: '#334155', 
+                      backgroundColor: '#060608', 
+                      borderColor: 'rgba(255,255,255,0.1)', 
                       color: '#ffffff', 
                       borderRadius: '12px',
                       fontSize: '12px',
@@ -140,8 +140,8 @@ export default function AttributionView() {
                 <PieChart>
                   <Tooltip 
                     contentStyle={{ 
-                      backgroundColor: '#090d16', 
-                      borderColor: '#334155', 
+                      backgroundColor: '#060608', 
+                      borderColor: 'rgba(255,255,255,0.1)', 
                       color: '#ffffff', 
                       borderRadius: '12px',
                       fontSize: '12px',
@@ -174,45 +174,45 @@ export default function AttributionView() {
         <div className="col-span-12 lg:col-span-4 flex flex-col justify-between h-[460px] gap-3">
           
           {/* Card 1: Biomass */}
-          <div className="glass-panel rounded-xl p-3.5 border-l-4 border-l-[#f97316] bg-slate-900/60 flex-1 flex flex-col justify-center">
+          <div className="glass-panel rounded-2xl p-4 border-l-4 border-l-[#f97316] bg-[#0c0c10] border border-white/[0.08] flex-1 flex flex-col justify-center">
             <div className="flex items-center space-x-2 text-xs font-extrabold text-white">
               <Flame size={15} className="text-[#f97316]" />
               <span>Biomass & Farm Fires</span>
             </div>
-            <p className="text-[11px] text-slate-300 font-medium mt-1 leading-relaxed">
+            <p className="text-[11px] text-zinc-300 font-medium mt-1 leading-relaxed">
               Detected from Formaldehyde (HCHO) satellite data. Stubble burning and wood smoke release high organic gases into the air.
             </p>
           </div>
 
           {/* Card 2: Vehicular */}
-          <div className="glass-panel rounded-xl p-3.5 border-l-4 border-l-[#38bdf8] bg-slate-900/60 flex-1 flex flex-col justify-center">
+          <div className="glass-panel rounded-2xl p-4 border-l-4 border-l-[#38bdf8] bg-[#0c0c10] border border-white/[0.08] flex-1 flex flex-col justify-center">
             <div className="flex items-center space-x-2 text-xs font-extrabold text-white">
               <Car size={15} className="text-[#38bdf8]" />
               <span>Vehicular & Traffic Exhaust</span>
             </div>
-            <p className="text-[11px] text-slate-300 font-medium mt-1 leading-relaxed">
+            <p className="text-[11px] text-zinc-300 font-medium mt-1 leading-relaxed">
               Identified by high Nitrogen Dioxide (NO₂) and Carbon Monoxide (CO). Common in city traffic and busy highway corridors.
             </p>
           </div>
 
           {/* Card 3: Industrial */}
-          <div className="glass-panel rounded-xl p-3.5 border-l-4 border-l-[#a855f7] bg-slate-900/60 flex-1 flex flex-col justify-center">
+          <div className="glass-panel rounded-2xl p-4 border-l-4 border-l-[#a855f7] bg-[#0c0c10] border border-white/[0.08] flex-1 flex flex-col justify-center">
             <div className="flex items-center space-x-2 text-xs font-extrabold text-white">
               <Factory size={15} className="text-[#a855f7]" />
               <span>Factories & Power Plants</span>
             </div>
-            <p className="text-[11px] text-slate-300 font-medium mt-1 leading-relaxed">
+            <p className="text-[11px] text-zinc-300 font-medium mt-1 leading-relaxed">
               Identified by Sulfur Dioxide (SO₂) emissions from coal power plants, heavy industrial boilers, and brick kilns.
             </p>
           </div>
 
           {/* Diagnostic Note */}
-          <div className="glass-panel rounded-xl p-3.5 border-l-4 border-l-purple-400 bg-purple-950/20 border border-purple-500/20 flex-1 flex flex-col justify-center">
+          <div className="glass-panel rounded-2xl p-4 border-l-4 border-l-purple-400 bg-[#0c0c10] border border-purple-500/30 flex-1 flex flex-col justify-center">
             <div className="flex items-center space-x-2 text-xs font-extrabold text-white">
               <ShieldAlert size={15} className="text-purple-400" />
               <span>Detection Standard</span>
             </div>
-            <p className="text-[11px] text-slate-300 font-medium mt-1 leading-relaxed">
+            <p className="text-[11px] text-zinc-300 font-medium mt-1 leading-relaxed">
               When satellite HCHO gas rises significantly above background levels, it directly confirms open farm fire smoke.
             </p>
           </div>

@@ -215,71 +215,19 @@ export default function LiveMapView() {
   return (
     <div className="h-[calc(100vh-140px)] flex flex-col space-y-4">
       {/* Controls Overlay Header */}
-      <div className="glass-panel rounded-xl p-4 flex flex-col md:flex-row justify-between items-center z-10 gap-4">
+      <div className="glass-panel rounded-2xl p-4 flex flex-col md:flex-row justify-between items-center z-10 gap-4">
         <div>
-          <h2 className="text-base font-bold theme-adapt-text">Geospatial GIS Atmospheric Overview</h2>
-          <p className="text-xs text-slate-500 font-medium">Hyperlocal village prediction model overlaying Sentinel-5P column density & active fire points</p>
+          <h2 className="text-base font-extrabold text-white tracking-tight">Geospatial GIS Atmospheric Overview</h2>
+          <p className="text-xs text-zinc-400 font-medium">Continuous 10km satellite-inferred air quality grid with click-to-predict village resolution</p>
         </div>
         
-        <div className="flex flex-wrap items-center gap-4">
-          {/* Base Layer Switcher */}
-          <div className="flex bg-slate-900/50 border border-slate-800/80 rounded-lg p-0.5 text-xs text-slate-400">
-            {['AQI', 'PM2.5', 'PM10', 'HCHO'].map((layer) => {
-              const isActive = selectedLayer === layer
-              return (
-                <span
-                  key={layer}
-                  onClick={() => setSelectedLayer(layer)}
-                  className={`px-3 py-1 rounded cursor-pointer transition-all ${
-                    isActive 
-                      ? 'bg-[#4b6bf5] text-white font-bold shadow-md' 
-                      : 'hover:text-slate-200'
-                  }`}
-                >
-                  {layer}
-                </span>
-              )
-            })}
+        <div className="flex items-center gap-3">
+          <div className="flex items-center space-x-2 bg-[#060608] border border-white/[0.06] rounded-xl px-3 py-1.5 text-xs text-zinc-300 font-bold">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>Live Satellite Telemetry</span>
           </div>
-
-          {/* Visibility Toggles */}
-          <div className="flex space-x-4 text-xs font-semibold text-slate-400">
-            <label className="flex items-center space-x-2 cursor-pointer hover:text-slate-200">
-              <input 
-                type="checkbox" 
-                checked={layers.aqi} 
-                onChange={() => setLayers({...layers, aqi: !layers.aqi})}
-                className="accent-[#4b6bf5]"
-              />
-              <span>Districts</span>
-            </label>
-            <label className="flex items-center space-x-2 cursor-pointer hover:text-slate-200">
-              <input 
-                type="checkbox" 
-                checked={layers.hotspots} 
-                onChange={() => setLayers({...layers, hotspots: !layers.hotspots})}
-                className="accent-purple-600"
-              />
-              <span>Hotspots</span>
-            </label>
-            <label className="flex items-center space-x-2 cursor-pointer hover:text-slate-200">
-              <input 
-                type="checkbox" 
-                checked={layers.fires} 
-                onChange={() => setLayers({...layers, fires: !layers.fires})}
-                className="accent-orange-500"
-              />
-              <span>Fires</span>
-            </label>
-            <label className="flex items-center space-x-2 cursor-pointer hover:text-slate-200">
-              <input 
-                type="checkbox" 
-                checked={layers.plumes} 
-                onChange={() => setLayers({...layers, plumes: !layers.plumes})}
-                className="accent-amber-600"
-              />
-              <span>Plumes</span>
-            </label>
+          <div className="flex items-center space-x-2 bg-[#060608] border border-white/[0.06] rounded-xl px-3 py-1.5 text-xs text-indigo-400 font-bold">
+            <span>🛰️ Multi-Stream Fusion</span>
           </div>
         </div>
       </div>

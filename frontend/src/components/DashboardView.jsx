@@ -345,26 +345,12 @@ export default function DashboardView() {
         <div className="col-span-7 glass-panel rounded-2xl p-5 flex flex-col h-[570px] relative">
           <div className="flex justify-between items-center mb-3">
             <div>
-              <div className="text-sm font-extrabold text-slate-200 tracking-tight">Geospatial Atmospheric Grid</div>
+              <div className="text-sm font-extrabold text-white tracking-tight">Geospatial Atmospheric Grid</div>
+              <div className="text-[10px] text-zinc-400 font-medium">Regional 10km resolution CPCB-aligned inversion telemetry</div>
             </div>
-            {/* Toggles */}
-            <div className="flex bg-slate-900/50 border border-slate-800/80 rounded-lg p-0.5 text-xs text-slate-400">
-              {['AQI', 'PM2.5', 'PM10', 'HCHO'].map((layer) => {
-                const isActive = selectedLayer === layer
-                return (
-                  <span
-                    key={layer}
-                    onClick={() => setSelectedLayer(layer)}
-                    className={`px-3 py-1 rounded-md font-bold cursor-pointer transition-all ${
-                      isActive 
-                        ? 'bg-[#4b6bf5] text-white shadow-md' 
-                        : 'hover:text-slate-250'
-                    }`}
-                  >
-                    {layer}
-                  </span>
-                )
-              })}
+            <div className="flex items-center space-x-2 bg-[#060608] border border-white/[0.06] rounded-xl px-3 py-1.5 text-xs text-zinc-300 font-bold">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>Air Quality Index (AQI)</span>
             </div>
           </div>
 
